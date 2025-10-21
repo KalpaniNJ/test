@@ -193,6 +193,11 @@ def show(params: dict):
         with st.spinner(
             f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
         ):
+            
+            Map.addLayer(_sentinel1_period_vv(params["start_date"], params["end_date"]),
+                         {"min": -20, "max": 5, "palette": ["#000000", "#ffffff"]},
+                         f"Sentinel-1 VV Median ({params['start_date']}–{params['end_date']})", False)
+            
             # ---- Temporal aggregation ----
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
 
