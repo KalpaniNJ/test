@@ -1,5 +1,5 @@
 # Ignore large files
-data/lka_gnd.shp
+# data/lka_gnd.shp
 *.tif
 *.zip
 *.dbf
