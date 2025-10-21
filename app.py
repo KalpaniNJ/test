@@ -144,18 +144,18 @@ from modules import analysis, monitoring, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 
 
-ee.Authenticate()
-ee.Initialize(project='rice-mapping-472904')
+# ee.Authenticate()
+# ee.Initialize(project='rice-mapping-472904')
 
-# if "gee_initialized" not in st.session_state:
-#     with st.spinner("Initializing Google Earth Engine..."):
-#         service_account = st.secrets["earthengine"]["service_account"]
-#         private_key = st.secrets["earthengine"]["private_key"]
+if "gee_initialized" not in st.session_state:
+    with st.spinner("Initializing Google Earth Engine..."):
+        service_account = st.secrets["earthengine"]["service_account"]
+        private_key = st.secrets["earthengine"]["private_key"]
 
-#         credentials = ee.ServiceAccountCredentials(service_account, key_data=private_key)
-#         ee.Initialize(credentials)
+        credentials = ee.ServiceAccountCredentials(service_account, key_data=private_key)
+        ee.Initialize(credentials)
     
-#     st.session_state["gee_initialized"] = True
+    st.session_state["gee_initialized"] = True
 
 
 st.markdown(
