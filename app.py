@@ -128,7 +128,7 @@ display_fixed_header()
 st.markdown("""
     <style>
         [data-testid="stSidebar"] {
-            margin-top: 124px; /* Push sidebar content below the fixed header */
+            margin-top: 125px; /* Push sidebar content below the fixed header */
         }
     </style>
 """, unsafe_allow_html=True)
