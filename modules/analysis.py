@@ -118,7 +118,7 @@ def show(params):
                         }),
                         {},
                         "AOI Boundary",
-                        True
+                        False
                     )
 
                     Map_SA.addLayer(maskedPaddyClassification,
@@ -185,32 +185,33 @@ def show(params):
             "stats_pie_month", "stats_pie_day",
             "stats_combo_month", "stats_combo_day"
         ]):
+            
             col1, col2 = st.columns(2)
             with col1:
+                if "stats_combo_month" in st.session_state:
+                    st.subheader("Monthly & Cumulative Paddy Area")
+                    st.pyplot(st.session_state["stats_combo_month"])
+            with col2:
+                if "stats_combo_day" in st.session_state:
+                    st.subheader("Dekadal & Cumulative Paddy Area")
+                    st.pyplot(st.session_state["stats_combo_day"])
+
+            col3, col4 = st.columns(2)
+            with col3:
                 if "stats_bar_month" in st.session_state:
                     st.subheader("Paddy Area by Month")
                     st.pyplot(st.session_state["stats_bar_month"])
-            with col2:
+            with col4:
                 if "stats_bar_day" in st.session_state:
                     st.subheader("Paddy Area by Start Date (MM-DD)")
                     st.pyplot(st.session_state["stats_bar_day"])
 
-            col3, col4 = st.columns(2)
-            with col3:
+            col5, col6 = st.columns(2)
+            with col5:
                 if "stats_pie_month" in st.session_state:
                     st.subheader("Paddy Area Percentage by Month")
                     st.pyplot(st.session_state["stats_pie_month"])
-            with col4:
+            with col6:
                 if "stats_pie_day" in st.session_state:
                     st.subheader("Paddy Area Percentage by Start Date (MM-DD)")
                     st.pyplot(st.session_state["stats_pie_day"])
-
-            col5, col6 = st.columns(2)
-            with col5:
-                if "stats_combo_month" in st.session_state:
-                    st.subheader("Monthly & Cumulative Paddy Area")
-                    st.pyplot(st.session_state["stats_combo_month"])
-            with col6:
-                if "stats_combo_day" in st.session_state:
-                    st.subheader("Dekadal & Cumulative Paddy Area")
-                    st.pyplot(st.session_state["stats_combo_day"])
