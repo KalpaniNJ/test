@@ -145,11 +145,22 @@ def show(params: dict):
         "LULC (ESA WorldCover 2021)", False
     )
 
-    Map.addLayer(
-        _srtm_dem(),
-        {"min": 0, "max": 3000, "palette": ["#000000", "#ffffff"]},
-        "Elevation (SRTM)", False
-    )
+    palette = [
+    "#006400",  # dark green – lowlands
+    "#228B22",  # forest green
+    "#ADFF2F",  # light green
+    "#FFD700",  # yellowish midlands
+    "#DAA520",  # golden brown
+    "#A0522D",  # brown
+    "#D2B48C",  # tan
+    "#FFFFFF"   # snow-capped peaks
+    ]
+
+    dem = _srtm_dem()
+    hillshade = ee.Terrain.hillshade(dem)
+    Map.addLayer(hillshade, {"min": 150, "max": 255}, "Hillshade", True)
+    Map.addLayer(dem, {"min": 0, "max": 4000, "palette": palette}, "Elevation (SRTM)", True)
+
 
     Map.addLayer(
     _jrc_permanent_water(), 
