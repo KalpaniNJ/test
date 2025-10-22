@@ -609,6 +609,18 @@ def show(params):
             Map_SM = geemap.Map(center=[aoi_centroid_mt[1], aoi_centroid_mt[0]], zoom=12)
             Map_SM.add_basemap("SATELLITE")
 
+            # --- Add AOI boundary (red outline) ---
+            Map_SM.addLayer(
+                ee.FeatureCollection(aoi_mt).style(**{
+                    "color": "black",
+                    "width": 1,
+                    "fillColor": "00000000"  # transparent fill
+                }),
+                {},
+                "AOI Boundary",
+                False
+            )
+
             Map_SM.addLayer(maskedPaddyClassification,
                         {"min": 0, "max": 1, "palette": ['red', 'green']},
                         "Paddy Map")
@@ -703,6 +715,45 @@ def show(params):
                 df_mmdd = df_mmdd.sort_values("Seasonal_Index")
                 df_mmdd["Cumulative_Area_ha"] = df_mmdd["Area_ha"].cumsum()
 
+                col1, col2 = st.columns(2)
+                with col1:
+                    x = np.arange(len(df_month))
+                    fig_month, ax_month = plt.subplots(figsize=(9, 5))
+                    ax_month.bar(x, df_month["Area_ha"], color='skyblue', width=0.5, label='Monthly Area (ha)')
+                    ax_month.plot(x, df_month["Cumulative_Area_ha"],
+                                color='darkgreen', marker='o', linewidth=2.5, label='Cumulative Area (ha)')
+                    ax_month.fill_between(x, df_month["Cumulative_Area_ha"], color='green', alpha=0.15)
+
+                    ax_month.set_xticks(x)
+                    ax_month.set_xticklabels(df_month["Month_Name"], rotation=45)
+                    ax_month.set_xlabel("Month")
+                    ax_month.set_ylabel("Area (ha)")
+                    ax_month.set_title("Monthly and Cumulative Paddy Area")
+                    ax_month.grid(axis='y', linestyle='--', alpha=0.5)
+                    ax_month.legend()
+
+                    st.pyplot(fig_month, width='stretch')
+                    plt.close(fig_month)
+
+                with col2:
+                    x = np.arange(len(df_mmdd))
+                    fig_mmdd, ax_mmdd = plt.subplots(figsize=(10, 5))  # slightly wider
+                    ax_mmdd.bar(x, df_mmdd["Area_ha"], color='skyblue', width=0.6, label='Dekadal Area (ha)')
+                    ax_mmdd.plot(x, df_mmdd["Cumulative_Area_ha"],
+                                color='darkgreen', marker='o', linewidth=2.5, label='Cumulative Area (ha)')
+                    ax_mmdd.fill_between(x, df_mmdd["Cumulative_Area_ha"], color='green', alpha=0.15)
+
+                    ax_mmdd.set_xticks(x)
+                    ax_mmdd.set_xticklabels(df_mmdd["Month_Day"], rotation=45)
+                    ax_mmdd.set_xlabel("Start Date (MM-DD)")
+                    ax_mmdd.set_ylabel("Area (ha)")
+                    ax_mmdd.set_title("Dekadal and Cumulative Paddy Area")
+                    ax_mmdd.grid(axis='y', linestyle='--', alpha=0.5)
+                    ax_mmdd.legend()
+
+                    st.pyplot(fig_mmdd, width='stretch')
+                    plt.close(fig_mmdd)
+                
                 # Two columns, first row (bar charts)
                 col1, col2, col3, col4 = st.columns(4)
 
@@ -762,45 +813,6 @@ def show(params):
                     ax4.set_title("Paddy Area % by Start Date")
                     st.pyplot(fig4)
                     plt.close(fig4)
-
-                col1, col2 = st.columns(2)
-                with col1:
-                    x = np.arange(len(df_month))
-                    fig_month, ax_month = plt.subplots(figsize=(9, 5))
-                    ax_month.bar(x, df_month["Area_ha"], color='skyblue', width=0.5, label='Monthly Area (ha)')
-                    ax_month.plot(x, df_month["Cumulative_Area_ha"],
-                                color='darkgreen', marker='o', linewidth=2.5, label='Cumulative Area (ha)')
-                    ax_month.fill_between(x, df_month["Cumulative_Area_ha"], color='green', alpha=0.15)
-
-                    ax_month.set_xticks(x)
-                    ax_month.set_xticklabels(df_month["Month_Name"], rotation=45)
-                    ax_month.set_xlabel("Month")
-                    ax_month.set_ylabel("Area (ha)")
-                    ax_month.set_title("Monthly and Cumulative Paddy Area")
-                    ax_month.grid(axis='y', linestyle='--', alpha=0.5)
-                    ax_month.legend()
-
-                    st.pyplot(fig_month, width='stretch')
-                    plt.close(fig_month)
-
-                with col2:
-                    x = np.arange(len(df_mmdd))
-                    fig_mmdd, ax_mmdd = plt.subplots(figsize=(10, 5))  # slightly wider
-                    ax_mmdd.bar(x, df_mmdd["Area_ha"], color='skyblue', width=0.6, label='Dekadal Area (ha)')
-                    ax_mmdd.plot(x, df_mmdd["Cumulative_Area_ha"],
-                                color='darkgreen', marker='o', linewidth=2.5, label='Cumulative Area (ha)')
-                    ax_mmdd.fill_between(x, df_mmdd["Cumulative_Area_ha"], color='green', alpha=0.15)
-
-                    ax_mmdd.set_xticks(x)
-                    ax_mmdd.set_xticklabels(df_mmdd["Month_Day"], rotation=45)
-                    ax_mmdd.set_xlabel("Start Date (MM-DD)")
-                    ax_mmdd.set_ylabel("Area (ha)")
-                    ax_mmdd.set_title("Dekadal and Cumulative Paddy Area")
-                    ax_mmdd.grid(axis='y', linestyle='--', alpha=0.5)
-                    ax_mmdd.legend()
-
-                    st.pyplot(fig_mmdd, width='stretch')
-                    plt.close(fig_mmdd)
 
     else:
         st.markdown(
