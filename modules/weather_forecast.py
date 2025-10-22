@@ -161,7 +161,6 @@ def show(params: dict):
     Map.addLayer(hillshade, {"min": 150, "max": 255}, "Hillshade", True)
     Map.addLayer(dem, {"min": 0, "max": 4000, "palette": palette}, "Elevation (SRTM)", True)
 
-
     Map.addLayer(
     _jrc_permanent_water(), 
     {"palette": ["#0000FF"], "opacity": 0.6},
