@@ -403,7 +403,7 @@ elif page == "Paddy Mapping":
         monitoring.show(params)
 
     # ABOUT SECTION
-    elif subpage == "About me":
+    elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
         show_readme()
 
