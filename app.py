@@ -206,7 +206,7 @@ st.markdown("<hr style='border:2px solid #0d6efd'>", unsafe_allow_html=True)
 
 # --- Home icon button in the sidebar ---
 st.sidebar.markdown("""
-    <div style="text-align:left; margin-bottom:15px;">
+    <div style="text-align:center; margin-bottom:15px;">
         <a href="?main_page_select=Rainfall+Distribution" title="Go to Home">
             <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" width="32" style="margin-bottom:5px;">
         </a>
