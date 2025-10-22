@@ -35,7 +35,7 @@ def display_fixed_header():
                 left: 0;
                 width: 100%;
                 height: 90px;
-                background-color: #000000;
+                background-color: #FFFFFF;
                 color: black;
                 z-index: 999;
                 border-bottom: 1px solid #333;
