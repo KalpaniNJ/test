@@ -275,6 +275,34 @@ if page == "Rainfall Distribution":
 
 
 # ==============================
+# WEATHER FORECAST MODULE
+# ==============================
+elif page == "Weather Forecast":
+    st.markdown("""
+        <div style="
+            background-color:#e7f4fe;
+            border-left: 6px solid #2b7de9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        ">
+            <h3 style="color:#1a73e8;">Module Under Development</h3>
+            <p style="color:#333; font-size:16px;">
+                The <b>Weather Forecast</b> module is currently under development.  
+                It will soon provide interactive tools for monitoring and analyzing 
+                rainfall forecasts, precipitation anomalies, and near-real-time weather data 
+                from satellite and global climate models.
+            </p>
+            <p style="color:#555; font-size:14px;">
+                Stay tuned for updates — upcoming versions will support short-term and seasonal forecasts,
+                including rainfall outlooks and temperature trends for decision support.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+
+# ==============================
 # PADDY MAPPING MODULE
 # ==============================
 elif page == "Paddy Mapping":
@@ -384,7 +412,6 @@ elif page == "Water Productivity":
             </p>
         </div>
     """, unsafe_allow_html=True)
-
 
 
 def add_footer():
