@@ -103,16 +103,14 @@ def show(params: dict):
         "Rivers": "lka_rivers.shp",
         "Roads": "lka_roads.shp",
         "Basins": "lka_basins.shp",
-        "Districts": "lka_dis.shp",
-        "GNDs": "lka_gnd.shp"
+        "Districts": "lka_dis.shp"
     }
 
     layer_styles = {
         "Rivers": {"color": "#1E90FF", "weight": 1.0, "fillOpacity": 0},
         "Roads": {"color": "#ECFA22", "weight": 0.8, "fillOpacity": 0},
         "Basins": {"color": "#419490", "weight": 0.8, "fillOpacity": 0},
-        "Districts": {"color": "#3A3B3C", "weight": 0.6, "fillOpacity": 0},
-        "GNDs": {"color": "#A9A9A9", "weight": 0.4, "fillOpacity": 0}
+        "Districts": {"color": "#3A3B3C", "weight": 0.6, "fillOpacity": 0}
     }
 
     selected_layers = st.sidebar.multiselect(
