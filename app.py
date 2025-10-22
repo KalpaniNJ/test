@@ -204,26 +204,6 @@ st.markdown(
 
 st.markdown("<hr style='border:2px solid #0d6efd'>", unsafe_allow_html=True)
 
-# --- Tool description ---
-st.markdown("""
-    <div style="
-        background-color:#f8f9fa;
-        padding: 20px 30px;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        margin-bottom: 20px;
-        text-align: justify;
-    ">
-        <p style="font-size:17px; color:#333;">
-            <b>RiceWater Analytics Hub</b> is a digital platform combining 
-            <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
-            to strengthen <i>climate-smart rice production</i>. 
-            It provides an integrated view of <i>water availability, crop performance,</i> 
-            and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
-        </p>
-    </div>
-""", unsafe_allow_html=True)
-
 params = sidebar_controls()
 
 # Page selector
@@ -239,6 +219,26 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
 if page == "Rainfall Distribution":
+    # --- Tool description ---
+    st.markdown("""
+        <div style="
+            background-color:#f8f9fa;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: justify;
+        ">
+            <p style="font-size:17px; color:#333;">
+                <b>RiceWater Analytics Hub</b> is a digital platform combining 
+                <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
+                to strengthen <i>climate-smart rice production</i>. 
+                It provides an integrated view of <i>water availability, crop performance,</i> 
+                and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
     data_dir = os.path.join(os.path.dirname(__file__), "data")
 
     # Sidebar options
