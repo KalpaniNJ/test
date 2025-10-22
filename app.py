@@ -140,7 +140,7 @@ import base64
 from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
-from modules import analysis, monitoring, Rainfall Distribution, weather_forecast, water_productivity
+from modules import analysis, monitoring, rainfall_distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 
 
