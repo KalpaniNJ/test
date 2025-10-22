@@ -228,6 +228,8 @@ def show(params: dict):
                 vis_params=rain_vis,
                 label=f"GPM Rainfall ({temporal_method}) [mm]",
                 layer_name=f"GPM Rainfall ({temporal_method})",
+                font_size=14,
+                label_font_size=16
             )
 
     # ---- Final map ----
