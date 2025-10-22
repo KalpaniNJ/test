@@ -216,10 +216,10 @@ st.markdown("""
     ">
         <p style="font-size:17px; color:#333;">
             <b>RiceWater Analytics Hub</b> is a digital platform combining 
-            satellite data, rainfall analytics, and water productivity assessments 
-            to strengthen climate-smart rice production. 
-            It provides an integrated view of water availability, crop performance, 
-            and irrigation efficiency, advancing water and food security goals.
+            <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
+            to strengthen <i>climate-smart rice production</i>. 
+            It provides an integrated view of <i>water availability, crop performance,</i> 
+            and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
         </p>
     </div>
 """, unsafe_allow_html=True)
