@@ -59,7 +59,7 @@ def show_readme():
                         <li><b>Seasonal Monitoring:</b> Employed for near real-time tracking of ongoing or recent seasons. 
                         It automatically detects key growth stages like the Start of Season (SOS) and peak periods, 
                         monitors mRVI variations for current growth trends, maps active paddy fields, and calculates current-season paddy area.</li>
-                        <li><b>Data and Methods:</b> About this Dashboard</li>
+                        <li><b>Data and Methods:</b> Provides an overview of the analytical framework, algorithms, and data sources powering the dashboard.</li>
                     </ol>
                     The workflow integrates several modules for:
                     <ul>
