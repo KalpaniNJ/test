@@ -108,11 +108,11 @@ def show(params: dict):
     }
 
     layer_styles = {
-        "Rivers": {"color": "#1E90FF", "weight": 1.2, "fillOpacity": 0},
+        "Rivers": {"color": "#1E90FF", "weight": 1.0, "fillOpacity": 0},
         "Roads": {"color": "#ECFA22", "weight": 0.8, "fillOpacity": 0},
-        "Basins": {"color": "#419490", "weight": 1.0, "fillOpacity": 0},
-        "Districts": {"color": "#070606", "weight": 0.8, "fillOpacity": 0},
-        "GNDs": {"color": "#A9A9A9", "weight": 0.6, "fillOpacity": 0}
+        "Basins": {"color": "#419490", "weight": 0.8, "fillOpacity": 0},
+        "Districts": {"color": "#3A3B3C", "weight": 0.6, "fillOpacity": 0},
+        "GNDs": {"color": "#A9A9A9", "weight": 0.4, "fillOpacity": 0}
     }
 
     selected_layers = st.sidebar.multiselect(
@@ -214,13 +214,13 @@ def show(params: dict):
             Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
 
             # ---- AOI outline ----
-            Map.addLayer(
-                ee.FeatureCollection(ee.Feature(aoi)).style(
-                    color="red", width=1, fillColor="00000000"
-                ),
-                {},
-                f"AOI – {aoi_label}",
-            )
+            # Map.addLayer(
+            #     ee.FeatureCollection(ee.Feature(aoi)).style(
+            #         color="red", width=1, fillColor="00000000"
+            #     ),
+            #     {},
+            #     f"AOI – {aoi_label}",
+            # )
 
             # ---- Static colorbar legend ----
             Map.add_colorbar(
