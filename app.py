@@ -329,7 +329,7 @@ elif page == "Paddy Mapping":
     # Select sub-section under Paddy Mapping
     subpage = st.sidebar.radio(
         "Select Subsection",
-        ["Seasonal Analysis", "Seasonal Monitoring", "About me"],
+        ["Seasonal Analysis", "Seasonal Monitoring", "Data and Methods"],
         key="paddy_subpage"
     )
 
