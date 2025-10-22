@@ -140,7 +140,7 @@ import base64
 from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
-from modules import analysis, monitoring, weather_forecast, water_productivity
+from modules import analysis, monitoring, Rainfall Distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 
 
@@ -209,16 +209,16 @@ params = sidebar_controls()
 # Page selector
 page = st.sidebar.selectbox(
     "Select Module",
-    ["Weather Forecast", "Paddy Mapping", "Water Productivity"],
+    ["Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
     key="main_page_select"
 )
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
 
 # ==============================
-# WEATHER FORECAST MODULE
+# RAINFALL DISTRIBUTION MODULE
 # ==============================
-if page == "Weather Forecast":
+if page == "Rainfall Distribution":
     data_dir = os.path.join(os.path.dirname(__file__), "data")
 
     # Sidebar options
@@ -271,7 +271,7 @@ if page == "Weather Forecast":
     }
 
     # --- Run the forecast analysis ---
-    weather_forecast.show(params)
+    rainfall_distribution.show(params)
 
 
 # ==============================
