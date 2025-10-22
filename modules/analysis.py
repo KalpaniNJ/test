@@ -109,6 +109,17 @@ def show(params):
                     aoi_centroid = aoi.centroid().coordinates().getInfo()
                     Map_SA = geemap.Map(center=[aoi_centroid[1], aoi_centroid[0]], zoom=12)
                     Map_SA.add_basemap("SATELLITE")
+                    
+                    # --- Add AOI boundary (red outline) ---
+                    Map_SA.addLayer(ee.FeatureCollection(aoi).style(**{
+                            "color": "black",
+                            "width": 2,
+                            "fillColor": "00000000"  # transparent
+                        }),
+                        {},
+                        "AOI Boundary",
+                        True
+                    )
 
                     Map_SA.addLayer(maskedPaddyClassification,
                                 {"min": 0, "max": 1, "palette": ['red', 'green']},
