@@ -113,7 +113,7 @@ def show(params):
                     # --- Add AOI boundary (red outline) ---
                     Map_SA.addLayer(ee.FeatureCollection(aoi).style(**{
                             "color": "black",
-                            "width": 2,
+                            "width": 1,
                             "fillColor": "00000000"  # transparent
                         }),
                         {},
