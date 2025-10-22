@@ -97,7 +97,6 @@ def show(params: dict):
     # st.title("Accumulated Rainfall")
 
     Map = geemap.Map(center=[7.8, 80.7], zoom=8)
-    Map.add_basemap("SATELLITE")
 
     # ---- Add static local layers ----
     layer_options = {
