@@ -98,7 +98,6 @@ def show(params: dict):
 
     Map = geemap.Map(center=[7.8, 80.7], zoom=8)
     Map.add_basemap("SATELLITE")
-    add_basemap_with_visibility(Map, "SATELLITE", visible=False)
 
     # ---- Add static local layers ----
     layer_options = {
