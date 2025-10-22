@@ -155,11 +155,7 @@ def show(params: dict):
     "#D2B48C",  # tan
     "#FFFFFF"   # snow-capped peaks
     ]
-
-    dem = _srtm_dem()
-    hillshade = ee.Terrain.hillshade(dem)
-    Map.addLayer(hillshade, {"min": 150, "max": 255}, "Hillshade", True)
-    Map.addLayer(dem, {"min": 0, "max": 4000, "palette": palette}, "Elevation (SRTM)", True)
+    Map.addLayer(_srtm_dem(), {"min": 0, "max": 3000, "palette": palette}, "Elevation (SRTM)", False)
 
     Map.addLayer(
     _jrc_permanent_water(), 
