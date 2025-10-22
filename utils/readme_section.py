@@ -43,7 +43,7 @@ def show_readme():
         st.markdown(
             """
             <div class="readme-box">
-                <div class="readme-title">About This Dashboard</div>
+                <div class="readme-title">Data and Methods Used</div>
                 <div class="readme-text">
                     The Rice Mapping Dashboard is a user-friendly tool developed by the <b>International Water Management Institute (IWMI)</b> 
                     for analyzing Sentinel-1 based rice growth patterns, built with Python and Streamlit, and integrated with 
