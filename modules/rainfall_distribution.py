@@ -109,7 +109,7 @@ def show(params: dict):
     layer_styles = {
         "Rivers": {"color": "#0000FF", "weight": 1.0, "fillOpacity": 0},
         "Roads": {"color": "#FF0000", "weight": 0.8, "fillOpacity": 0},
-        "Basins": {"color": "#00ffff", "weight": 0.8, "fillOpacity": 0},
+        "Basins": {"color": "#8D5F8C", "weight": 0.8, "fillOpacity": 0},
         "Districts": {"color": "#3A3B3C", "weight": 0.6, "fillOpacity": 0}
     }
 
