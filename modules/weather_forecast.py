@@ -146,14 +146,9 @@ def show(params: dict):
     )
 
     palette = [
-    "#006400",  # dark green – lowlands
-    "#228B22",  # forest green
-    "#ADFF2F",  # light green
-    "#FFD700",  # yellowish midlands
-    "#DAA520",  # golden brown
-    "#A0522D",  # brown
-    "#D2B48C",  # tan
-    "#FFFFFF"   # snow-capped peaks
+        "#2E8B57", "#9ACD32", "#EEE8AA", 
+        "#CD853F", "#D2691E", "#A0522D", 
+        "#FFFFFF"
     ]
     Map.addLayer(_srtm_dem(), {"min": 0, "max": 3000, "palette": palette}, "Elevation (SRTM)", False)
 
