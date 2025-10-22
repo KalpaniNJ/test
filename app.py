@@ -3,7 +3,7 @@ import streamlit as st
 import os
 import base64
 
-st.set_page_config(page_title="AquaCrop Nexus Portal", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="RiceWater Analytics Hub", layout="wide", initial_sidebar_state="collapsed")
 
 # --- Helper: Convert local logo to base64 ---
 def load_logo_as_base64(path):
@@ -112,7 +112,7 @@ def display_fixed_header():
             <div class="header-left">
                 {'<img src="data:image/png;base64,' + logo_left1 + '" class="header-logo">' if logo_left1 else ''}
                 {'<img src="data:image/png;base64,' + logo_left2 + '" class="header-logo">' if logo_left2 else ''}
-                <h2 class="header-title">AquaCrop Nexus Portal</h2>
+                <h2 class="header-title">RiceWater Analytics Hub</h2>
             </div>
             <div class="header-right">
                 {'<img src="data:image/png;base64,' + logo_right1 + '" class="header-logo">' if logo_right1 else ''}
@@ -193,7 +193,7 @@ st.markdown(
     </style>
 
     <div class="title-container">
-        <h1>AquaCrop Nexus Portal</h1>
+        <h1>RiceWater Analytics Hub</h1>
         <div class="image-credit">
             Photo © Pixabay / <a href="https://pixabay.com" target="_blank" style="color:#aee;">Pixabay License</a>
         </div>
