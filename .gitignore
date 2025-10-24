@@ -1,8 +1,0 @@
-# Ignore large files
-# data/lka_gnd.shp
-*.tif
-*.zip
-*.dbf
-*.shx
-*.prj
-*.csv
