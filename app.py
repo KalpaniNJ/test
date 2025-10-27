@@ -260,7 +260,6 @@ if page == "Rainfall Distribution":
     with col2:
         if not run_forecast:
             leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-            folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
             folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
             folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
             st_folium(leaflet_map)
