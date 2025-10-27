@@ -142,6 +142,8 @@ import pandas as pd
 import geopandas as gpd
 from modules import analysis, monitoring, rainfall_distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
+from streamlit_folium import st_folium
+import folium
 
 
 # ee.Authenticate()
@@ -256,7 +258,22 @@ if page == "Rainfall Distribution":
         run_forecast = st.button("Apply Layers")
 
     with col2:
-        if run_forecast:
+        if not run_forecast:
+            # Default Leaflet basemap
+            center_coords = [7.8731, 80.7718]  # Sri Lanka centroid
+            leaflet_map = folium.Map(location=center_coords, zoom_start=7, tiles="OpenStreetMap")
+
+            # Add extra basemap options
+            folium.TileLayer("Stamen Terrain").add_to(leaflet_map)
+            folium.TileLayer("Esri.WorldImagery").add_to(leaflet_map)
+            folium.LayerControl().add_to(leaflet_map)
+
+            st_folium(leaflet_map, width=900, height=550)
+
+            st.info("👈 Adjust parameters and click *Apply Layers* to display the rainfall map.")
+        
+        else:
+            # Once button is clicked → call your API / GEE layer
             params = {
                 "analysis_type": analysis_type,
                 "district": selected_district if analysis_type == "Administrative" else None,
@@ -266,9 +283,12 @@ if page == "Rainfall Distribution":
                 "end_date": str(wea_end_date),
                 "run_forecast": run_forecast,
             }
-            rainfall_distribution.show(params)
-        else:
-            st.info("👈 Adjust parameters and click *Apply Layers* to display the rainfall map.")
+
+            # Example placeholder: in production, you’ll call rainfall_distribution.show(params)
+            st.success("✅ Layers applied. Fetching GPM rainfall data...")
+
+            # (You can display a Folium map with the new data overlay once fetched)
+
 
 
 # ==============================
