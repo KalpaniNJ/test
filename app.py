@@ -13,7 +13,6 @@ def load_logo_as_base64(path):
 # --- Fixed Header with Local Logos and Title ---
 def display_fixed_header():
     base_path = os.path.join(os.path.dirname(__file__), "logo")
-    # Update these filenames to match your actual logo files
     logos = {
         "left1": os.path.join(base_path, "1.png"),
         "left2": os.path.join(base_path, "4.png"),
@@ -21,7 +20,6 @@ def display_fixed_header():
         "right2": os.path.join(base_path, "3.png"),
     }
 
-    # Convert existing logos to base64 if available
     logo_left1 = load_logo_as_base64(logos["left1"]) if os.path.exists(logos["left1"]) else ""
     logo_left2 = load_logo_as_base64(logos["left2"]) if os.path.exists(logos["left2"]) else ""
     logo_right1 = load_logo_as_base64(logos["right1"]) if os.path.exists(logos["right1"]) else ""
@@ -123,35 +121,6 @@ def display_fixed_header():
 
 # --- Call the header function ---
 display_fixed_header()
-
-st.markdown("""
-    <style>
-        /* 🔹 Reduce outer page margins */
-        .main .block-container {
-            padding-left: 1rem !important;   /* Default ~5rem — this tightens left spacing */
-            padding-right: 1rem !important;  /* Default ~5rem — this tightens right spacing */
-            padding-top: 1rem !important;    /* Keeps small breathing space below header */
-            padding-bottom: 0rem !important;
-        }
-
-        /* 🔹 Keep consistent spacing between inner columns */
-        .stColumn > div {
-            padding-right: 0.5rem;
-            padding-left: 0.5rem;
-        }
-
-        /* 🔹 Optional: tighten sidebar spacing */
-        [data-testid="stSidebar"] {
-            padding-top: 0.5rem !important;
-        }
-
-        /* 🔹 Make map take more horizontal space inside column */
-        iframe {
-            border-radius: 10px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 
 # --- Adjust sidebar position below header ---
 st.markdown("""
@@ -282,8 +251,8 @@ if page == "Rainfall Distribution":
             selected_district = None
 
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
-        wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
+        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
+        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
         run_forecast = st.button("Apply Layers")
 
     with col2:
@@ -292,7 +261,6 @@ if page == "Rainfall Distribution":
             folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
             folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
             st_folium(leaflet_map, use_container_width=True, height=650)
-            st.info("👈 Adjust parameters and click *Apply Layers* to display the rainfall map.")
 
         # After Apply Layers is clicked
         else:
@@ -320,8 +288,6 @@ if page == "Rainfall Distribution":
                 leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
             folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-
-            st.success(f"✅ Map updated for {selected_district or selected_basin}")
             st_folium(leaflet_map, use_container_width=True, height=650)
 
             # 🔹 You can now later overlay GPM data here:
