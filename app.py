@@ -124,6 +124,14 @@ def display_fixed_header():
 # --- Call the header function ---
 display_fixed_header()
 
+st.markdown("""
+    <style>
+        .main .block-container {
+            padding: 0.5rem 0.8rem 0.5rem 0.8rem !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # --- Adjust sidebar position below header ---
 st.markdown("""
     <style>
