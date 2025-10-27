@@ -264,7 +264,6 @@ if page == "Rainfall Distribution":
             leaflet_map = folium.Map(location=center_coords, zoom_start=7, tiles="OpenStreetMap")
 
             # Add extra basemap options
-            folium.TileLayer("Stamen Terrain").add_to(leaflet_map)
             folium.TileLayer("Esri.WorldImagery").add_to(leaflet_map)
             folium.LayerControl().add_to(leaflet_map)
 
