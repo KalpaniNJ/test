@@ -227,15 +227,12 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
-# Inside your Rainfall Distribution section
 if page == "Rainfall Distribution":
-    st.markdown("### 🌧️ Rainfall Distribution Analysis")
+    st.markdown("### 🌧️ Rainfall Distribution")
 
-    # Create two columns: left for controls, right for map/results
-    col1, col2 = st.columns([1.2, 2.8])
+    col1, col2 = st.columns([1, 3])
 
     with col1:
-        st.markdown("#### Input Parameters")
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
 
         data_dir = os.path.join(os.path.dirname(__file__), "data")
@@ -259,7 +256,6 @@ if page == "Rainfall Distribution":
         run_forecast = st.button("Apply Layers")
 
     with col2:
-        st.markdown("#### Visualization")
         if run_forecast:
             params = {
                 "analysis_type": analysis_type,
