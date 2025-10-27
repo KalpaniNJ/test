@@ -126,11 +126,32 @@ display_fixed_header()
 
 st.markdown("""
     <style>
+        /* 🔹 Reduce outer page margins */
         .main .block-container {
-            padding: 0.5rem 0.8rem 0.5rem 0.8rem !important;
+            padding-left: 1rem !important;   /* Default ~5rem — this tightens left spacing */
+            padding-right: 1rem !important;  /* Default ~5rem — this tightens right spacing */
+            padding-top: 1rem !important;    /* Keeps small breathing space below header */
+            padding-bottom: 0rem !important;
+        }
+
+        /* 🔹 Keep consistent spacing between inner columns */
+        .stColumn > div {
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        /* 🔹 Optional: tighten sidebar spacing */
+        [data-testid="stSidebar"] {
+            padding-top: 0.5rem !important;
+        }
+
+        /* 🔹 Make map take more horizontal space inside column */
+        iframe {
+            border-radius: 10px;
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 # --- Adjust sidebar position below header ---
 st.markdown("""
