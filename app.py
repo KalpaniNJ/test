@@ -262,7 +262,7 @@ if page == "Rainfall Distribution":
             leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
             folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
             folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map)
+            st_folium(leaflet_map, use_container_width=True, height=650)
             st.info("👈 Adjust parameters and click *Apply Layers* to display the rainfall map.")
 
         # After Apply Layers is clicked
@@ -293,7 +293,7 @@ if page == "Rainfall Distribution":
             folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
 
             st.success(f"✅ Map updated for {selected_district or selected_basin}")
-            st_folium(leaflet_map)
+            st_folium(leaflet_map, use_container_width=True, height=650)
 
             # 🔹 You can now later overlay GPM data here:
             # rainfall_distribution.show(params)
