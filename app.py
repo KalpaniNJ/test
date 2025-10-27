@@ -232,11 +232,10 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 if page == "Rainfall Distribution":
     st.markdown("### 🌧️ Rainfall Distribution")
 
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([0.9, 3.1])
 
     with col1:
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
-
         data_dir = os.path.join(os.path.dirname(__file__), "data")
 
         if analysis_type == "Administrative":
@@ -244,50 +243,61 @@ if page == "Rainfall Distribution":
             districts = gpd.read_file(districts_path)
             district_names = sorted(districts["ADM2_EN"].unique())
             selected_district = st.selectbox("Select District", district_names)
+            selected_basin = None
 
         else:
             basins_path = os.path.join(data_dir, "lka_basins.shp")
             basins = gpd.read_file(basins_path)
             basin_names = sorted(basins["WSHD_NAME"].unique())
             selected_basin = st.selectbox("Select Basin", basin_names)
+            selected_district = None
 
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
         wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
         wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
-
         run_forecast = st.button("Apply Layers")
 
     with col2:
         if not run_forecast:
-            # Default Leaflet basemap
-            center_coords = [7.8731, 80.7718]  # Sri Lanka centroid
-            leaflet_map = folium.Map(location=center_coords, zoom_start=7, tiles="OpenStreetMap")
-
-            # Add extra basemap options
-            folium.TileLayer("Esri.WorldImagery").add_to(leaflet_map)
-            folium.LayerControl().add_to(leaflet_map)
-
-            st_folium(leaflet_map, width=900, height=550)
-
+            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+            folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
+            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
+            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+            st_folium(leaflet_map)
             st.info("👈 Adjust parameters and click *Apply Layers* to display the rainfall map.")
-        
+
+        # After Apply Layers is clicked
         else:
-            # Once button is clicked → call your API / GEE layer
-            params = {
-                "analysis_type": analysis_type,
-                "district": selected_district if analysis_type == "Administrative" else None,
-                "basin": selected_basin if analysis_type == "Hydrological" else None,
-                "temporal_method": temporal_method,
-                "start_date": str(wea_start_date),
-                "end_date": str(wea_end_date),
-                "run_forecast": run_forecast,
-            }
+            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+            folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
+            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
-            # Example placeholder: in production, you’ll call rainfall_distribution.show(params)
-            st.success("✅ Layers applied. Fetching GPM rainfall data...")
+            # --- Show only the selected district or basin ---
+            if selected_district:
+                selected_geom = districts[districts["ADM2_EN"] == selected_district]
+                folium.GeoJson(
+                    selected_geom.__geo_interface__,
+                    name=f"{selected_district} District",
+                    style_function=lambda x: {"color": "red", "weight": 2, "fillOpacity": 0.05}
+                ).add_to(leaflet_map)
+                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
-            # (You can display a Folium map with the new data overlay once fetched)
+            elif selected_basin:
+                selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
+                folium.GeoJson(
+                    selected_geom.__geo_interface__,
+                    name=f"{selected_basin} Basin",
+                    style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.05}
+                ).add_to(leaflet_map)
+                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
+            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+
+            st.success(f"✅ Map updated for {selected_district or selected_basin}")
+            st_folium(leaflet_map)
+
+            # 🔹 You can now later overlay GPM data here:
+            # rainfall_distribution.show(params)
 
 
 # ==============================
