@@ -283,10 +283,7 @@ if page == "Rainfall Distribution":
             ).add_to(leaflet_map)
 
             leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
-            # 🔹 Placeholder for rainfall overlay (GPM/CHIRPS etc.)
-            from rainfall_distribution import show_rainfall
-            
+          
             with st.spinner("Loading GPM rainfall data..."):
                 leaflet_map = show_rainfall(
                     leaflet_map,
