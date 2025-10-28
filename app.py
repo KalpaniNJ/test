@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit as st
 import os
 import base64
 
@@ -133,16 +132,14 @@ st.markdown("""
 
 
 import ee
-import os
-import base64
+import geemap.foliumap as geemap
 from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
 from modules import analysis, monitoring, rainfall_distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
+import folium
 from streamlit_folium import st_folium
-import geemap.foliumap as geemap
-
             
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
