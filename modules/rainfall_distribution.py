@@ -1,15 +1,15 @@
 import ee
-import geemap
+import folium
 import streamlit as st
 
 def show_rainfall(leaflet_map, selected_geom, start_date, end_date, method):
-    """Add GPM rainfall data to a Folium map inside Streamlit."""
+    """Add GPM rainfall layer to a Folium map (Streamlit-safe)."""
 
-    # --- Convert selected AOI (GeoDataFrame) to EE geometry ---
+    # --- Convert AOI ---
     geojson = selected_geom.__geo_interface__
     aoi = ee.Geometry(geojson["features"][0]["geometry"])
 
-    # --- Load and aggregate GPM rainfall ---
+    # --- Fetch GPM IMERG ---
     gpm = ee.ImageCollection("NASA/GPM_L3/IMERG_V06") \
         .filterDate(start_date.strftime("%Y-%m-%d"),
                     end_date.strftime("%Y-%m-%d")) \
@@ -24,36 +24,42 @@ def show_rainfall(leaflet_map, selected_geom, start_date, end_date, method):
 
     gpm_img = gpm_img.clip(aoi)
 
-    # --- Visualization parameters ---
+    # --- Visualization ---
     vis_params = {
         "min": 0,
         "max": 300,
         "palette": ["#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"]
     }
 
-    # --- Add image layer safely using geemap's folium_add() ---
+    # --- Create Map ID and URL manually (works in all geemap versions) ---
     try:
-        geemap.folium_add(
-            ee_object=gpm_img,
-            map_object=leaflet_map,
-            vis_params=vis_params,
-            name=f"GPM {method} ({start_date}–{end_date})"
-        )
+        map_id_dict = ee.Image(gpm_img).getMapId(vis_params)
+        folium.TileLayer(
+            tiles=map_id_dict["tile_fetcher"].url_format,
+            attr="GPM IMERG (NASA)",
+            name=f"GPM {method} ({start_date}–{end_date})",
+            overlay=True,
+            control=True,
+            opacity=0.8
+        ).add_to(leaflet_map)
+
+        # Optional legend
+        legend_html = """
+        <div style="position: fixed; 
+                    bottom: 50px; left: 50px; width: 150px; height: 120px; 
+                    background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+                    text-align:center;">
+            <b>Rainfall (mm)</b><br>
+            <i style="background:#f7fbff;width:20px;height:10px;display:inline-block;"></i> 0<br>
+            <i style="background:#c6dbef;width:20px;height:10px;display:inline-block;"></i> 50<br>
+            <i style="background:#6baed6;width:20px;height:10px;display:inline-block;"></i> 100<br>
+            <i style="background:#2171b5;width:20px;height:10px;display:inline-block;"></i> 200<br>
+            <i style="background:#08306b;width:20px;height:10px;display:inline-block;"></i> 300+
+        </div>
+        """
+        leaflet_map.get_root().html.add_child(folium.Element(legend_html))
+
     except Exception as e:
         st.error(f"⚠️ Unable to render rainfall layer: {e}")
-        return leaflet_map
-
-    # --- Add legend (optional) ---
-    try:
-        legend_dict = {
-            "0 mm": "#f7fbff",
-            "50 mm": "#c6dbef",
-            "100 mm": "#6baed6",
-            "200 mm": "#2171b5",
-            "300+ mm": "#08306b"
-        }
-        leaflet_map.add_child(geemap.folium_legend(legend_dict=legend_dict, position="bottomright"))
-    except Exception:
-        pass
 
     return leaflet_map
