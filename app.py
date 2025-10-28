@@ -273,8 +273,14 @@ if page == "Rainfall Distribution":
         if run_rainfall:
             selected_geom = gdf[gdf[filter_field] == selected_name]
 
+            import json
+            from shapely.geometry import mapping
+            
+            # Convert to a safe, JSON-serializable object
+            geom_json = json.loads(selected_geom.to_json())
+            
             folium.GeoJson(
-                selected_geom.__geo_interface__,
+                geom_json,
                 name=f"{selected_name}",
                 style_function=lambda x: {
                     "color": color,
@@ -282,6 +288,7 @@ if page == "Rainfall Distribution":
                     "fillOpacity": 0.05
                 }
             ).add_to(leaflet_map)
+
 
             leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
           
