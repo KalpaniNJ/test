@@ -142,7 +142,6 @@ from modules import analysis, monitoring, rainfall_distribution, weather_forecas
 from utils.readme_section import show_readme
 from streamlit_folium import st_folium
 import folium
-import json
 
 
 # ee.Authenticate()
@@ -238,70 +237,61 @@ if page == "Rainfall Distribution":
         data_dir = os.path.join(os.path.dirname(__file__), "data")
 
         if analysis_type == "Administrative":
-            shp_path = os.path.join(data_dir, "lka_dis.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["ADM2_EN"].unique())
-            selected_name = st.selectbox("Select District", names)
-            col_name = "ADM2_EN"
+            districts_path = os.path.join(data_dir, "lka_dis.shp")
+            districts = gpd.read_file(districts_path)
+            district_names = sorted(districts["ADM2_EN"].unique())
+            selected_district = st.selectbox("Select District", district_names)
+            selected_basin = None
 
         else:
-            shp_path = os.path.join(data_dir, "lka_basins.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["WSHD_NAME"].unique())
-            selected_name = st.selectbox("Select Basin", names)
-            col_name = "WSHD_NAME"
+            basins_path = os.path.join(data_dir, "lka_basins.shp")
+            basins = gpd.read_file(basins_path)
+            basin_names = sorted(basins["WSHD_NAME"].unique())
+            selected_basin = st.selectbox("Select Basin", basin_names)
+            selected_district = None
 
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
-        start_date = st.date_input("From", value=pd.to_datetime("2025-01-01"))
-        end_date = st.date_input("To", value=pd.to_datetime("2025-01-31"))
-        run_forecast = st.button("Show Rainfall")
+        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
+        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
+        run_forecast = st.button("Apply Layers")
 
     with col2:
-        leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-    
-        # Satellite layer
-        folium.TileLayer(
-            "Esri.WorldImagery",
-            name="Satellite",
-            attr="Tiles © Esri",
-            show=False
-        ).add_to(leaflet_map)
-    
-        selected_geom = gdf[gdf[col_name] == selected_name].copy()
-        selected_geom = selected_geom[selected_geom.geometry.notnull()]
-        selected_geom["geometry"] = selected_geom.buffer(0)
-        
-        folium.GeoJson(
-            json.loads(selected_geom.to_json()),
-            name=f"{selected_name}",
-            style_function=lambda x: {"color": "#FF0000", "weight": 2, "fillOpacity": 0.05}
-        ).add_to(leaflet_map)
-        
-        leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+        if not run_forecast:
+            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
+            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+            st_folium(leaflet_map, use_container_width=True, height=650)
 
-    
-        # ---- Add rainfall layer ----
-        if run_forecast:
-            with st.spinner("Loading rainfall layer from GEE..."):
-                tile_url, layer_name = rainfall.get_rainfall_layer(
-                    start_date.strftime("%Y-%m-%d"),
-                    end_date.strftime("%Y-%m-%d"),
-                    temporal_method,
-                    selected_geom
-                )
-    
-                folium.raster_layers.TileLayer(
-                    tiles=tile_url,
-                    attr="GPM IMERG (NASA)",
-                    name=layer_name,
-                    overlay=True,
-                    opacity=0.85,
-                    show=True
+        # After Apply Layers is clicked
+        else:
+            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+            folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
+            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
+
+            # --- Show only the selected district or basin ---
+            if selected_district:
+                selected_geom = districts[districts["ADM2_EN"] == selected_district]
+                folium.GeoJson(
+                    selected_geom.__geo_interface__,
+                    name=f"{selected_district} District",
+                    style_function=lambda x: {"color": "red", "weight": 2, "fillOpacity": 0.05}
                 ).add_to(leaflet_map)
-    
-        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        st_folium(leaflet_map, use_container_width=True, height=650)
-    
+                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+
+            elif selected_basin:
+                selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
+                folium.GeoJson(
+                    selected_geom.__geo_interface__,
+                    name=f"{selected_basin} Basin",
+                    style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.05}
+                ).add_to(leaflet_map)
+                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+
+            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+            st_folium(leaflet_map, use_container_width=True, height=650)
+
+            # 🔹 You can now later overlay GPM data here:
+            # rainfall_distribution.show(params)
 
 
 # ==============================
@@ -490,4 +480,3 @@ def add_footer():
 
 if __name__ == "__main__":
     add_footer()
-
