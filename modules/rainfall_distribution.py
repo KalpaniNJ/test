@@ -5,14 +5,6 @@ import geemap
 import geopandas as gpd
 import pandas as pd
 
-# Initialize Earth Engine
-try:
-    ee.Initialize()
-except Exception:
-    ee.Authenticate()
-    ee.Initialize()
-
-
 # ==========================================================
 # 1️⃣ Convert Shapefile AOI to Earth Engine Geometry
 # ==========================================================
