@@ -289,7 +289,7 @@ if page == "Rainfall Distribution":
         # ---- Add rainfall layer after "Apply Layers" ----
         if run_forecast and selected_geom is not None:
             with st.spinner("Loading rainfall layer..."):
-                tile_url, layer_name = rainfall.get_rainfall_layer(
+                tile_url, layer_name = rainfall_distribution.get_rainfall_layer(
                     wea_start_date.strftime("%Y-%m-%d"),
                     wea_end_date.strftime("%Y-%m-%d"),
                     temporal_method,
