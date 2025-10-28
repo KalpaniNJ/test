@@ -287,8 +287,28 @@ if page == "Rainfall Distribution":
                 ).add_to(leaflet_map)
                 leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
-            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map, use_container_width=True, height=650)
+        # ---- Add rainfall layer after "Apply Layers" ----
+        if run_forecast and selected_geom is not None:
+            with st.spinner("Loading rainfall layer..."):
+                tile_url, layer_name = rainfall.get_rainfall_layer(
+                    wea_start_date.strftime("%Y-%m-%d"),
+                    wea_end_date.strftime("%Y-%m-%d"),
+                    temporal_method,
+                    selected_geom
+                )
+
+                folium.raster_layers.TileLayer(
+                    tiles=tile_url,
+                    attr="GPM IMERG",
+                    name=layer_name,
+                    overlay=True,
+                    opacity=0.85,
+                    show=True
+                ).add_to(leaflet_map)
+
+        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+        st_folium(leaflet_map, use_container_width=True, height=650)
+
 
             # 🔹 You can now later overlay GPM data here:
             # rainfall_distribution.show(params)
