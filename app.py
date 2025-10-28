@@ -143,7 +143,9 @@ import folium
 from streamlit_folium import st_folium
 
     
-from modules.rainfall_distribution import show_rainfall_v7
+from modules.rainfall_distribution import show_gpm_v7_map
+
+
             
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -308,10 +310,6 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
         # st_folium(leaflet_map, use_container_width=True, height=650)
     
 
-
-from modules.rainfall_distribution import show_gpm_v7_map
-from streamlit_folium import st_folium
-import folium
 
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
