@@ -141,8 +141,9 @@ import geopandas as gpd
 from modules import analysis, monitoring, rainfall_distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 from streamlit_folium import st_folium
-import folium
+import geemap.foliumap as geemap
 
+            
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -292,6 +293,40 @@ if page == "Rainfall Distribution":
 
             # 🔹 You can now later overlay GPM data here:
             # rainfall_distribution.show(params)
+
+            
+            # --- inside the else: block (after Apply Layers clicked) ---
+            
+            if selected_district:
+                aoi = rainfall_distribution.aoi_from_shapefile(districts_path, "ADM2_EN", selected_district)
+            elif selected_basin:
+                aoi = rainfall_distribution.aoi_from_shapefile(basins_path, "WSHD_NAME", selected_basin)
+            
+            # Fetch rainfall image + mean value
+            rainfall_img, mean_rain = rainfall_distribution.get_rainfall_distribution(
+                aoi,
+                start_date=wea_start_date.strftime("%Y-%m-%d"),
+                end_date=wea_end_date.strftime("%Y-%m-%d"),
+                method=temporal_method
+            )
+            
+            # Add GPM raster layer (visualize rainfall intensity)
+            vis_params = {
+                "min": 0,
+                "max": 1000,
+                "palette": ["#d4f1f9", "#76bde8", "#2171b5", "#08306b"]
+            }
+            
+            Map = geemap.Map(add_google_map=False)
+            Map.addLayer(rainfall_img, vis_params, f"GPM {temporal_method}")
+            Map.addLayer(aoi, {}, "AOI boundary")
+            Map.centerObject(aoi, 8)
+            
+            # Render folium map inside Streamlit
+            st_folium(Map.to_streamlit(height=650), use_container_width=True)
+            
+            # Optional summary
+            st.success(f"**Mean rainfall ({temporal_method})** from {wea_start_date} to {wea_end_date}: {mean_rain:.2f} mm")
 
 
 # ==============================
