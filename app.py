@@ -309,8 +309,8 @@ if page == "Rainfall Distribution":
                     wea_end_date
                 )
         
-            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map, use_container_width=True, height=650)
+        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+        st_folium(leaflet_map, use_container_width=True, height=650)
 
 
         # folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
