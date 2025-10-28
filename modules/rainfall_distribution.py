@@ -1,70 +1,132 @@
-# rainfall_distribution.py
+# modules/rainfall_distribution.py
+
 import ee
+import folium
 import geopandas as gpd
+import streamlit as st
 
-# ---------- Helper ----------
-def _to_ee_geometry(gdf: gpd.GeoDataFrame) -> ee.Geometry:
-    """Convert GeoDataFrame to ee.Geometry (merged)."""
-    if gdf.crs and gdf.crs.to_epsg() != 4326:
-        gdf = gdf.to_crs(4326)
-    return ee.Geometry(gdf.unary_union.__geo_interface__)
 
-# ---------- GPM Rainfall Aggregation ----------
-def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
+def show(params):
     """
-    Aggregate GPM rainfall over time:
-    - Sum: total rainfall (30-min data)
-    - Mean: mean of daily totals
-    - Median: median of daily totals
+    Display GPM IMERG V07 rainfall for the selected AOI and time range.
+    Handles aggregation options: Sum, Mean, or Median.
     """
-    ic = (
-        ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
-        .filterDate(ee.Date(start_date), ee.Date(end_date))
-        .select("precipitation")
-    )
 
-    method = temporal_method.lower()
+    analysis_type = params.get("analysis_type")
+    district = params.get("district")
+    basin = params.get("basin")
+    temporal_method = params.get("temporal_method")
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
 
-    # Compute daily rainfall totals
-    def daily_sum(date):
-        date = ee.Date(date)
-        next_day = date.advance(1, "day")
-        daily = ic.filterDate(date, next_day).sum()
-        return daily.set("system:time_start", date.millis())
+    # -----------------------------
+    # Base map setup
+    # -----------------------------
+    leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles=None)
+    folium.TileLayer("OpenStreetMap", name="OSM Streets").add_to(leaflet_map)
+    folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
+    folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
-    n_days = ee.Date(end_date).difference(ee.Date(start_date), "day").round()
-    daily_ic = ee.ImageCollection(
-        ee.List.sequence(0, n_days.subtract(1))
-        .map(lambda d: daily_sum(ee.Date(start_date).advance(d, "day")))
-    )
+    # -----------------------------
+    # Load AOI geometry
+    # -----------------------------
+    data_dir = "data"  # adjust if needed
+    selected_geom = None
+    color = "red"
 
-    if method == "sum":
-        img = ic.sum()
-    elif method == "mean":
-        img = daily_ic.mean()
-    elif method == "median":
-        img = daily_ic.median()
-    else:
-        img = ic.sum()
+    try:
+        if analysis_type == "Administrative" and district:
+            gdf = gpd.read_file(f"{data_dir}/lka_dis.shp")
+            selected_geom = gdf[gdf["ADM2_EN"] == district]
+            color = "red"
+        elif analysis_type == "Hydrological" and basin:
+            gdf = gpd.read_file(f"{data_dir}/lka_basins.shp")
+            selected_geom = gdf[gdf["WSHD_NAME"] == basin]
+            color = "blue"
+    except Exception as e:
+        st.error(f"⚠️ Could not load shapefile: {e}")
+        return None
 
-    return img
+    # -----------------------------
+    # Fetch and process GPM data
+    # -----------------------------
+    try:
+        # Load GPM IMERG V07 (30-minute precipitation)
+        gpm = ee.ImageCollection("NASA/GPM_L3/IMERG_V07") \
+            .filterDate(start_date, end_date) \
+            .select("precipitation")
 
+        # ----- Temporal aggregation -----
+        if temporal_method == "Sum":
+            # Sum of all 30-minute rainfall values in period
+            rainfall_img = gpm.sum()
+            agg_label = "Total Rainfall (mm)"
+        elif temporal_method == "Mean":
+            # Average of daily rainfall (mean)
+            rainfall_img = gpm.mean()
+            agg_label = "Mean Daily Rainfall (mm)"
+        elif temporal_method == "Median":
+            # Median daily rainfall
+            rainfall_img = gpm.median()
+            agg_label = "Median Daily Rainfall (mm)"
+        else:
+            rainfall_img = gpm.mean()
+            agg_label = "Mean Daily Rainfall (mm)"
 
-# ---------- function for app.py ----------
-def get_rainfall_layer(start_date: str, end_date: str, temporal_method: str, aoi_gdf: gpd.GeoDataFrame):
-    """
-    Returns a Tile URL for Folium (GEE map tiles).
-    """
-    aoi = _to_ee_geometry(aoi_gdf)
-    rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
+        # Clip to AOI if available
+        if selected_geom is not None:
+            ee_geom = ee.Geometry.Polygon(selected_geom.geometry.values[0].exterior.coords[:])
+            rainfall_img = rainfall_img.clip(ee_geom)
+        else:
+            ee_geom = None
 
-    vis = {
-        "min": 0,
-        "max": 500,
-        "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
-    }
+        # Visualization
+        vis_params = {
+            "min": 0,
+            "max": 100 if temporal_method == "Sum" else 50,
+            "palette": ["#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"]
+        }
 
-    map_id_dict = ee.Image(rain_img).getMapId(vis)
-    tile_url = map_id_dict["tile_fetcher"].url_format
+        # Get tile URL
+        map_id_dict = rainfall_img.getMapId(vis_params)
+        tile_url = map_id_dict["tile_fetcher"].url_format
 
-    return tile_url, f"GPM Rainfall ({temporal_method})"
+        # Add GPM overlay
+        folium.TileLayer(
+            tiles=tile_url,
+            name=f"GPM {agg_label} ({start_date} → {end_date})",
+            attr="NASA GPM IMERG V07",
+            overlay=True,
+            control=True,
+            opacity=0.75,
+        ).add_to(leaflet_map)
+
+        # Add AOI boundary overlay
+        if selected_geom is not None:
+            folium.GeoJson(
+                selected_geom.__geo_interface__,
+                name=f"{district or basin}",
+                style_function=lambda x: {"color": color, "weight": 2, "fillOpacity": 0.05},
+            ).add_to(leaflet_map)
+            leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+
+        # Add layer control
+        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+
+        # ----- Compute summary statistic -----
+        if ee_geom is not None:
+            stats = rainfall_img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=ee_geom,
+                scale=10000,
+                maxPixels=1e13
+            ).get("precipitation").getInfo()
+
+            if stats is not None:
+                st.success(f"🌧️ {agg_label} over {district or basin}: {stats:.2f} mm")
+
+        return leaflet_map
+
+    except Exception as e:
+        st.error(f"⚠️ Error loading GPM rainfall data: {e}")
+        return None
