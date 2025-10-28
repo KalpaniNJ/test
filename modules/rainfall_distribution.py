@@ -2,15 +2,6 @@ import ee
 import folium
 import streamlit as st
 
-# Initialize Earth Engine (safe for Streamlit Cloud)
-if "ee_initialized" not in st.session_state:
-    try:
-        ee.Initialize()
-    except Exception:
-        ee.Authenticate()
-        ee.Initialize()
-    st.session_state["ee_initialized"] = True
-
 
 def show_rainfall_v7(leaflet_map, selected_date):
     """
