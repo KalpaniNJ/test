@@ -265,7 +265,6 @@ if page == "Rainfall Distribution":
         # After Apply Layers is clicked
         else:
             leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-            folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
             folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
             # --- Show only the selected district or basin ---
