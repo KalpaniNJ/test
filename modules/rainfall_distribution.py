@@ -17,8 +17,10 @@ def show(params):
     district = params.get("district")
     basin = params.get("basin")
     temporal_method = params.get("temporal_method")
-    start_date = params.get("start_date")
-    end_date = params.get("end_date")
+    # Convert possible Timestamps to string (YYYY-MM-DD)
+    start_date = str(params.get("start_date"))[:10]
+    end_date = str(params.get("end_date"))[:10]
+
 
     # -----------------------------
     # Base map setup (no default tiles)
