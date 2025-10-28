@@ -15,6 +15,7 @@ def show_rainfall(leaflet_map, selected_geom, start_date, end_date, method):
                     end_date.strftime("%Y-%m-%d")) \
         .select("precipitationCal")
 
+    # --- Aggregate by user-selected method ---
     if method == "Sum":
         gpm_img = gpm.sum()
     elif method == "Median":
@@ -24,31 +25,32 @@ def show_rainfall(leaflet_map, selected_geom, start_date, end_date, method):
 
     gpm_img = gpm_img.clip(aoi)
 
-    # --- Visualization ---
+    # --- Visualization parameters ---
     vis_params = {
         "min": 0,
         "max": 300,
         "palette": ["#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"]
     }
 
-    # --- Create Map ID and URL manually (works in all geemap versions) ---
+    # --- Safe conversion to Folium tile layer ---
     try:
-        map_id_dict = ee.Image(gpm_img).getMapId(vis_params)
+        map_id = gpm_img.getMapId(vis_params)
         folium.TileLayer(
-            tiles=map_id_dict["tile_fetcher"].url_format,
-            attr="GPM IMERG (NASA)",
-            name=f"GPM {method} ({start_date}–{end_date})",
+            tiles=map_id["tile_fetcher"].url_format,
+            attr="NASA GPM IMERG",
+            name=f"GPM {method} ({start_date.strftime('%Y-%m-%d')} → {end_date.strftime('%Y-%m-%d')})",
             overlay=True,
             control=True,
             opacity=0.8
         ).add_to(leaflet_map)
 
-        # Optional legend
+        # --- Optional legend ---
         legend_html = """
-        <div style="position: fixed; 
-                    bottom: 50px; left: 50px; width: 150px; height: 120px; 
-                    background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
-                    text-align:center;">
+        <div style="
+            position: fixed; 
+            bottom: 50px; left: 50px; width: 150px; height: 120px; 
+            background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+            text-align:center;">
             <b>Rainfall (mm)</b><br>
             <i style="background:#f7fbff;width:20px;height:10px;display:inline-block;"></i> 0<br>
             <i style="background:#c6dbef;width:20px;height:10px;display:inline-block;"></i> 50<br>
