@@ -142,6 +142,7 @@ from modules import analysis, monitoring, rainfall_distribution, weather_forecas
 from utils.readme_section import show_readme
 from streamlit_folium import st_folium
 import folium
+import json
 
 
 # ee.Authenticate()
