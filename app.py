@@ -303,12 +303,12 @@ if page == "Rainfall Distribution":
 
             from modules.rainfall_distribution import calculate_rainfall_sum
     
-                if run_rainfall:
-                    with st.spinner("Calculating total rainfall over AOI..."):
-                        total_mm = calculate_rainfall_sum(selected_geom, wea_start_date, wea_end_date)
-                
-                    if total_mm is not None:
-                        st.success(f"🌧️ **Total Rainfall:** {total_mm:.2f} mm")
+            if run_rainfall:
+                with st.spinner("Calculating total rainfall over AOI..."):
+                    total_mm = calculate_rainfall_sum(selected_geom, wea_start_date, wea_end_date)
+            
+                if total_mm is not None:
+                    st.success(f"🌧️ **Total Rainfall:** {total_mm:.2f} mm")
 
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
