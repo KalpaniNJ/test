@@ -258,7 +258,7 @@ if page == "Rainfall Distribution":
 
     with col2:
         leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-
+    
         # Satellite layer
         folium.TileLayer(
             "Esri.WorldImagery",
@@ -266,18 +266,26 @@ if page == "Rainfall Distribution":
             attr="Tiles © Esri",
             show=False
         ).add_to(leaflet_map)
-
-        selected_geom = gdf[gdf[col_name] == selected_name]
-
-        # AOI boundary
+    
+        # --- Select AOI ---
+        selected_geom = gdf[gdf[col_name] == selected_name].copy()
+    
+        # 🧹 FIX: clean any non-serializable column types
+        for col in selected_geom.columns:
+            try:
+                selected_geom[col] = selected_geom[col].astype(str)
+            except Exception:
+                pass
+    
+        # --- AOI boundary ---
         folium.GeoJson(
             json.loads(selected_geom.to_json()),
             name=f"{selected_name}",
             style_function=lambda x: {"color": "#FF0000", "weight": 2, "fillOpacity": 0.05}
         ).add_to(leaflet_map)
-
+    
         leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
+    
         # ---- Add rainfall layer ----
         if run_forecast:
             with st.spinner("Loading rainfall layer from GEE..."):
@@ -287,7 +295,7 @@ if page == "Rainfall Distribution":
                     temporal_method,
                     selected_geom
                 )
-
+    
                 folium.raster_layers.TileLayer(
                     tiles=tile_url,
                     attr="GPM IMERG (NASA)",
@@ -296,9 +304,10 @@ if page == "Rainfall Distribution":
                     opacity=0.85,
                     show=True
                 ).add_to(leaflet_map)
-
+    
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
+    
 
 
 # ==============================
