@@ -267,24 +267,18 @@ if page == "Rainfall Distribution":
             show=False
         ).add_to(leaflet_map)
     
-        # --- Select AOI ---
         selected_geom = gdf[gdf[col_name] == selected_name].copy()
-    
-        # 🧹 FIX: clean any non-serializable column types
-        for col in selected_geom.columns:
-            try:
-                selected_geom[col] = selected_geom[col].astype(str)
-            except Exception:
-                pass
-    
-        # --- AOI boundary ---
+        selected_geom = selected_geom[selected_geom.geometry.notnull()]
+        selected_geom["geometry"] = selected_geom.buffer(0)
+        
         folium.GeoJson(
             json.loads(selected_geom.to_json()),
             name=f"{selected_name}",
             style_function=lambda x: {"color": "#FF0000", "weight": 2, "fillOpacity": 0.05}
         ).add_to(leaflet_map)
-    
+        
         leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+
     
         # ---- Add rainfall layer ----
         if run_forecast:
