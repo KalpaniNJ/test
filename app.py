@@ -256,37 +256,37 @@ if page == "Rainfall Distribution":
         run_forecast = st.button("Apply Layers")
 
     with col2:
-        if not run_forecast:
-            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
-            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map, use_container_width=True, height=650)
-
-        # After Apply Layers is clicked
-        else:
-            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
-
-            # --- Show only the selected district or basin ---
-            if selected_district:
-                selected_geom = districts[districts["ADM2_EN"] == selected_district]
-                folium.GeoJson(
-                    selected_geom.__geo_interface__,
-                    name=f"{selected_district} District",
-                    style_function=lambda x: {"color": "red", "weight": 2, "fillOpacity": 0.05}
-                ).add_to(leaflet_map)
-                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
-            elif selected_basin:
-                selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
-                folium.GeoJson(
-                    selected_geom.__geo_interface__,
-                    name=f"{selected_basin} Basin",
-                    style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.05}
-                ).add_to(leaflet_map)
-                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
-        # ---- Add rainfall layer after "Apply Layers" ----
+        # --- Initialize base map ---
+        leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+        folium.TileLayer(
+            "Esri.WorldImagery",
+            name="Satellite",
+            attr="Tiles © Esri",
+            show=False
+        ).add_to(leaflet_map)
+    
+        selected_geom = None
+    
+        # --- Show only the selected district or basin ---
+        if selected_district:
+            selected_geom = districts[districts["ADM2_EN"] == selected_district]
+            folium.GeoJson(
+                selected_geom.__geo_interface__,
+                name=f"{selected_district} District",
+                style_function=lambda x: {"color": "red", "weight": 2, "fillOpacity": 0.05}
+            ).add_to(leaflet_map)
+            leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+    
+        elif selected_basin:
+            selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
+            folium.GeoJson(
+                selected_geom.__geo_interface__,
+                name=f"{selected_basin} Basin",
+                style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.05}
+            ).add_to(leaflet_map)
+            leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+    
+        # ---- Add rainfall layer only when Apply Layers is clicked ----
         if run_forecast and selected_geom is not None:
             with st.spinner("Loading rainfall layer..."):
                 tile_url, layer_name = rainfall_distribution.get_rainfall_layer(
@@ -295,22 +295,19 @@ if page == "Rainfall Distribution":
                     temporal_method,
                     selected_geom
                 )
-
+    
                 folium.raster_layers.TileLayer(
                     tiles=tile_url,
-                    attr="GPM IMERG",
+                    attr="GPM IMERG (NASA)",
                     name=layer_name,
                     overlay=True,
                     opacity=0.85,
                     show=True
                 ).add_to(leaflet_map)
-
+    
+        # ---- Always add controls and render the map once ----
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
-
-
-            # 🔹 You can now later overlay GPM data here:
-            # rainfall_distribution.show(params)
 
 
 # ==============================
