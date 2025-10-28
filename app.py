@@ -271,36 +271,40 @@ if page == "Rainfall Distribution":
         folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
         # if run_rainfall:
-            # selected_geom = gdf[gdf[filter_field] == selected_name]
+        #     selected_geom = gdf[gdf[filter_field] == selected_name]
 
-            # import json
-            # from shapely.geometry import mapping
+        #     import json
+        #     from shapely.geometry import mapping
             
-            # # Convert to a safe, JSON-serializable object
-            # geom_json = json.loads(selected_geom.to_json())
+        #     # Convert to a safe, JSON-serializable object
+        #     geom_json = json.loads(selected_geom.to_json())
             
-            # folium.GeoJson(
-            #     geom_json,
-            #     name=f"{selected_name}",
-            #     style_function=lambda x: {
-            #         "color": color,
-            #         "weight": 2,
-            #         "fillOpacity": 0.05
-            #     }
-            # ).add_to(leaflet_map)
+        #     folium.GeoJson(
+        #         geom_json,
+        #         name=f"{selected_name}",
+        #         style_function=lambda x: {
+        #             "color": color,
+        #             "weight": 2,
+        #             "fillOpacity": 0.05
+        #         }
+        #     ).add_to(leaflet_map)
 
 
-            # leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+        #     leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
           
-            # with st.spinner("Loading GPM rainfall data..."):
-            #     leaflet_map = show_rainfall(
-            #         leaflet_map,
-            #         selected_geom,
-            #         wea_start_date,
-            #         wea_end_date,
-            #         temporal_method
-            #     )
+        #     with st.spinner("Loading GPM rainfall data..."):
+        #         leaflet_map = show_rainfall(
+        #             leaflet_map,
+        #             selected_geom,
+        #             wea_start_date,
+        #             wea_end_date,
+        #             temporal_method
+        #         )
 
+        # folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+        # st_folium(leaflet_map, use_container_width=True, height=650)
+    
+    
         if run_rainfall:
             with st.spinner("Fetching GPM rainfall data..."):
                 leaflet_map = show_rainfall(
@@ -311,11 +315,6 @@ if page == "Rainfall Distribution":
         
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
-
-
-        # folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        # st_folium(leaflet_map, use_container_width=True, height=650)
-
 
 
 # ==============================
