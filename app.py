@@ -309,19 +309,26 @@ if page == "Rainfall Distribution":
     
 
 
-        # --- UI ---
-        selected_date = st.date_input("Select Date", pd.to_datetime("2025-01-01"))
-        run_rainfall = st.button("Show GPM V7 Data")
-        
-        with col2:
-            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-        
-            if run_rainfall:
-                with st.spinner("Fetching GPM IMERG V7 data..."):
-                    leaflet_map = show_rainfall_v7(leaflet_map, str(selected_date))
-        
-            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map, use_container_width=True, height=650)
+from modules.rainfall_distribution import show_gpm_v7_map
+from streamlit_folium import st_folium
+import folium
+
+# ==============================
+# RAINFALL DISTRIBUTION MODULE
+# ==============================
+if page == "Rainfall Distribution":
+    st.markdown("### 🌧️ Rainfall Distribution")
+    st.write("GPM IMERG V7 (30-minute) Precipitation Data for a Single Day")
+
+    # You can adjust the date here if needed
+    selected_date = "2019-09-03"
+
+    leaflet_map = show_gpm_v7_map(selected_date)
+
+    if leaflet_map:
+        st_folium(leaflet_map, use_container_width=True, height=650)
+    else:
+        st.warning("⚠️ Unable to load GPM rainfall map.")
 
 
 
