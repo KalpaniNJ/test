@@ -137,7 +137,7 @@ from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
 from modules import analysis, monitoring, weather_forecast, water_productivity
-from modules.rainfall_distribution import show_rainfall
+# from modules.rainfall_distribution import show_rainfall
 from utils.readme_section import show_readme
 import folium
 from streamlit_folium import st_folium
