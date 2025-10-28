@@ -24,7 +24,6 @@ def show(params):
     # -----------------------------
     leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles=None)
     folium.TileLayer("OpenStreetMap", name="OSM Streets").add_to(leaflet_map)
-    folium.TileLayer("Stamen Terrain", name="Terrain").add_to(leaflet_map)
     folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
     # -----------------------------
