@@ -137,7 +137,7 @@ from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
 from modules import analysis, monitoring, weather_forecast, water_productivity
-# from modules.rainfall_distribution import show_rainfall
+from modules.rainfall_distribution import show_rainfall
 from utils.readme_section import show_readme
 import folium
 from streamlit_folium import st_folium
@@ -270,7 +270,7 @@ if page == "Rainfall Distribution":
         leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
         folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
-        if run_rainfall:
+        # if run_rainfall:
             # selected_geom = gdf[gdf[filter_field] == selected_name]
 
             # import json
@@ -301,18 +301,20 @@ if page == "Rainfall Distribution":
             #         temporal_method
             #     )
 
-            from modules.rainfall_distribution import calculate_rainfall_sum
-    
-            if run_rainfall:
-                with st.spinner("Calculating total rainfall over AOI..."):
-                    total_mm = calculate_rainfall_sum(selected_geom, wea_start_date, wea_end_date)
-            
-                if total_mm is not None:
-                    st.success(f"🌧️ **Total Rainfall:** {total_mm:.2f} mm")
+        if run_rainfall:
+            with st.spinner("Fetching GPM rainfall data..."):
+                leaflet_map = show_rainfall(
+                    leaflet_map,
+                    wea_start_date,
+                    wea_end_date
+                )
+        
+            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+            st_folium(leaflet_map, use_container_width=True, height=650)
 
 
-        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        st_folium(leaflet_map, use_container_width=True, height=650)
+        # folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
+        # st_folium(leaflet_map, use_container_width=True, height=650)
 
 
 
