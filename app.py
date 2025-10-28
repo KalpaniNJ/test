@@ -130,6 +130,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+import sys, os
+
+# Ensure app directory is in Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 
 import ee
 import geemap.foliumap as geemap
