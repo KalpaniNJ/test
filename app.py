@@ -228,9 +228,6 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
-# ==============================
-# 🌧️ RAINFALL DISTRIBUTION MODULE
-# ==============================
 if page == "Rainfall Distribution":
     st.markdown("### 🌧️ Rainfall Distribution")
 
@@ -241,7 +238,6 @@ if page == "Rainfall Distribution":
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
         data_dir = os.path.join(os.path.dirname(__file__), "data")
 
-        # --- Load shapefile based on type ---
         if analysis_type == "Administrative":
             shp_path = os.path.join(data_dir, "lka_dis.shp")
             gdf = gpd.read_file(shp_path)
@@ -261,27 +257,28 @@ if page == "Rainfall Distribution":
         start_date = st.date_input("From", value=pd.to_datetime("2025-01-01"))
         end_date = st.date_input("To", value=pd.to_datetime("2025-01-31"))
 
-        run_forecast = st.button("Show ")
+        run_forecast = st.button("Show Rainfall")
 
     # ---------- Map Visualization ----------
     with col2:
         Map = geemap.Map(center=[7.8, 80.7], zoom=8)
 
-        # --- Build AOI ---
+        # --- Add selected shapefile layer ---
+        style = {
+            "color": "#3A3B3C" if analysis_type == "Administrative" else "#9B5DE0",
+            "weight": 0.8,
+            "fillOpacity": 0
+        }
+        Map.add_shapefile(shp_path, layer_name=analysis_type, style=style, shown=True)
+
+        # --- Define AOI for rainfall clipping ---
         selected_geom = gdf[gdf[col_name] == selected_name]
-        aoi = rainfall_distribution._to_ee_geometry(selected_geom)
+        aoi = rainfall._to_ee_geometry(selected_geom)
 
-        # --- Display boundary only ---
-        Map.add_gdf(
-            selected_geom,
-            layer_name=f"{selected_name} Boundary",
-            style={"color": "red", "weight": 1.5, "fillOpacity": 0}
-        )
-
-        # --- Rainfall layer ---
+        # --- Add rainfall layer ---
         if run_forecast:
             with st.spinner(f"Computing {temporal_method} rainfall for {selected_name}..."):
-                rain_img = rainfall_distribution._rainfall_aggregate(
+                rain_img = rainfall._rainfall_aggregate(
                     start_date.strftime("%Y-%m-%d"),
                     end_date.strftime("%Y-%m-%d"),
                     temporal_method
@@ -295,7 +292,6 @@ if page == "Rainfall Distribution":
 
                 Map.addLayer(rain_img, vis, f"GPM Rainfall ({temporal_method})")
 
-                # --- Colorbar legend ---
                 Map.add_colorbar(
                     vis_params=vis,
                     label=f"GPM Rainfall ({temporal_method}) [mm]",
@@ -306,7 +302,6 @@ if page == "Rainfall Distribution":
 
         Map.addLayerControl()
         Map.to_streamlit(height=720)
-
 
 
 # ==============================
