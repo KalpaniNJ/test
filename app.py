@@ -228,15 +228,20 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
+# ==============================
+# 🌧️ RAINFALL DISTRIBUTION MODULE
+# ==============================
 if page == "Rainfall Distribution":
     st.markdown("### 🌧️ Rainfall Distribution")
 
     col1, col2 = st.columns([0.9, 3.1])
 
+    # ---------- Sidebar Controls ----------
     with col1:
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
         data_dir = os.path.join(os.path.dirname(__file__), "data")
 
+        # --- Load shapefile based on type ---
         if analysis_type == "Administrative":
             shp_path = os.path.join(data_dir, "lka_dis.shp")
             gdf = gpd.read_file(shp_path)
@@ -252,24 +257,30 @@ if page == "Rainfall Distribution":
             col_name = "WSHD_NAME"
 
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
+
         start_date = st.date_input("From", value=pd.to_datetime("2025-01-01"))
         end_date = st.date_input("To", value=pd.to_datetime("2025-01-31"))
+
         run_forecast = st.button("Show Rainfall")
 
+    # ---------- Map Visualization ----------
     with col2:
-        # Initialize geemap map
         Map = geemap.Map(center=[7.8, 80.7], zoom=8)
 
         # --- Build AOI ---
         selected_geom = gdf[gdf[col_name] == selected_name]
         aoi = rainfall._to_ee_geometry(selected_geom)
 
-        # --- Add boundary layer ---
-        Map.add_gdf(selected_geom, layer_name=f"{selected_name} Boundary", style={"color": "red", "fillOpacity": 0})
+        # --- Display boundary only ---
+        Map.add_gdf(
+            selected_geom,
+            layer_name=f"{selected_name} Boundary",
+            style={"color": "red", "weight": 1.5, "fillOpacity": 0}
+        )
 
-        # --- Add rainfall layer ---
+        # --- Rainfall layer ---
         if run_forecast:
-            with st.spinner("Loading rainfall layer from GEE..."):
+            with st.spinner(f"Computing {temporal_method} rainfall for {selected_name}..."):
                 rain_img = rainfall._rainfall_aggregate(
                     start_date.strftime("%Y-%m-%d"),
                     end_date.strftime("%Y-%m-%d"),
@@ -283,9 +294,16 @@ if page == "Rainfall Distribution":
                 }
 
                 Map.addLayer(rain_img, vis, f"GPM Rainfall ({temporal_method})")
-                Map.add_colorbar(vis_params=vis, label=f"GPM Rainfall ({temporal_method}) [mm]")
 
-        # --- Add base layers and controls ---
+                # --- Colorbar legend ---
+                Map.add_colorbar(
+                    vis_params=vis,
+                    label=f"GPM Rainfall ({temporal_method}) [mm]",
+                    layer_name=f"GPM Rainfall ({temporal_method})",
+                    font_size=14,
+                    label_font_size=16
+                )
+
         Map.addLayerControl()
         Map.to_streamlit(height=720)
 
