@@ -225,53 +225,53 @@ page = st.sidebar.selectbox(
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
 
-# ==============================
-# RAINFALL DISTRIBUTION MODULE
-# ==============================
-if page == "Rainfall Distribution":
-    st.markdown("### 🌧️ Rainfall Distribution")
+# # ==============================
+# # RAINFALL DISTRIBUTION MODULE
+# # ==============================
+# if page == "Rainfall Distribution":
+#     st.markdown("### 🌧️ Rainfall Distribution")
 
-    col1, col2 = st.columns([0.9, 3.1])
+#     col1, col2 = st.columns([0.9, 3.1])
 
-    with col1:
-        analysis_type = st.radio(
-            "Select Analysis Type",
-            ["Administrative", "Hydrological"],
-            horizontal=True
-        )
+#     with col1:
+#         analysis_type = st.radio(
+#             "Select Analysis Type",
+#             ["Administrative", "Hydrological"],
+#             horizontal=True
+#         )
 
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+#         data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
-        if analysis_type == "Administrative":
-            shp_path = os.path.join(data_dir, "lka_dis.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["ADM2_EN"].unique())
-            selected_name = st.selectbox("Select District", names)
-            filter_field = "ADM2_EN"
-            color = "red"
-        else:
-            shp_path = os.path.join(data_dir, "lka_basins.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["WSHD_NAME"].unique())
-            selected_name = st.selectbox("Select Basin", names)
-            filter_field = "WSHD_NAME"
-            color = "blue"
+#         if analysis_type == "Administrative":
+#             shp_path = os.path.join(data_dir, "lka_dis.shp")
+#             gdf = gpd.read_file(shp_path)
+#             names = sorted(gdf["ADM2_EN"].unique())
+#             selected_name = st.selectbox("Select District", names)
+#             filter_field = "ADM2_EN"
+#             color = "red"
+#         else:
+#             shp_path = os.path.join(data_dir, "lka_basins.shp")
+#             gdf = gpd.read_file(shp_path)
+#             names = sorted(gdf["WSHD_NAME"].unique())
+#             selected_name = st.selectbox("Select Basin", names)
+#             filter_field = "WSHD_NAME"
+#             color = "blue"
 
-        temporal_method = st.radio(
-            "Temporal Aggregation",
-            ["Sum", "Mean", "Median"],
-            horizontal=True
-        )
+#         temporal_method = st.radio(
+#             "Temporal Aggregation",
+#             ["Sum", "Mean", "Median"],
+#             horizontal=True
+#         )
 
-        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
+#         wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
+#         wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
 
-        run_rainfall = st.button("Apply Layers")
+#         run_rainfall = st.button("Apply Layers")
 
-    # Map Section
-    with col2:
-        leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-        folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
+#     # Map Section
+#     with col2:
+#         leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
+#         folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
 
         # if run_rainfall:
         #     selected_geom = gdf[gdf[filter_field] == selected_name]
