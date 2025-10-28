@@ -261,7 +261,7 @@ if page == "Rainfall Distribution":
         start_date = st.date_input("From", value=pd.to_datetime("2025-01-01"))
         end_date = st.date_input("To", value=pd.to_datetime("2025-01-31"))
 
-        run_forecast = st.button("Show Rainfall")
+        run_forecast = st.button("Show ")
 
     # ---------- Map Visualization ----------
     with col2:
@@ -269,7 +269,7 @@ if page == "Rainfall Distribution":
 
         # --- Build AOI ---
         selected_geom = gdf[gdf[col_name] == selected_name]
-        aoi = rainfall._to_ee_geometry(selected_geom)
+        aoi = rainfall_distribution._to_ee_geometry(selected_geom)
 
         # --- Display boundary only ---
         Map.add_gdf(
@@ -281,7 +281,7 @@ if page == "Rainfall Distribution":
         # --- Rainfall layer ---
         if run_forecast:
             with st.spinner(f"Computing {temporal_method} rainfall for {selected_name}..."):
-                rain_img = rainfall._rainfall_aggregate(
+                rain_img = rainfall_distribution._rainfall_aggregate(
                     start_date.strftime("%Y-%m-%d"),
                     end_date.strftime("%Y-%m-%d"),
                     temporal_method
