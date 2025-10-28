@@ -227,7 +227,6 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
-
 if page == "Rainfall Distribution":
     st.markdown("### 🌧️ Rainfall Distribution")
 
@@ -238,51 +237,57 @@ if page == "Rainfall Distribution":
         data_dir = os.path.join(os.path.dirname(__file__), "data")
 
         if analysis_type == "Administrative":
-            districts_path = os.path.join(data_dir, "lka_dis.shp")
-            districts = gpd.read_file(districts_path)
-            district_names = sorted(districts["ADM2_EN"].unique())
-            selected_district = st.selectbox("Select District", district_names)
-            selected_basin = None
+            shp_path = os.path.join(data_dir, "lka_dis.shp")
+            gdf = gpd.read_file(shp_path)
+            names = sorted(gdf["ADM2_EN"].unique())
+            selected_name = st.selectbox("Select District", names)
+            col_name = "ADM2_EN"
 
         else:
-            basins_path = os.path.join(data_dir, "lka_basins.shp")
-            basins = gpd.read_file(basins_path)
-            basin_names = sorted(basins["WSHD_NAME"].unique())
-            selected_basin = st.selectbox("Select Basin", basin_names)
-            selected_district = None
+            shp_path = os.path.join(data_dir, "lka_basins.shp")
+            gdf = gpd.read_file(shp_path)
+            names = sorted(gdf["WSHD_NAME"].unique())
+            selected_name = st.selectbox("Select Basin", names)
+            col_name = "WSHD_NAME"
 
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
-        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
-        run_forecast = st.button("Apply Layers")
+        start_date = st.date_input("From", value=pd.to_datetime("2025-01-01"))
+        end_date = st.date_input("To", value=pd.to_datetime("2025-01-31"))
+        run_forecast = st.button("Show Rainfall")
 
     with col2:
-        # Default basemap before applying layers
-        if not run_forecast:
-            leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles=None)
-            folium.TileLayer("OpenStreetMap", name="OSM Streets").add_to(leaflet_map)
-            folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
-            folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-            st_folium(leaflet_map, use_container_width=True, height=650)
-            st.info("👈 Select an AOI and date range, then click *Apply Layers* to view rainfall.")
+        # Initialize geemap map
+        Map = geemap.Map(center=[7.8, 80.7], zoom=8)
 
-        # After Apply Layers is clicked
-        else:
-            params = {
-                "analysis_type": analysis_type,
-                "district": selected_district,
-                "basin": selected_basin,
-                "temporal_method": temporal_method,
-                "start_date": str(wea_start_date),
-                "end_date": str(wea_end_date)
-            }
+        # --- Build AOI ---
+        selected_geom = gdf[gdf[col_name] == selected_name]
+        aoi = rainfall._to_ee_geometry(selected_geom)
 
-            leaflet_map = rainfall_distribution.show(params)
+        # --- Add boundary layer ---
+        Map.add_gdf(selected_geom, layer_name=f"{selected_name} Boundary", style={"color": "red", "fillOpacity": 0})
 
-            if leaflet_map:
-                st_folium(leaflet_map, use_container_width=True, height=650)
-            else:
-                st.warning("Unable to display rainfall map.")
+        # --- Add rainfall layer ---
+        if run_forecast:
+            with st.spinner("Loading rainfall layer from GEE..."):
+                rain_img = rainfall._rainfall_aggregate(
+                    start_date.strftime("%Y-%m-%d"),
+                    end_date.strftime("%Y-%m-%d"),
+                    temporal_method
+                ).clip(aoi)
+
+                vis = {
+                    "min": 0,
+                    "max": 500,
+                    "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
+                }
+
+                Map.addLayer(rain_img, vis, f"GPM Rainfall ({temporal_method})")
+                Map.add_colorbar(vis_params=vis, label=f"GPM Rainfall ({temporal_method}) [mm]")
+
+        # --- Add base layers and controls ---
+        Map.addLayerControl()
+        Map.to_streamlit(height=720)
+
 
 
 # ==============================
