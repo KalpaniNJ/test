@@ -17,9 +17,24 @@ def show(params):
     district = params.get("district")
     basin = params.get("basin")
     temporal_method = params.get("temporal_method")
-    # Convert possible Timestamps to string (YYYY-MM-DD)
-    start_date = str(params.get("start_date"))[:10]
-    end_date = str(params.get("end_date"))[:10]
+    from datetime import date, datetime
+    
+    # Force clean ISO strings
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+    
+    # Handle Timestamp, datetime.date, and other types
+    if isinstance(start_date, (pd.Timestamp, datetime, date)):
+        start_date = start_date.strftime("%Y-%m-%d")
+    else:
+        start_date = str(start_date).split(" ")[0]
+    
+    if isinstance(end_date, (pd.Timestamp, datetime, date)):
+        end_date = end_date.strftime("%Y-%m-%d")
+    else:
+        end_date = str(end_date).split(" ")[0]
+    
+    st.write("DEBUG start_date:", start_date, "end_date:", end_date)
 
 
     # -----------------------------
