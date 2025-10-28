@@ -285,8 +285,17 @@ if page == "Rainfall Distribution":
             leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
             # 🔹 Placeholder for rainfall overlay (GPM/CHIRPS etc.)
-            # from rainfall_distribution import show_rainfall
-            # show_rainfall(leaflet_map, selected_geom, wea_start_date, wea_end_date, temporal_method)
+            from rainfall_distribution import show_rainfall
+            
+            with st.spinner("Loading GPM rainfall data..."):
+                leaflet_map = show_rainfall(
+                    leaflet_map,
+                    selected_geom,
+                    wea_start_date,
+                    wea_end_date,
+                    temporal_method
+                )
+
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
