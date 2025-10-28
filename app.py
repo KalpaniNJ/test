@@ -288,11 +288,6 @@ if page == "Rainfall Distribution":
             # from rainfall_distribution import show_rainfall
             # show_rainfall(leaflet_map, selected_geom, wea_start_date, wea_end_date, temporal_method)
 
-            st.success(f"Displaying {temporal_method} rainfall for {selected_name} ({wea_start_date} → {wea_end_date})")
-        else:
-            st.info("Use the controls on the left to select an area and time period, then click **Apply Layers**.")
-
-
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
 
