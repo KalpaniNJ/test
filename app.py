@@ -302,54 +302,29 @@ if page == "Rainfall Distribution":
 # ==============================
 # WEATHER FORECAST MODULE
 # ==============================
-if page == "Weather Forecast":
-
-    col1, col2 = st.columns([0.9, 3.1])
-
-    with col1:
-        st.info("Visualize live OpenWeather layers: Temperature, Precipitation, Clouds, Wind, and Pressure.")
-
-        api_key = st.text_input("Enter your OpenWeather API Key", type="password")
-
-        lat = st.number_input("Latitude", value=7.8731)
-        lon = st.number_input("Longitude", value=80.7718)
-
-        st.markdown("#### 🌦️ Select Layer to Display")
-
-        show_temp = st.button("🌡 Temperature (2 m)")
-        show_precip = st.button("🌧 Precipitation")
-        show_clouds = st.button("☁️ Clouds")
-        show_wind = st.button("💨 Wind Speed")
-        show_pressure = st.button("🌀 Pressure")
-
-    with col2:
-        leaflet_map = folium.Map(location=[lat, lon], zoom_start=7, tiles="OpenStreetMap")
-
-        # Add static layers
-        from modules.map_layers import add_static_layers
-        add_static_layers(leaflet_map)
-
-        # Add weather layer when button clicked
-        if api_key:
-            from modules.weather_layers import add_weather_layer
-
-            if show_temp:
-                add_weather_layer(leaflet_map, api_key, "Temperature")
-
-            if show_precip:
-                add_weather_layer(leaflet_map, api_key, "Precipitation")
-
-            if show_clouds:
-                add_weather_layer(leaflet_map, api_key, "Clouds")
-
-            if show_wind:
-                add_weather_layer(leaflet_map, api_key, "Wind Speed")
-
-            if show_pressure:
-                add_weather_layer(leaflet_map, api_key, "Pressure")
-
-        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        st_folium(leaflet_map, use_container_width=True, height=650)
+elif page == "Weather Forecast":
+    st.markdown("""
+        <div style="
+            background-color:#e7f4fe;
+            border-left: 6px solid #2b7de9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        ">
+            <h3 style="color:#1a73e8;">Module Under Development</h3>
+            <p style="color:#333; font-size:16px;">
+                The <b>Weather Forecast</b> module is currently under development.  
+                It will soon provide interactive tools for monitoring and analyzing 
+                rainfall forecasts, precipitation anomalies, and near-real-time weather data 
+                from satellite and global climate models.
+            </p>
+            <p style="color:#555; font-size:14px;">
+                Stay tuned for updates — upcoming versions will support short-term and seasonal forecasts,
+                including rainfall outlooks and temperature trends for decision support.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
 
 
