@@ -337,32 +337,50 @@ if page == "Weather Forecast":
     col1, col2 = st.columns([0.9, 3.1])
 
     with col1:
-        st.info("Displays live OpenWeather layers (temperature, precipitation, wind, etc.).")
-        api_key = "325b2939eac475787bf1a3e9656ccb67"
+        st.info("Visualize live OpenWeather layers: Temperature, Precipitation, Clouds, Wind, and Pressure.")
+
+        api_key = st.text_input("Enter your OpenWeather API Key", type="password")
 
         lat = st.number_input("Latitude", value=7.8731)
         lon = st.number_input("Longitude", value=80.7718)
 
-        add_weather = st.button("Add Weather Layers")
+        st.markdown("#### 🌦️ Select Layer to Display")
+
+        show_temp = st.button("🌡 Temperature (2 m)")
+        show_precip = st.button("🌧 Precipitation")
+        show_clouds = st.button("☁️ Clouds")
+        show_wind = st.button("💨 Wind Speed")
+        show_pressure = st.button("🌀 Pressure")
 
     with col2:
         leaflet_map = folium.Map(location=[lat, lon], zoom_start=7, tiles="OpenStreetMap")
 
+        # Add static layers
         from modules.map_layers import add_static_layers
         add_static_layers(leaflet_map)
 
-        if add_weather and api_key:
-            from modules.weather_layers import add_weather_layers
-            leaflet_map = add_weather_layers(leaflet_map, api_key)
-            folium.Marker(
-                [lat, lon],
-                popup="Center of Map",
-                tooltip="Selected Location",
-                icon=folium.Icon(color="orange", icon="cloud-sun", prefix="fa")
-            ).add_to(leaflet_map)
+        # Add weather layer when button clicked
+        if api_key:
+            from modules.weather_layers import add_weather_layer
+
+            if show_temp:
+                add_weather_layer(leaflet_map, api_key, "Temperature")
+
+            if show_precip:
+                add_weather_layer(leaflet_map, api_key, "Precipitation")
+
+            if show_clouds:
+                add_weather_layer(leaflet_map, api_key, "Clouds")
+
+            if show_wind:
+                add_weather_layer(leaflet_map, api_key, "Wind Speed")
+
+            if show_pressure:
+                add_weather_layer(leaflet_map, api_key, "Pressure")
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
+
 
 
 
