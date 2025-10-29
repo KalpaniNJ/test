@@ -134,12 +134,16 @@ st.markdown("""
 import ee
 import geemap.foliumap as geemap
 from sidebar import sidebar_controls
-import pandas as pd
-import geopandas as gpd
-from modules import analysis, rainfall, monitoring, weather_forecast, water_productivity
-from utils.readme_section import show_readme
+import requests
 import folium
+import geopandas as gpd
 from streamlit_folium import st_folium
+import pandas as pd
+import json
+from shapely.geometry import mapping
+from modules import analysis, monitoring, weather_forecast, water_productivity
+from utils.readme_section import show_readme
+
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -271,34 +275,24 @@ if page == "Rainfall Distribution":
 
         if run_rainfall:
             selected_geom = gdf[gdf[filter_field] == selected_name]
-
-            import json
-            from shapely.geometry import mapping
-            
-            # Convert to a safe, JSON-serializable object
             geom_json = json.loads(selected_geom.to_json())
-            
+
             folium.GeoJson(
                 geom_json,
                 name=f"{selected_name}",
-                style_function=lambda x: {
-                    "color": color,
-                    "weight": 2,
-                    "fillOpacity": 0.05
-                }
+                style_function=lambda x: {"color": color, "weight": 2, "fillOpacity": 0.05}
             ).add_to(leaflet_map)
 
-
             leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-          
-            with st.spinner("Loading GPM rainfall data..."):
-                leaflet_map = show_rainfall(
-                    leaflet_map,
-                    selected_geom,
-                    wea_start_date,
-                    wea_end_date,
-                    temporal_method
+
+            with st.spinner("Fetching GPM rainfall data from API..."):
+                leaflet_map, rainfall_df = show_rainfall_api(
+                    leaflet_map, geom_json, wea_start_date, wea_end_date, temporal_method
                 )
+
+            # Optional: Display daily rainfall as a chart
+            if rainfall_df is not None and not rainfall_df.empty:
+                st.line_chart(rainfall_df.set_index("date")["rainfall_mm"])
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
