@@ -29,8 +29,18 @@ def show_rainfall_api(
     }
 
     try:
-        # Send POST request
-        response = requests.post(api_url, json=payload, timeout=60)
+        # ==============================
+        # 🔹 TEST BLOCK: Ignore SSL verification for now
+        # ==============================
+        response = requests.post(api_url, json=payload, timeout=60, verify=False)
+
+        # Print status and response directly in Streamlit for debugging
+        st.write("📡 API URL:", api_url)
+        st.write("📤 Payload Sent:", payload)
+        st.write("📥 Status Code:", response.status_code)
+        st.write("📦 Response Text:")
+        st.text(response.text)
+        # ==============================
 
         # 🔍 Show status and possible API message
         if response.status_code != 200:
