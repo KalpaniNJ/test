@@ -304,25 +304,6 @@ if page == "Rainfall Distribution":
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
-    
-
-# ==============================
-# RAINFALL DISTRIBUTION MODULE
-# ==============================
-if page == "Rainfall Distribution":
-    st.markdown("### 🌧️ Rainfall Distribution")
-    st.write("GPM IMERG V7 (30-minute) Precipitation Data for a Single Day")
-
-    # You can adjust the date here if needed
-    selected_date = "2019-09-03"
-
-    leaflet_map = show_gpm_v7_map(selected_date)
-
-    if leaflet_map:
-        st_folium(leaflet_map, use_container_width=True, height=650)
-    else:
-        st.warning("⚠️ Unable to load GPM rainfall map.")
-
 
 
 # ==============================
