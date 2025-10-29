@@ -15,7 +15,7 @@ def show_rainfall_api(
     # API endpoint (replace with your real link)
     api_url = "https://dmsdemo.iwmi.org:8443/flood/extreme_rainfall/map"
 
-    # ✅ Build payload matching the API's required schema exactly
+    # Build payload matching the API's required schema exactly
     payload = {
         "country_name": str(country_name),
         "state_name": str(state_name) if state_name else "string",
@@ -29,20 +29,18 @@ def show_rainfall_api(
     }
 
     try:
-        # ==============================
-        # 🔹 TEST BLOCK: Ignore SSL verification for now
-        # ==============================
+        # TEST BLOCK: Ignore SSL verification for now
         response = requests.post(api_url, json=payload, timeout=60, verify=False)
 
         # Print status and response directly in Streamlit for debugging
-        st.write("📡 API URL:", api_url)
-        st.write("📤 Payload Sent:", payload)
-        st.write("📥 Status Code:", response.status_code)
-        st.write("📦 Response Text:")
+        st.write("API URL:", api_url)
+        st.write("Payload Sent:", payload)
+        st.write("Status Code:", response.status_code)
+        st.write("Response Text:")
         st.text(response.text)
-        # ==============================
 
-        # 🔍 Show status and possible API message
+
+        # Show status and possible API message
         if response.status_code != 200:
             st.error(f"API Error {response.status_code}: {response.text}")
             return map_obj, pd.DataFrame()
@@ -50,9 +48,9 @@ def show_rainfall_api(
         data = response.json()
 
         # Show debugging info
-        st.subheader("📤 API Request Sent")
+        st.subheader("API Request Sent")
         st.json(payload)
-        st.subheader("📥 API Response Received")
+        st.subheader("API Response Received")
         st.json(data)
 
         # Simple visual confirmation on map
