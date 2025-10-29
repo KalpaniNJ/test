@@ -279,7 +279,7 @@ if page == "Rainfall Distribution":
 
             if not selected_geom.empty:
                 try:
-                    # ✅ Safely convert GeoDataFrame to GeoJSON dict
+                    # Safely convert GeoDataFrame to GeoJSON dict
                     geom_json = json.loads(selected_geom.to_json())
                 except Exception:
                     # fallback if to_json fails
@@ -308,7 +308,7 @@ if page == "Rainfall Distribution":
                 # Fit map to selected boundary
                 leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
-                # 🔹 Call your rainfall API
+                # Call rainfall API
                 with st.spinner("Fetching rainfall data from API..."):
                     leaflet_map, rainfall_df = show_rainfall_api(
                         leaflet_map,
@@ -323,10 +323,10 @@ if page == "Rainfall Distribution":
 
                 # 🔹 Display API results
                 if not rainfall_df.empty:
-                    st.success("✅ Rainfall data retrieved successfully")
+                    st.success("Rainfall data retrieved successfully")
                     st.dataframe(rainfall_df)
             else:
-                st.warning("⚠️ No geometry found for the selected region.")
+                st.warning("No geometry found for the selected region.")
 
 
 # ==============================
