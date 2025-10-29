@@ -142,6 +142,7 @@ import pandas as pd
 import json
 from shapely.geometry import mapping
 from modules import analysis, monitoring, weather_forecast, water_productivity
+from modules.rainfall import show_rainfall_api
 from utils.readme_section import show_readme
 
 
