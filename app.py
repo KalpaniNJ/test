@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit as st
 import os
 import base64
 
@@ -12,6 +13,7 @@ def load_logo_as_base64(path):
 # --- Fixed Header with Local Logos and Title ---
 def display_fixed_header():
     base_path = os.path.join(os.path.dirname(__file__), "logo")
+    # Update these filenames to match your actual logo files
     logos = {
         "left1": os.path.join(base_path, "1.png"),
         "left2": os.path.join(base_path, "4.png"),
@@ -19,6 +21,7 @@ def display_fixed_header():
         "right2": os.path.join(base_path, "3.png"),
     }
 
+    # Convert existing logos to base64 if available
     logo_left1 = load_logo_as_base64(logos["left1"]) if os.path.exists(logos["left1"]) else ""
     logo_left2 = load_logo_as_base64(logos["left2"]) if os.path.exists(logos["left2"]) else ""
     logo_right1 = load_logo_as_base64(logos["right1"]) if os.path.exists(logos["right1"]) else ""
@@ -132,14 +135,14 @@ st.markdown("""
 
 
 import ee
-import geemap.foliumap as geemap
+import os
+import base64
 from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
-from modules import analysis, rainfall, monitoring, weather_forecast, water_productivity
+from modules import analysis, monitoring, rainfall_distribution, weather_forecast, water_productivity
 from utils.readme_section import show_readme
-import folium
-from streamlit_folium import st_folium
+
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -225,83 +228,79 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
 if page == "Rainfall Distribution":
-    st.markdown("### 🌧️ Rainfall Distribution")
+    # --- Tool description ---
+    st.markdown("""
+        <div style="
+            background-color:#f8f9fa;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: justify;
+        ">
+            <p style="font-size:17px; color:#333;">
+                <b>RiceWater Analytics Hub</b> is a digital platform combining 
+                <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
+                to strengthen <i>climate-smart rice production</i>. 
+                It provides an integrated view of <i>water availability, crop performance,</i> 
+                and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    data_dir = os.path.join(os.path.dirname(__file__), "data")
 
-    col1, col2 = st.columns([0.9, 3.1])
+    # Sidebar options
+    with st.sidebar.expander("View Rainfall"):
+        st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
 
-    with col1:
-        analysis_type = st.radio(
-            "Select Analysis Type",
-            ["Administrative", "Hydrological"],
-            horizontal=True
-        )
+        analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
 
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-
+        # --- Administrative: District only ---
         if analysis_type == "Administrative":
-            shp_path = os.path.join(data_dir, "lka_dis.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["ADM2_EN"].unique())
-            selected_name = st.selectbox("Select District", names)
-            filter_field = "ADM2_EN"
-            color = "red"
-        else:
-            shp_path = os.path.join(data_dir, "lka_basins.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["WSHD_NAME"].unique())
-            selected_name = st.selectbox("Select Basin", names)
-            filter_field = "WSHD_NAME"
-            color = "blue"
+            districts_path = os.path.join(data_dir, "lka_dis.shp")
 
+            if not os.path.exists(districts_path):
+                st.error(f"District shapefile not found at: {districts_path}")
+            else:
+                districts = gpd.read_file(districts_path)
+                district_names = sorted(districts["ADM2_EN"].unique())
+                selected_district = st.selectbox("Select District", district_names)
+
+        # --- Hydrological: Basin only ---
+        else:
+            basins_path = os.path.join(data_dir, "lka_basins.shp")
+
+            if not os.path.exists(basins_path):
+                st.error(f"Basin shapefile not found at: {basins_path}")
+            else:
+                basins = gpd.read_file(basins_path)
+                basin_names = sorted(basins["WSHD_NAME"].unique())
+                selected_basin = st.selectbox("Select Basin", basin_names)
+
+        # --- Temporal settings ---
         temporal_method = st.radio(
             "Temporal Aggregation",
             ["Sum", "Mean", "Median"],
             horizontal=True
         )
+        wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
+        wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
+        run_forecast = st.button("Run Analysis")
 
-        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
+    # --- Build params for processing ---
+    params = {
+        "analysis_type": analysis_type,
+        "district": selected_district if analysis_type == "Administrative" else None,
+        "basin": selected_basin if analysis_type == "Hydrological" else None,
+        "temporal_method": temporal_method,
+        "start_date": str(wea_start_date),
+        "end_date": str(wea_end_date),
+        "run_forecast": run_forecast,
+    }
 
-        run_rainfall = st.button("Apply Layers")
-
-    # Map Section
-    with col2:
-        leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-        folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
-
-        if run_rainfall:
-            selected_geom = gdf[gdf[filter_field] == selected_name]
-
-            import json
-            from shapely.geometry import mapping
-            
-            # Convert to a safe, JSON-serializable object
-            geom_json = json.loads(selected_geom.to_json())
-            
-            folium.GeoJson(
-                geom_json,
-                name=f"{selected_name}",
-                style_function=lambda x: {
-                    "color": color,
-                    "weight": 2,
-                    "fillOpacity": 0.05
-                }
-            ).add_to(leaflet_map)
-
-
-            leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-          
-            with st.spinner("Loading GPM rainfall data..."):
-                leaflet_map = show_rainfall(
-                    leaflet_map,
-                    selected_geom,
-                    wea_start_date,
-                    wea_end_date,
-                    temporal_method
-                )
-
-        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        st_folium(leaflet_map, use_container_width=True, height=650)
+    # --- Run the forecast analysis ---
+    rainfall_distribution.show(params)
 
 
 # ==============================
@@ -490,3 +489,4 @@ def add_footer():
 
 if __name__ == "__main__":
     add_footer()
+
