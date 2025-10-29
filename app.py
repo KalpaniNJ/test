@@ -144,6 +144,8 @@ from shapely.geometry import mapping
 from modules import analysis, monitoring, weather_forecast, water_productivity
 from modules.rainfall import show_rainfall_api
 from utils.readme_section import show_readme
+from modules.rainfall import get_gpm_rainfall
+from utils.other_gee_layers import (get_worldcover, get_dem, get_roads_layer, get_rivers_layer, get_surface_water_layer, get_admin_layer)
 
 
 # ee.Authenticate()
@@ -233,7 +235,9 @@ if page == "Rainfall Distribution":
     st.markdown("### 🌧️ Rainfall Distribution")
 
     col1, col2 = st.columns([0.9, 3.1])
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
+    # ---- Left Panel ----
     with col1:
         analysis_type = st.radio(
             "Select Analysis Type",
@@ -241,22 +245,12 @@ if page == "Rainfall Distribution":
             horizontal=True
         )
 
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-
-        if analysis_type == "Administrative":
-            shp_path = os.path.join(data_dir, "lka_dis.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["ADM2_EN"].unique())
-            selected_name = st.selectbox("Select District", names)
-            filter_field = "ADM2_EN"
-            color = "red"
-        else:
-            shp_path = os.path.join(data_dir, "lka_basins.shp")
-            gdf = gpd.read_file(shp_path)
-            names = sorted(gdf["WSHD_NAME"].unique())
-            selected_name = st.selectbox("Select Basin", names)
-            filter_field = "WSHD_NAME"
-            color = "blue"
+        gdf, filter_field, color = get_admin_layer(data_dir, analysis_type)
+        names = sorted(gdf[filter_field].unique())
+        selected_name = st.selectbox(
+            "Select District" if analysis_type == "Administrative" else "Select Basin",
+            names
+        )
 
         temporal_method = st.radio(
             "Temporal Aggregation",
@@ -269,64 +263,40 @@ if page == "Rainfall Distribution":
 
         run_rainfall = st.button("Apply Layers")
 
-    # Map Section
+    # ---- Right Panel (Map) ----
     with col2:
-        leaflet_map = folium.Map(location=[7.8731, 80.7718], zoom_start=7, tiles="OpenStreetMap")
-        folium.TileLayer("Esri.WorldImagery", name="Satellite", show=False).add_to(leaflet_map)
+        Map = geemap.Map(center=[7.8, 80.7], zoom=8)
 
+        # Static layers (load once)
+        lulc, lulc_vis = get_worldcover()
+        dem, dem_vis = get_dem()
+        water, water_vis = get_water()
+        roads_gdf = get_roads_layer(data_dir)
+        rivers_gdf = get_rivers_layer(data_dir)
+        surface_gdf = get_surface_water_layer(data_dir)
+
+        # Add static base layers
+        Map.addLayer(dem, dem_vis, "SRTM DEM")
+        Map.addLayer(lulc, lulc_vis, "WorldCover LULC")
+
+        if roads_gdf is not None:
+            Map.add_gdf(roads_gdf, "Roads", color="black")
+        if rivers_gdf is not None:
+            Map.add_gdf(rivers_gdf, "Rivers", color="blue")
+        if surface_gdf is not None:
+            Map.add_gdf(surface_gdf, "Surface Water", color="cyan")
+
+        # Dynamic Rainfall
         if run_rainfall:
-            selected_geom = gdf[gdf[filter_field] == selected_name]
+            rainfall_img, rainfall_vis = get_gpm_rainfall(wea_start_date, wea_end_date, temporal_method)
+            Map.addLayer(rainfall_img, rainfall_vis, f"GPM Rainfall ({temporal_method})")
 
-            if not selected_geom.empty:
-                try:
-                    # Safely convert GeoDataFrame to GeoJSON dict
-                    geom_json = json.loads(selected_geom.to_json())
-                except Exception:
-                    # fallback if to_json fails
-                    geom_json = {
-                        "type": "FeatureCollection",
-                        "features": [
-                            {
-                                "type": "Feature",
-                                "geometry": selected_geom.geometry.iloc[0].__geo_interface__,
-                                "properties": {}
-                            }
-                        ]
-                    }
+            aoi = gdf[gdf[filter_field] == selected_name]
+            Map.add_gdf(aoi, "Selected AOI", color=color)
 
-                # Add selected geometry to the map
-                folium.GeoJson(
-                    geom_json,
-                    name=f"{selected_name}",
-                    style_function=lambda x: {
-                        "color": color,
-                        "weight": 2,
-                        "fillOpacity": 0.05
-                    }
-                ).add_to(leaflet_map)
+            st.success(f"Displaying {temporal_method} rainfall from {wea_start_date} to {wea_end_date} for {selected_name}")
 
-                # Fit map to selected boundary
-                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
-                # Call rainfall API
-                with st.spinner("Fetching rainfall data from API..."):
-                    leaflet_map, rainfall_df = show_rainfall_api(
-                        leaflet_map,
-                        geom_json,
-                        wea_start_date,
-                        wea_end_date,
-                        temporal_method,
-                        country_name="Sri Lanka",
-                        state_name=selected_name if analysis_type == "Administrative" else "",
-                        basin_name=selected_name if analysis_type == "Hydrological" else ""
-                    )
-
-                # 🔹 Display API results
-                if not rainfall_df.empty:
-                    st.success("Rainfall data retrieved successfully")
-                    st.dataframe(rainfall_df)
-            else:
-                st.warning("No geometry found for the selected region.")
+        Map.to_streamlit(height=600)
 
 
 # ==============================
