@@ -285,17 +285,22 @@ if page == "Rainfall Distribution":
 
             leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
 
-            with st.spinner("Fetching GPM rainfall data from API..."):
+            with st.spinner("Fetching rainfall data from API..."):
                 leaflet_map, rainfall_df = show_rainfall_api(
-                    leaflet_map, geom_json, wea_start_date, wea_end_date, temporal_method
+                    leaflet_map,
+                    geom_json,
+                    wea_start_date,
+                    wea_end_date,
+                    temporal_method,
+                    country_name="Sri Lanka",
+                    state_name=selected_name if analysis_type == "Administrative" else "",
+                    basin_name=selected_name if analysis_type == "Hydrological" else ""
                 )
 
-            # Optional: Display daily rainfall as a chart
-            if rainfall_df is not None and not rainfall_df.empty:
-                st.line_chart(rainfall_df.set_index("date")["rainfall_mm"])
-
-        folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
-        st_folium(leaflet_map, use_container_width=True, height=650)
+            # Optionally show results below the map
+            if not rainfall_df.empty:
+                st.success("✅ Rainfall data retrieved successfully")
+                st.dataframe(rainfall_df)
 
 
 # ==============================
