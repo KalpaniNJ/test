@@ -141,8 +141,8 @@ from modules import analysis, monitoring, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 import folium
 from streamlit_folium import st_folium
+from Rainfall import rainfall_module
 
-            
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
 
@@ -304,6 +304,9 @@ if page == "Rainfall Distribution":
 
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
+
+if page == "Rainfall Distribution":
+    rainfall_module()
 
 
 # ==============================
