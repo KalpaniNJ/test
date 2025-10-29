@@ -141,6 +141,7 @@ from streamlit_folium import st_folium
 import pandas as pd
 import json
 from shapely.geometry import mapping
+sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
 from modules import analysis, monitoring, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 from modules.rainfall import get_gpm_rainfall
