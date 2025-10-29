@@ -271,7 +271,6 @@ if page == "Rainfall Distribution":
         # Static layers (load once)
         lulc, lulc_vis = get_worldcover()
         dem, dem_vis = get_dem()
-        water, water_vis = get_water()
         roads_gdf = get_roads_layer(data_dir)
         rivers_gdf = get_rivers_layer(data_dir)
         surface_gdf = get_surface_water_layer(data_dir)
