@@ -136,12 +136,12 @@ import geemap.foliumap as geemap
 from sidebar import sidebar_controls
 import pandas as pd
 import geopandas as gpd
-from modules import analysis, monitoring, weather_forecast, water_productivity
+from modules import analysis, rainfall, monitoring, weather_forecast, water_productivity
 # from modules.rainfall_distribution import show_rainfall
 from utils.readme_section import show_readme
 import folium
 from streamlit_folium import st_folium
-from modules.Rainfall import rainfall_module
+from rainfall import rainfall_module
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
