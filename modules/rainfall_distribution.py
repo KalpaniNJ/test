@@ -6,9 +6,6 @@ st.set_page_config(page_title="Rainfall Data", layout="wide")
 
 st.title("🌧️ GPM Rainfall Visualization")
 
-# Initialize Earth Engine
-ee.Initialize()
-
 # --- User inputs ---
 date = st.date_input("Select a Date", value=None)
 if date:
