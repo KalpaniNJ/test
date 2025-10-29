@@ -303,9 +303,6 @@ if page == "Rainfall Distribution":
         folium.LayerControl(position="topright", collapsed=False).add_to(leaflet_map)
         st_folium(leaflet_map, use_container_width=True, height=650)
 
-if page == "Rainfall Distribution":
-    rainfall_module()
-
 
 # ==============================
 # WEATHER FORECAST MODULE
