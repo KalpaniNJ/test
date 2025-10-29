@@ -13,7 +13,7 @@ def show_rainfall_api(
     """
 
     # API endpoint (replace with your real link)
-    api_url = "http://dmsdemo.iwmi.org:8443/flood/extreme_rainfall/map"
+    api_url = "https://dmsdemo.iwmi.org:8443/flood/extreme_rainfall/map"
 
     # ✅ Build payload matching the API's required schema exactly
     payload = {
