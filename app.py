@@ -141,7 +141,7 @@ from modules import analysis, rainfall, monitoring, weather_forecast, water_prod
 from utils.readme_section import show_readme
 import folium
 from streamlit_folium import st_folium
-from rainfall import rainfall_module
+from modules.rainfall import rainfall_module
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
