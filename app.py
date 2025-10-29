@@ -276,32 +276,57 @@ if page == "Rainfall Distribution":
 
         if run_rainfall:
             selected_geom = gdf[gdf[filter_field] == selected_name]
-            geom_json = json.loads(selected_geom.to_json())
 
-            folium.GeoJson(
-                geom_json,
-                name=f"{selected_name}",
-                style_function=lambda x: {"color": color, "weight": 2, "fillOpacity": 0.05}
-            ).add_to(leaflet_map)
+            if not selected_geom.empty:
+                try:
+                    # ✅ Safely convert GeoDataFrame to GeoJSON dict
+                    geom_json = json.loads(selected_geom.to_json())
+                except Exception:
+                    # fallback if to_json fails
+                    geom_json = {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "geometry": selected_geom.geometry.iloc[0].__geo_interface__,
+                                "properties": {}
+                            }
+                        ]
+                    }
 
-            leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
-
-            with st.spinner("Fetching rainfall data from API..."):
-                leaflet_map, rainfall_df = show_rainfall_api(
-                    leaflet_map,
+                # Add selected geometry to the map
+                folium.GeoJson(
                     geom_json,
-                    wea_start_date,
-                    wea_end_date,
-                    temporal_method,
-                    country_name="Sri Lanka",
-                    state_name=selected_name if analysis_type == "Administrative" else "",
-                    basin_name=selected_name if analysis_type == "Hydrological" else ""
-                )
+                    name=f"{selected_name}",
+                    style_function=lambda x: {
+                        "color": color,
+                        "weight": 2,
+                        "fillOpacity": 0.05
+                    }
+                ).add_to(leaflet_map)
 
-            # Optionally show results below the map
-            if not rainfall_df.empty:
-                st.success("✅ Rainfall data retrieved successfully")
-                st.dataframe(rainfall_df)
+                # Fit map to selected boundary
+                leaflet_map.fit_bounds(selected_geom.total_bounds.tolist())
+
+                # 🔹 Call your rainfall API
+                with st.spinner("Fetching rainfall data from API..."):
+                    leaflet_map, rainfall_df = show_rainfall_api(
+                        leaflet_map,
+                        geom_json,
+                        wea_start_date,
+                        wea_end_date,
+                        temporal_method,
+                        country_name="Sri Lanka",
+                        state_name=selected_name if analysis_type == "Administrative" else "",
+                        basin_name=selected_name if analysis_type == "Hydrological" else ""
+                    )
+
+                # 🔹 Display API results
+                if not rainfall_df.empty:
+                    st.success("✅ Rainfall data retrieved successfully")
+                    st.dataframe(rainfall_df)
+            else:
+                st.warning("⚠️ No geometry found for the selected region.")
 
 
 # ==============================
