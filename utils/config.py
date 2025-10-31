@@ -2,7 +2,7 @@ import ee
 
 
 AOI_OPTIONS = {
-    "Walawa Irrigation Scheme": "projects/ricemapping-475407/assets/UWIS_aoi"
+    "Walawa Irrigation Scheme": "projects/ricemapping-475407/assets/UWIS_aoi",
 }
 
 ASSETS = {
