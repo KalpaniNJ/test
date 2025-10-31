@@ -14,7 +14,7 @@ ASSETS = {
 def load_assets():
     return {
         # AOIs
-        "WIS": ee.FeatureCollection(AOI_OPTIONS["Walawa Irrigation Scheme"])
+        "WIS": ee.FeatureCollection(AOI_OPTIONS["Walawa Irrigation Scheme"]),
         # "IA": ee.FeatureCollection(AOI_OPTIONS["MahaKanadarawa Irrigable Area"]),
 
         # Supporting layers
