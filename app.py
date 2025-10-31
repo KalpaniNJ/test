@@ -347,7 +347,8 @@ elif page == "Paddy Mapping":
 
             aoi_option = st.selectbox(
                 "Select AOI",
-                ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
+                ["Walawa Irrigation Scheme"],
+                # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
                 key="aoi_select_tab1"
             )
 
@@ -393,7 +394,8 @@ elif page == "Paddy Mapping":
 
             aoi_option_mnt = st.selectbox(
                 "Select AOI",
-                ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
+                ["Walawa Irrigation Scheme"],
+                # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
                 key="aoi_select_tab2"
             )
 
