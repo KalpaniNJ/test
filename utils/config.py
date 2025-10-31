@@ -3,7 +3,7 @@ import ee
 
 AOI_OPTIONS = {
     # "MahaKanadarawa Water Influence Zone": "projects/rice-mapping-472904/assets/mk_influence_zone",
-    # "MahaKanadarawa Irrigable Area": "projects/rice-mapping-472904/assets/mk_Irrigable_Area"
+    # "MahaKanadarawa Irrigable Area": "projects/rice-mapping-472904/assets/mk_Irrigable_Area",
     "Walawa Irrigation Scheme": "projects/ricemapping-475407/assets/UWIS_aoi"
 }
 
