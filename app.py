@@ -233,70 +233,80 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
 if page == "Rainfall Distribution":
-    st.markdown("### 🌧️ Rainfall Distribution")
+    # --- Tool description ---
+    st.markdown("""
+        <div style="
+            background-color:#f8f9fa;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: justify;
+        ">
+            <p style="font-size:17px; color:#333;">
+                <b>RiceWater Analytics Hub</b> is a digital platform combining 
+                <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
+                to strengthen <i>climate-smart rice production</i>. 
+                It provides an integrated view of <i>water availability, crop performance,</i> 
+                and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    data_dir = os.path.join(os.path.dirname(__file__), "data")
 
-    col1, col2 = st.columns([0.9, 3.1])
-    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    # Sidebar options
+    with st.sidebar.expander("View Rainfall"):
+        st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
 
-    # ---- Left Panel ----
-    with col1:
-        analysis_type = st.radio(
-            "Select Analysis Type",
-            ["Administrative", "Hydrological"],
-            horizontal=True
-        )
+        analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
 
-        gdf, filter_field, color = get_admin_layer(data_dir, analysis_type)
-        names = sorted(gdf[filter_field].unique())
-        selected_name = st.selectbox(
-            "Select District" if analysis_type == "Administrative" else "Select Basin",
-            names
-        )
+        # --- Administrative: District only ---
+        if analysis_type == "Administrative":
+            districts_path = os.path.join(data_dir, "lka_dis.shp")
 
+            if not os.path.exists(districts_path):
+                st.error(f"District shapefile not found at: {districts_path}")
+            else:
+                districts = gpd.read_file(districts_path)
+                district_names = sorted(districts["ADM2_EN"].unique())
+                selected_district = st.selectbox("Select District", district_names)
+
+        # --- Hydrological: Basin only ---
+        else:
+            basins_path = os.path.join(data_dir, "lka_basins.shp")
+
+            if not os.path.exists(basins_path):
+                st.error(f"Basin shapefile not found at: {basins_path}")
+            else:
+                basins = gpd.read_file(basins_path)
+                basin_names = sorted(basins["WSHD_NAME"].unique())
+                selected_basin = st.selectbox("Select Basin", basin_names)
+
+        # --- Temporal settings ---
         temporal_method = st.radio(
             "Temporal Aggregation",
             ["Sum", "Mean", "Median"],
             horizontal=True
         )
+        wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
+        wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
+        run_forecast = st.button("Run Analysis")
 
-        wea_start_date = st.date_input("From", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("To", pd.to_datetime("2025-01-31"))
+    # --- Build params for processing ---
+    params = {
+        "analysis_type": analysis_type,
+        "district": selected_district if analysis_type == "Administrative" else None,
+        "basin": selected_basin if analysis_type == "Hydrological" else None,
+        "temporal_method": temporal_method,
+        "start_date": str(wea_start_date),
+        "end_date": str(wea_end_date),
+        "run_forecast": run_forecast,
+    }
 
-        run_rainfall = st.button("Apply Layers")
+    # --- Run the forecast analysis ---
+    rainfall_distribution.show(params)
 
-    # ---- Right Panel (Map) ----
-    with col2:
-        Map = geemap.Map(center=[7.8, 80.7], zoom=8)
-
-        # Static layers (load once)
-        lulc, lulc_vis = get_worldcover()
-        dem, dem_vis = get_dem()
-        roads_gdf = get_roads_layer(data_dir)
-        rivers_gdf = get_rivers_layer(data_dir)
-        surface_gdf = get_surface_water_layer(data_dir)
-
-        # Add static base layers
-        Map.addLayer(dem, dem_vis, "SRTM DEM")
-        Map.addLayer(lulc, lulc_vis, "WorldCover LULC")
-
-        if roads_gdf is not None:
-            Map.add_gdf(roads_gdf, "Roads", color="black")
-        if rivers_gdf is not None:
-            Map.add_gdf(rivers_gdf, "Rivers", color="blue")
-        if surface_gdf is not None:
-            Map.add_gdf(surface_gdf, "Surface Water", color="cyan")
-
-        # Dynamic Rainfall
-        if run_rainfall:
-            rainfall_img, rainfall_vis = get_gpm_rainfall(wea_start_date, wea_end_date, temporal_method)
-            Map.addLayer(rainfall_img, rainfall_vis, f"GPM Rainfall ({temporal_method})")
-
-            aoi = gdf[gdf[filter_field] == selected_name]
-            Map.add_gdf(aoi, "Selected AOI", color=color)
-
-            st.success(f"Displaying {temporal_method} rainfall from {wea_start_date} to {wea_end_date} for {selected_name}")
-
-        Map.to_streamlit(height=600)
 
 
 # ==============================
