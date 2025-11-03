@@ -576,6 +576,8 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
+        <hr style="border:0.5px solid #ccc; margin-top:40px; margin-bottom:10px;">
+
         # TIME SERIES ANALYSIS
         if step == "Time Series Analysis":
             col1, col2 = st.columns([0.4, 1.3])
