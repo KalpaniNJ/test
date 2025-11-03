@@ -210,8 +210,7 @@ st.markdown("<hr style='border:2px solid #0d6efd'>", unsafe_allow_html=True)
 params = sidebar_controls()
 
 
-# --- Sidebar Tabs with Perfect Right-Aligned Dropdown Arrow ---
-
+# --- Sidebar Tabs with Expandable Rice Mapping -------------------------------------------------
 tabs = {
     "Home": "🏠 Home",
     "Rainfall Distribution": "🌧 Rainfall Distribution",
@@ -220,6 +219,7 @@ tabs = {
     "Water Productivity": "💧 Water Productivity"
 }
 
+# Sub-tabs for Rice Mapping (⚙️ added to Data & Methods)
 rice_subtabs = {
     "Seasonal Analysis": "📈 Seasonal Analysis",
     "Seasonal Monitoring": "🌾 Seasonal Monitoring",
@@ -227,7 +227,7 @@ rice_subtabs = {
     "Data and Methods": "⚙️ Data & Methods"
 }
 
-# Initialize
+# Initialize session state
 if "active_page" not in st.session_state:
     st.session_state["active_page"] = "Home"
 if "active_subtab" not in st.session_state:
@@ -235,87 +235,60 @@ if "active_subtab" not in st.session_state:
 if "rice_expanded" not in st.session_state:
     st.session_state["rice_expanded"] = False
 
-# --- Custom CSS ---
+--- Sidebar Styling ---
 st.sidebar.markdown("""
 <style>
-.sidebar-tab {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f8f9fa;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    color: #333;
-    font-weight: 500;
-    font-size: 15px;
+/* Main and Sub-tab Buttons */
+div.stButton > button:first-child {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
     transition: all 0.2s ease-in-out;
+    width: 100% !important;
 }
-.sidebar-tab:hover {
-    background-color: #e7f1ff;
-    color: #0d6efd;
-    border-color: #0d6efd;
+div.stButton > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
 }
-.sidebar-tab.active {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-.arrow {
-    margin-left: auto;
-    font-size: 14px;
-    transition: transform 0.25s ease-in-out;
-}
-.arrow.expanded {
-    transform: rotate(90deg);
+div.stButton > button[kind="primary"] {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
 }
 
-/* Subtabs */
-.subtab {
-    padding: 8px 14px;
-    margin: 4px 0 4px 1.5rem;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background-color: #fafafa;
-    cursor: pointer;
-    font-size: 14px;
+/* Indented subtabs */
+.subtab-button {
+    margin-left: 1.5rem;
 }
-.subtab:hover {
-    background-color: #e7f1ff;
-    color: #0d6efd;
+
+/* Gear icon animation */
+.gear-icon {
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
 }
-.subtab.active {
-    background-color: #0d6efd;
-    color: white;
+.gear-icon:hover {
+    transform: rotate(45deg);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Rendering ---
+--- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        arrow = "▶" if not st.session_state["rice_expanded"] else "▼"
-        expanded_class = "expanded" if st.session_state["rice_expanded"] else ""
-        active_class = "active" if st.session_state["active_page"] == "Rice Mapping" else ""
+        # Expand/collapse toggle for Rice Mapping
+        expand_label = "▼ " if st.session_state["rice_expanded"] else "▶ "
+        button_label = f"{expand_label}{label}"
 
-        # HTML clickable flex layout
-        st.sidebar.markdown(
-            f"""
-            <div class="sidebar-tab {active_class}" onclick="window.location.href='?page={tab_key}'">
-                <span>{label}</span>
-                <span class="arrow {expanded_class}">{arrow}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # If user clicked Rice Mapping in previous rerun
-        query_params = st.query_params
-        if query_params.get("page") == ["Rice Mapping"]:
+        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-            st.session_state["active_page"] = "Rice Mapping"
+            st.session_state["active_page"] = tab_key
             st.rerun()
 
         # Show subtabs if expanded
@@ -325,134 +298,29 @@ for tab_key, label in tabs.items():
                     st.session_state["active_page"] == "Rice Mapping"
                     and st.session_state["active_subtab"] == sub_key
                 )
-                sub_class = "active" if sub_active else ""
-                if st.sidebar.button(sub_label, key=f"subtab_{sub_key}", use_container_width=True):
+
+                # Add a subtle left indentation
+                sub_button_label = f"    {sub_label}"
+
+                # Add hover-rotating gear for Data & Methods
+                if "Data and Methods" in sub_key:
+                    sub_button_label = f"    ⚙️ Data & Methods"
+
+                if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
                     st.session_state["active_page"] = "Rice Mapping"
                     st.session_state["active_subtab"] = sub_key
                     st.rerun()
+
     else:
+        # Regular main tab
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
             st.session_state["rice_expanded"] = False
             st.rerun()
 
-# Assign final active states
+# Assign current values
 page = st.session_state["active_page"]
 subpage = st.session_state["active_subtab"]
-
-
-
-# --- Sidebar Tabs with Expandable Rice Mapping -------------------------------------------------
-# tabs = {
-#     "Home": "🏠 Home",
-#     "Rainfall Distribution": "🌧 Rainfall Distribution",
-#     "Rice Mapping": "🌾 Rice Mapping",
-#     "Weather Forecast": "☁ Weather Forecast",
-#     "Water Productivity": "💧 Water Productivity"
-# }
-
-# # Sub-tabs for Rice Mapping (⚙️ added to Data & Methods)
-# rice_subtabs = {
-#     "Seasonal Analysis": "📈 Seasonal Analysis",
-#     "Seasonal Monitoring": "🌾 Seasonal Monitoring",
-#     "Compare Seasons": "🔁 Compare Seasons",
-#     "Data and Methods": "⚙️ Data & Methods"
-# }
-
-# # Initialize session state
-# if "active_page" not in st.session_state:
-#     st.session_state["active_page"] = "Home"
-# if "active_subtab" not in st.session_state:
-#     st.session_state["active_subtab"] = "Seasonal Analysis"
-# if "rice_expanded" not in st.session_state:
-#     st.session_state["rice_expanded"] = False
-
-# --- Sidebar Styling ---
-# st.sidebar.markdown("""
-# <style>
-# /* Main and Sub-tab Buttons */
-# div.stButton > button:first-child {
-#     text-align: left !important;
-#     justify-content: flex-start !important;
-#     padding: 10px 14px !important;
-#     border-radius: 8px !important;
-#     border: 1px solid #ddd !important;
-#     background-color: #f8f9fa !important;
-#     color: #333 !important;
-#     font-weight: 500 !important;
-#     font-size: 15px !important;
-#     transition: all 0.2s ease-in-out;
-#     width: 100% !important;
-# }
-# div.stButton > button:first-child:hover {
-#     background-color: #e7f1ff !important;
-#     color: #0d6efd !important;
-#     border-color: #0d6efd !important;
-# }
-# div.stButton > button[kind="primary"] {
-#     background-color: #0d6efd !important;
-#     color: white !important;
-#     border-color: #0d6efd !important;
-# }
-
-# /* Indented subtabs */
-# .subtab-button {
-#     margin-left: 1.5rem;
-# }
-
-# /* Gear icon animation */
-# .gear-icon {
-#     display: inline-block;
-#     transition: transform 0.3s ease-in-out;
-# }
-# .gear-icon:hover {
-#     transform: rotate(45deg);
-# }
-# </style>
-# """, unsafe_allow_html=True)
-
-# --- Render main sidebar tabs ---
-# for tab_key, label in tabs.items():
-#     if tab_key == "Rice Mapping":
-#         # Expand/collapse toggle for Rice Mapping
-#         expand_label = "▼ " if st.session_state["rice_expanded"] else "▶ "
-#         button_label = f"{expand_label}{label}"
-
-#         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
-#             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-#             st.session_state["active_page"] = tab_key
-#             st.rerun()
-
-        # # Show subtabs if expanded
-        # if st.session_state["rice_expanded"]:
-        #     for sub_key, sub_label in rice_subtabs.items():
-        #         sub_active = (
-        #             st.session_state["active_page"] == "Rice Mapping"
-        #             and st.session_state["active_subtab"] == sub_key
-        #         )
-
-        #         # Add a subtle left indentation
-        #         sub_button_label = f"    {sub_label}"
-
-        #         # Add hover-rotating gear for Data & Methods
-        #         if "Data and Methods" in sub_key:
-        #             sub_button_label = f"    ⚙️ Data & Methods"
-
-        #         if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
-        #             st.session_state["active_page"] = "Rice Mapping"
-        #             st.session_state["active_subtab"] = sub_key
-        #             st.rerun()
-
-#     else:
-#         # Regular main tab
-#         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
-#             st.session_state["active_page"] = tab_key
-#             st.session_state["rice_expanded"] = False
-#             st.rerun()
-
-# # Assign current values
-# page = st.session_state["active_page"]
-# subpage = st.session_state["active_subtab"]
 
 # # --- Sidebar Tab Navigation ---
 # tabs = {
