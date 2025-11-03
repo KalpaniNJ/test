@@ -288,7 +288,7 @@ if page == "Rainfall Distribution":
         # --- Select AOI ---
         data_dir = os.path.join(os.path.dirname(__file__), "data")
         if analysis_type == "Administrative":
-            districts_path = os.path.join(data_dir, "lka_dis.shp")
+            districts_path = os.path.join(data_dir, "lka_districts.shp")
             districts = gpd.read_file(districts_path)
             district_names = sorted(districts["ADM2_EN"].unique())
             selected_aoi = st.selectbox("Select District", district_names)
