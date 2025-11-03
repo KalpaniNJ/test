@@ -210,7 +210,7 @@ st.markdown("<hr style='border:2px solid #0d6efd'>", unsafe_allow_html=True)
 params = sidebar_controls()
 
 
-# --- Sidebar Tabs with Right-Aligned Dropdown Arrow for Rice Mapping ---
+# --- Sidebar Tabs with Proper Right-Aligned Arrow for Rice Mapping ---
 tabs = {
     "Home": "🏠 Home",
     "Rainfall Distribution": "🌧 Rainfall Distribution",
@@ -227,7 +227,7 @@ rice_subtabs = {
     "Data and Methods": "⚙️ Data & Methods"
 }
 
-# Initialize session state
+# Initialize state
 if "active_page" not in st.session_state:
     st.session_state["active_page"] = "Home"
 if "active_subtab" not in st.session_state:
@@ -235,99 +235,107 @@ if "active_subtab" not in st.session_state:
 if "rice_expanded" not in st.session_state:
     st.session_state["rice_expanded"] = False
 
-# --- Sidebar Styling ---
+# --- CSS Styling ---
 st.sidebar.markdown("""
 <style>
-div.stButton > button:first-child {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;  /* pushes arrow to right edge */
-    text-align: left !important;
-    padding: 10px 14px !important;
-    border-radius: 8px !important;
-    border: 1px solid #ddd !important;
-    background-color: #f8f9fa !important;
-    color: #333 !important;
-    font-weight: 500 !important;
-    font-size: 15px !important;
+.sidebar-tab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    color: #333;
+    font-weight: 500;
+    font-size: 15px;
     transition: all 0.2s ease-in-out;
-    width: 100% !important;
 }
-div.stButton > button:first-child:hover {
-    background-color: #e7f1ff !important;
-    color: #0d6efd !important;
-    border-color: #0d6efd !important;
+.sidebar-tab:hover {
+    background-color: #e7f1ff;
+    color: #0d6efd;
+    border-color: #0d6efd;
 }
-div.stButton > button[kind="primary"] {
-    background-color: #0d6efd !important;
-    color: white !important;
-    border-color: #0d6efd !important;
+.sidebar-tab.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
 }
-
-/* Subtab indentation */
-.subtab-button {
+.subtab {
+    padding: 8px 14px;
     margin-left: 1.5rem;
-}
-
-/* Arrow icon on right edge */
-.arrow-icon {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
+    cursor: pointer;
     font-size: 14px;
-    color: #555;
-    margin-left: auto;
+    margin-bottom: 4px;
+}
+.subtab:hover {
+    background-color: #e7f1ff;
+    color: #0d6efd;
+    border-color: #0d6efd;
+}
+.subtab.active {
+    background-color: #0d6efd;
+    color: white;
+}
+.arrow {
+    font-size: 14px;
     transition: transform 0.25s ease-in-out;
 }
-.arrow-icon.expanded {
+.arrow.expanded {
     transform: rotate(90deg);
-}
-
-/* Gear icon hover animation */
-.gear-icon {
-    display: inline-block;
-    transition: transform 0.3s ease-in-out;
-}
-.gear-icon:hover {
-    transform: rotate(45deg);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Render main sidebar tabs ---
+# --- Sidebar Rendering ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        # Right-aligned arrow
         arrow = "▶" if not st.session_state["rice_expanded"] else "▼"
-        button_label = f"{label} {arrow}"
+        active_class = "active" if st.session_state["active_page"] == tab_key else ""
+        expanded_class = "expanded" if st.session_state["rice_expanded"] else ""
+        
+        # Custom HTML for the flexbox tab
+        st.sidebar.markdown(
+            f"""
+            <div class="sidebar-tab {active_class}" onclick="window.location.href='?tab={tab_key}'">
+                <span>{label}</span>
+                <span class="arrow {expanded_class}">{arrow}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-        # Create a horizontal layout: label left, arrow right
-        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
+        # Handle expansion manually
+        if st.session_state["active_page"] == tab_key:
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-            st.session_state["active_page"] = tab_key
             st.rerun()
 
-        # Show subtabs if expanded
+        # Subtabs when expanded
         if st.session_state["rice_expanded"]:
             for sub_key, sub_label in rice_subtabs.items():
                 sub_active = (
                     st.session_state["active_page"] == "Rice Mapping"
                     and st.session_state["active_subtab"] == sub_key
                 )
-
-                # Add indentation
-                sub_button_label = f"    {sub_label}"
-
-                if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
+                sub_class = "active" if sub_active else ""
+                if st.sidebar.button(sub_label, key=f"subtab_{sub_key}", use_container_width=True):
                     st.session_state["active_page"] = "Rice Mapping"
                     st.session_state["active_subtab"] = sub_key
                     st.rerun()
 
     else:
-        # Regular main tab
+        # Normal tabs
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
             st.session_state["rice_expanded"] = False
             st.rerun()
 
-# Assign current values
+# Assign active selections
 page = st.session_state["active_page"]
 subpage = st.session_state["active_subtab"]
 
