@@ -685,10 +685,26 @@ elif page == "Rice Mapping":
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
 
-    # Other subtabs
     elif subpage == "Seasonal Monitoring":
-        st.markdown("### Seasonal Monitoring")
-        st.info("Monitor crop growth in near-real-time using Sentinel-1 time series.")
+        st.markdown("### 🌾 Seasonal Monitoring")
+        st.markdown("""
+        <p style="color:#444; font-size:16px;">
+            Monitor crop growth in near real-time using Sentinel-1 SAR time series.
+            Analyze mRVI-based dynamics for the current or recent growing season.
+        </p>
+        """, unsafe_allow_html=True)
+
+        # Initialize params for monitoring
+        params = {
+            "aoi_mnt": st.session_state.get("aoi_mnt"),
+            "start_date_mnt": st.session_state.get("start_mnt"),
+            "end_date_mnt": st.session_state.get("end_mnt"),
+            "run_monitor": st.session_state.get("run_monitor", False)
+        }
+
+        # --- Call monitoring module ---
+        monitoring.show(params)
+
 
     elif subpage == "Compare Seasons":
         st.markdown("""
