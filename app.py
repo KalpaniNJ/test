@@ -631,7 +631,7 @@ elif page == "Rice Mapping":
                 "run_monitor": run_monitor,
             }
 
-        with col1:
+        with col2:
             monitoring.show(params)
 
     # COMPARE SEASONS
