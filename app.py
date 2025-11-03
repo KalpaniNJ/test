@@ -420,63 +420,21 @@ for tab_key, label in tabs.items():
             st.session_state["active_page"] = tab_key
             st.rerun()
 
-if st.session_state["rice_expanded"]:
-    st.markdown("<div style='margin-top:5px'></div>", unsafe_allow_html=True)
+        # Subtabs (simple, normal Streamlit buttons)
+        if st.session_state["rice_expanded"]:
+            for sub_key, sub_label in rice_subtabs.items():
+                sub_active = (
+                    st.session_state["active_page"] == "Rice Mapping"
+                    and st.session_state["active_subtab"] == sub_key
+                )
 
-    for sub_key, sub_label in rice_subtabs.items():
-        is_active = (
-            st.session_state["active_page"] == "Rice Mapping"
-            and st.session_state["active_subtab"] == sub_key
-        )
+                # Add a small indentation
+                st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
 
-        bg_color = "#0d6efd" if is_active else "#e9f5ff"
-        text_color = "white" if is_active else "#003366"
-
-        # Create the button
-        if st.sidebar.button(sub_label, key=f"subtab_{sub_key}"):
-            st.session_state["active_page"] = "Rice Mapping"
-            st.session_state["active_subtab"] = sub_key
-            st.rerun()
-
-        # Apply per-button inline style dynamically
-        st.sidebar.markdown(
-            f"""
-            <style>
-            button[kind="secondary"][key="subtab_{sub_key}"] {{
-                background-color: {bg_color} !important;
-                color: {text_color} !important;
-                border-radius: 6px !important;
-                border: 1px solid #b3d9ff !important;
-                width: 100% !important;
-                text-align: left !important;
-                font-weight: 600 !important;
-                transition: all 0.2s ease-in-out;
-            }}
-            button[kind="secondary"][key="subtab_{sub_key}"]:hover {{
-                background-color: #0b5ed7 !important;
-                color: white !important;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-        # # Subtabs (simple, normal Streamlit buttons)
-        # if st.session_state["rice_expanded"]:
-        #     for sub_key, sub_label in rice_subtabs.items():
-        #         sub_active = (
-        #             st.session_state["active_page"] == "Rice Mapping"
-        #             and st.session_state["active_subtab"] == sub_key
-        #         )
-
-        #         # Add a small indentation
-        #         st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
-
-        #         if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
-        #             st.session_state["active_page"] = "Rice Mapping"
-        #             st.session_state["active_subtab"] = sub_key
-        #             st.rerun()
+                if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
+                    st.session_state["active_page"] = "Rice Mapping"
+                    st.session_state["active_subtab"] = sub_key
+                    st.rerun()
 
     else:
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
