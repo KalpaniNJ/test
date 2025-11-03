@@ -385,7 +385,7 @@ for tab_key, label in tabs.items():
             st.session_state["active_page"] = tab_key
             st.rerun()
 
-            # Subtabs (simple buttons with color)
+        # Subtabs (simple, normal Streamlit buttons)
         if st.session_state["rice_expanded"]:
             for sub_key, sub_label in rice_subtabs.items():
                 sub_active = (
@@ -393,49 +393,13 @@ for tab_key, label in tabs.items():
                     and st.session_state["active_subtab"] == sub_key
                 )
 
-                # Define color based on active state
-                bg_color = "#0d6efd" if sub_active else "#f1f3f4"
-                text_color = "white" if sub_active else "#333"
+                # Add a small indentation
+                st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
 
-                # Add indentation and background color
-                st.markdown(
-                    f"""
-                    <div style="
-                        margin-left:15px;
-                        margin-bottom:5px;
-                        border-radius:6px;
-                        background-color:{bg_color};
-                        padding:6px 10px;
-                    ">
-                        <p style="margin:0; color:{text_color}; font-weight:{'600' if sub_active else '400'};">
-                            ↳ {sub_label}
-                        </p>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-                # Normal button (clickable)
-                if st.sidebar.button(sub_label, key=f"subtab_{sub_key}", use_container_width=True):
+                if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
                     st.session_state["active_page"] = "Rice Mapping"
                     st.session_state["active_subtab"] = sub_key
                     st.rerun()
-
-        # # Subtabs (simple, normal Streamlit buttons)
-        # if st.session_state["rice_expanded"]:
-        #     for sub_key, sub_label in rice_subtabs.items():
-        #         sub_active = (
-        #             st.session_state["active_page"] == "Rice Mapping"
-        #             and st.session_state["active_subtab"] == sub_key
-        #         )
-
-        #         # Add a small indentation
-        #         st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
-
-        #         if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
-        #             st.session_state["active_page"] = "Rice Mapping"
-        #             st.session_state["active_subtab"] = sub_key
-        #             st.rerun()
 
     else:
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
