@@ -252,9 +252,15 @@ if page == "Rainfall Distribution":
         </div>
     """, unsafe_allow_html=True)
     
+    # --- Load shapefiles once ---
     data_dir = os.path.join(os.path.dirname(__file__), "data")
+    districts_path = os.path.join(data_dir, "lka_dis.shp")
+    basins_path = os.path.join(data_dir, "lka_basins.shp")
 
-    # --- Create two columns: left for controls, right for map ---
+    districts = gpd.read_file(districts_path) if os.path.exists(districts_path) else None
+    basins = gpd.read_file(basins_path) if os.path.exists(basins_path) else None
+
+    # --- Two columns layout ---
     col1, col2 = st.columns([0.4, 1.3])
     
     with col1:
@@ -262,31 +268,18 @@ if page == "Rainfall Distribution":
         st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
     
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
-    
-        data_dir = os.path.join(os.path.dirname(__file__), "data")
-    
-        # --- Administrative: District only ---
-        if analysis_type == "Administrative":
-            districts_path = os.path.join(data_dir, "lka_dis.shp")
-    
-            if not os.path.exists(districts_path):
-                st.error(f"District shapefile not found at: {districts_path}")
-            else:
-                districts = gpd.read_file(districts_path)
-                district_names = sorted(districts["ADM2_EN"].unique())
-                selected_district = st.selectbox("Select District", district_names)
-    
-        # --- Hydrological: Basin only ---
+
+        if analysis_type == "Administrative" and districts is not None:
+            district_names = sorted(districts["ADM2_EN"].unique())
+            selected_district = st.selectbox("Select District", district_names)
+
+        elif analysis_type == "Hydrological" and basins is not None:
+            basin_names = sorted(basins["WSHD_NAME"].unique())
+            selected_basin = st.selectbox("Select Basin", basin_names)
+
         else:
-            basins_path = os.path.join(data_dir, "lka_basins.shp")
-    
-            if not os.path.exists(basins_path):
-                st.error(f"Basin shapefile not found at: {basins_path}")
-            else:
-                basins = gpd.read_file(basins_path)
-                basin_names = sorted(basins["WSHD_NAME"].unique())
-                selected_basin = st.selectbox("Select Basin", basin_names)
-    
+            st.error("Shapefile not found in the data folder.")
+
         temporal_method = st.radio(
             "Temporal Aggregation",
             ["Sum", "Mean", "Median"],
@@ -306,24 +299,36 @@ if page == "Rainfall Distribution":
             "end_date": str(wea_end_date),
             "run_forecast": run_forecast,
         }
-    
+
     with col2:
         Map = geemap.Map(center=[7.8, 80.7], zoom=7)
-    
-        # --- Display shapefile and zoom to selected feature ---
-        if analysis_type == "Administrative" and "selected_district" in locals():
+
+        # --- Display selected boundary and zoom ---
+        if analysis_type == "Administrative" and districts is not None and "selected_district" in locals():
             selected_geom = districts[districts["ADM2_EN"] == selected_district]
-            geojson_data = json.loads(selected_geom.to_json())
-            Map.add_gdf(selected_geom, layer_name=f"{selected_district} District", style={"color": "blue", "fillOpacity": 0.2})
-            Map.centerObject(ee.Geometry(geojson_data["features"][0]["geometry"]), zoom=9)
-    
-        elif analysis_type == "Hydrological" and "selected_basin" in locals():
+            geom = selected_geom.geometry.values[0]
+            geom_json = mapping(geom)
+
+            Map.add_gdf(
+                selected_geom,
+                layer_name=f"{selected_district} District",
+                style={"color": "#007bff", "weight": 3, "fillOpacity": 0.2}
+            )
+            Map.centerObject(ee.Geometry(geom_json), zoom=9)
+
+        elif analysis_type == "Hydrological" and basins is not None and "selected_basin" in locals():
             selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
-            geojson_data = json.loads(selected_geom.to_json())
-            Map.add_gdf(selected_geom, layer_name=f"{selected_basin} Basin", style={"color": "green", "fillOpacity": 0.2})
-            Map.centerObject(ee.Geometry(geojson_data["features"][0]["geometry"]), zoom=8)
-    
-        # --- Show rainfall results if requested ---
+            geom = selected_geom.geometry.values[0]
+            geom_json = mapping(geom)
+
+            Map.add_gdf(
+                selected_geom,
+                layer_name=f"{selected_basin} Basin",
+                style={"color": "#28a745", "weight": 3, "fillOpacity": 0.2}
+            )
+            Map.centerObject(ee.Geometry(geom_json), zoom=8)
+
+        # --- Display map ---
         if run_forecast:
             rainfall.show(params)
         else:
