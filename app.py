@@ -146,6 +146,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
 from modules import analysis, monitoring, rainfall, weather_forecast, water_productivity
 from utils.readme_section import show_readme
 from utils.other_gee_layers import (get_worldcover, get_dem, get_roads_layer, get_rivers_layer, get_surface_water_layer, get_admin_layer)
+from streamlit_option_menu import option_menu
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -409,42 +410,62 @@ st.sidebar.markdown("""
 
 
 # --- Render sidebar tabs (simple + clean) ---
+from streamlit_option_menu import option_menu
+
+# --- Render sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        arrow = "›" if not st.session_state["rice_expanded"] else "⌃"
-        button_label = f"{label} {arrow}"
-
-        # Parent button (Rice Mapping)
-        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
-            st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-            st.session_state["active_page"] = tab_key
-            st.rerun()
-
-        # Subtabs (simple, normal Streamlit buttons)
-        if st.session_state["rice_expanded"]:
-            for sub_key, sub_label in rice_subtabs.items():
-                sub_active = (
-                    st.session_state["active_page"] == "Rice Mapping"
-                    and st.session_state["active_subtab"] == sub_key
-                )
-
-                # Add a small indentation
-                st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
-
-                if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
-                    st.session_state["active_page"] = "Rice Mapping"
-                    st.session_state["active_subtab"] = sub_key
-                    st.rerun()
-
-    else:
+        # Main button for Rice Mapping
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
-            st.session_state["rice_expanded"] = False
             st.rerun()
 
-# Assign current values
+        # --- Show the subtab menu only if user is on Rice Mapping ---
+        if st.session_state["active_page"] == "Rice Mapping":
+            with st.sidebar:
+                st.markdown("<div style='margin-left:10px;'></div>", unsafe_allow_html=True)
+                subtab = option_menu(
+                    "🌾 Rice Mapping",
+                    ["Seasonal Analysis", "Seasonal Monitoring", "Compare Seasons", "Data and Methods"],
+                    icons=["graph-up", "activity", "arrow-repeat", "gear"],
+                    menu_icon="flower3",
+                    default_index=0,
+                    styles={
+                        "container": {
+                            "background-color": "#e9f5ff",
+                            "padding": "5px",
+                            "border-radius": "8px",
+                        },
+                        "icon": {"color": "#0d6efd", "font-size": "18px"},
+                        "nav-link": {
+                            "font-size": "15px",
+                            "color": "#003366",
+                            "text-align": "left",
+                            "margin": "4px 0",
+                            "--hover-color": "#e7f1ff",
+                        },
+                        "nav-link-selected": {
+                            "background-color": "#0d6efd",
+                            "color": "white",
+                            "font-weight": "600",
+                            "border-radius": "6px",
+                        },
+                    },
+                )
+                # Save selected subtab to session state
+                st.session_state["active_subtab"] = subtab
+
+    else:
+        # Normal main tabs
+        if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
+            st.session_state["active_page"] = tab_key
+            st.session_state["active_subtab"] = None
+            st.rerun()
+
+# Assign current page and subpage
 page = st.session_state["active_page"]
-subpage = st.session_state["active_subtab"]
+subpage = st.session_state.get("active_subtab", None)
+
 
 # # --- Render main sidebar tabs ---
 # for tab_key, label in tabs.items():
@@ -623,7 +644,7 @@ elif page == "Weather Forecast":
 elif page == "Rice Mapping":
     # subpage = st.session_state["active_subtab"]  # comes from sidebar dropdown selection
 
-    from streamlit_option_menu import option_menu
+    
 
     # --- Sidebar Subtab Menu ---
     with st.sidebar:
