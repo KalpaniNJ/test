@@ -359,21 +359,19 @@ div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
 </style>
 """, unsafe_allow_html=True)
 
-
-# --- Render main sidebar tabs ---
+# --- Render sidebar tabs (simple + clean) ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        # Right-aligned arrow
-        arrow = "›" if not st.session_state["rice_expanded"] else " "
+        arrow = "›" if not st.session_state["rice_expanded"] else "⌃"
         button_label = f"{label} {arrow}"
 
-        # Create a horizontal layout: label left, arrow right
+        # Parent button (Rice Mapping)
         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
             st.session_state["active_page"] = tab_key
             st.rerun()
 
-        # Show subtabs if expanded
+        # Subtabs (simple, normal Streamlit buttons)
         if st.session_state["rice_expanded"]:
             for sub_key, sub_label in rice_subtabs.items():
                 sub_active = (
@@ -381,16 +379,15 @@ for tab_key, label in tabs.items():
                     and st.session_state["active_subtab"] == sub_key
                 )
 
-                # Add indentation
-                sub_button_label = f"    {sub_label}"
+                # Add a small indentation
+                st.markdown("<div style='margin-left:15px'></div>", unsafe_allow_html=True)
 
-                if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
+                if st.sidebar.button(f"↳ {sub_label}", key=f"subtab_{sub_key}", use_container_width=True):
                     st.session_state["active_page"] = "Rice Mapping"
                     st.session_state["active_subtab"] = sub_key
                     st.rerun()
 
     else:
-        # Regular main tab
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
             st.session_state["rice_expanded"] = False
@@ -399,6 +396,46 @@ for tab_key, label in tabs.items():
 # Assign current values
 page = st.session_state["active_page"]
 subpage = st.session_state["active_subtab"]
+
+# # --- Render main sidebar tabs ---
+# for tab_key, label in tabs.items():
+#     if tab_key == "Rice Mapping":
+#         # Right-aligned arrow
+#         arrow = "›" if not st.session_state["rice_expanded"] else " "
+#         button_label = f"{label} {arrow}"
+
+#         # Create a horizontal layout: label left, arrow right
+#         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
+#             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
+#             st.session_state["active_page"] = tab_key
+#             st.rerun()
+
+#         # Show subtabs if expanded
+#         if st.session_state["rice_expanded"]:
+#             for sub_key, sub_label in rice_subtabs.items():
+#                 sub_active = (
+#                     st.session_state["active_page"] == "Rice Mapping"
+#                     and st.session_state["active_subtab"] == sub_key
+#                 )
+
+#                 # Add indentation
+#                 sub_button_label = f"    {sub_label}"
+
+#                 if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
+#                     st.session_state["active_page"] = "Rice Mapping"
+#                     st.session_state["active_subtab"] = sub_key
+#                     st.rerun()
+
+#     else:
+#         # Regular main tab
+#         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
+#             st.session_state["active_page"] = tab_key
+#             st.session_state["rice_expanded"] = False
+#             st.rerun()
+
+# # Assign current values
+# page = st.session_state["active_page"]
+# subpage = st.session_state["active_subtab"]
 
 
 # ==============================
