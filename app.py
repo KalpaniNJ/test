@@ -235,6 +235,130 @@ if "active_subtab" not in st.session_state:
 if "rice_expanded" not in st.session_state:
     st.session_state["rice_expanded"] = False
 
+# --- Sidebar Styling ---
+st.sidebar.markdown("""
+<style>
+div.stButton > button:first-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;  /* pushes arrow to right edge */
+    text-align: left !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease-in-out;
+    width: 100% !important;
+}
+div.stButton > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+div.stButton > button[kind="primary"] {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+}
+
+/* Subtab indentation */
+.subtab-button {
+    margin-left: 1.5rem;
+}
+
+/* Arrow icon on right edge */
+.arrow-icon {
+    font-size: 14px;
+    color: #555;
+    margin-left: auto;
+    transition: transform 0.25s ease-in-out;
+}
+.arrow-icon.expanded {
+    transform: rotate(90deg);
+}
+
+/* Gear icon hover animation */
+.gear-icon {
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+.gear-icon:hover {
+    transform: rotate(45deg);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# --- Sub Tabs Sidebar Styling ---
+st.sidebar.markdown("""
+<style>
+/* --- MAIN TABS --- */
+div[data-testid="stSidebar"] div.stButton > button:first-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: left !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease-in-out;
+    width: 100% !important;
+}
+
+div[data-testid="stSidebar"] div.stButton > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+div[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+}
+
+/* --- RICE MAPPING SUBTABS --- */
+div[data-testid="stSidebar"] div.stButton.subtab > button:first-child {
+    margin-left: 1.3rem !important;
+    background-color: #fafafa !important;
+    border: 1px solid #eee !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #444 !important;
+    padding: 6px 12px !important;
+    transition: all 0.2s ease-in-out;
+    width: calc(100% - 1.5rem) !important;
+}
+
+div[data-testid="stSidebar"] div.stButton.subtab > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    transform: translateX(2px);
+}
+
+/* Active subtab */
+div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 2px 5px rgba(13,110,253,0.25) !important;
+    font-weight: 600 !important;
+}
+
+/* Remove copy/link icon completely */
+[data-testid="stMarkdownContainer"] a[href]:after {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 # --- Render sidebar tabs (simple + clean) ---
