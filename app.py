@@ -378,7 +378,7 @@ for tab_key, label in tabs.items():
         if st.session_state["rice_expanded"]:
             with st.sidebar:
                 subtab = option_menu(
-                    "🌾 Rice Mapping",
+                    # "🌾 Rice Mapping",
                     ["Seasonal Analysis", "Seasonal Monitoring", "Compare Seasons", "Data and Methods"],
                     icons=["graph-up", "activity", "arrow-repeat", "gear"],
                     menu_icon="flower3",
