@@ -222,16 +222,15 @@ params = sidebar_controls()
 # Page selector
 page = st.sidebar.selectbox(
     "Select Module",
-    ["Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
+    ["Home", "Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
     key="main_page_select"
 )
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
-
 # ==============================
-# RAINFALL DISTRIBUTION MODULE
+# HOME MODULE
 # ==============================
-if page == "Rainfall Distribution":
+if page == "Home":
     # --- Tool description ---
     st.markdown("""
         <div style="
@@ -251,7 +250,12 @@ if page == "Rainfall Distribution":
             </p>
         </div>
     """, unsafe_allow_html=True)
-    
+
+
+# ==============================
+# RAINFALL DISTRIBUTION MODULE
+# ==============================
+if page == "Rainfall Distribution": 
     # --- Load shapefiles once ---
     data_dir = os.path.join(os.path.dirname(__file__), "data")
     districts_path = os.path.join(data_dir, "lka_dis.shp")
@@ -300,40 +304,40 @@ if page == "Rainfall Distribution":
             "run_forecast": run_forecast,
         }
 
+
     with col2:
         Map = geemap.Map(center=[7.8, 80.7], zoom=7)
-
-        # --- Display selected boundary and zoom ---
-        if analysis_type == "Administrative" and districts is not None and "selected_district" in locals():
-            selected_geom = districts[districts["ADM2_EN"] == selected_district]
-            geom = selected_geom.geometry.values[0]
-            geom_json = mapping(geom)
-
-            Map.add_gdf(
-                selected_geom,
-                layer_name=f"{selected_district} District",
-                style={"color": "#007bff", "weight": 3, "fillOpacity": 0.2}
-            )
-            Map.centerObject(ee.Geometry(geom_json), zoom=9)
-
-        elif analysis_type == "Hydrological" and basins is not None and "selected_basin" in locals():
-            selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
-            geom = selected_geom.geometry.values[0]
-            geom_json = mapping(geom)
-
-            Map.add_gdf(
-                selected_geom,
-                layer_name=f"{selected_basin} Basin",
-                style={"color": "#28a745", "weight": 3, "fillOpacity": 0.2}
-            )
-            Map.centerObject(ee.Geometry(geom_json), zoom=8)
-
-        # --- Display map ---
+    
+        def add_and_zoom(gdf, name, color="#007bff", zoom_padding=0.02):
+            if gdf is None or gdf.empty:
+                st.warning("No geometry found for the selection.")
+                return
+            gdf_wgs84 = gdf.to_crs(4326) if gdf.crs is not None and gdf.crs.to_epsg() != 4326 else gdf
+            Map.add_gdf(gdf_wgs84, layer_name=name, style={"color": color, "weight": 3, "fillOpacity": 0.2})
+            minx, miny, maxx, maxy = gdf_wgs84.total_bounds
+            # add a tiny padding
+            dx = (maxx - minx) * zoom_padding
+            dy = (maxy - miny) * zoom_padding
+            Map.fit_bounds([[miny - dy, minx - dx], [maxy + dy, maxx + dx]])
+    
+        if analysis_type == "Administrative" and "selected_district" in locals():
+            sel = districts[districts["ADM2_EN"] == selected_district]
+            add_and_zoom(sel, f"{selected_district} District", color="#007bff")
+    
+        elif analysis_type == "Hydrological" and "selected_basin" in locals():
+            sel = basins[basins["WSHD_NAME"] == selected_basin]
+            add_and_zoom(sel, f"{selected_basin} Basin", color="#28a745")
+    
         if run_forecast:
-            rainfall.show(params)
+            rainfall.show(params)   # this should render its own map
         else:
             Map.add_basemap("OPENSTREETMAP")
-            Map.to_streamlit(height=650)
+            try:
+                Map.to_streamlit(height=650)
+            except Exception as e:
+                st.error(f"Map render error: {e}")
+
+
 
 
 # ==============================
