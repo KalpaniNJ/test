@@ -209,7 +209,7 @@ st.markdown("<hr style='border:2px solid #0d6efd'>", unsafe_allow_html=True)
 
 params = sidebar_controls()
 
-# --- Sidebar Tabs with Right-Aligned Rotating Chevron INSIDE Button ---
+# --- Sidebar Tabs with Right-Aligned Dropdown Arrow for Rice Mapping ---
 tabs = {
     "Home": "🏠 Home",
     "Rainfall Distribution": "🌧 Rainfall Distribution",
@@ -218,7 +218,7 @@ tabs = {
     "Water Productivity": "💧 Water Productivity"
 }
 
-# Sub-tabs for Rice Mapping
+# Sub-tabs for Rice Mapping (⚙️ added to Data & Methods)
 rice_subtabs = {
     "Seasonal Analysis": "📈 Seasonal Analysis",
     "Seasonal Monitoring": "🌾 Seasonal Monitoring",
@@ -226,7 +226,7 @@ rice_subtabs = {
     "Data and Methods": "⚙️ Data & Methods"
 }
 
-# Initialize state
+# Initialize session state
 if "active_page" not in st.session_state:
     st.session_state["active_page"] = "Home"
 if "active_subtab" not in st.session_state:
@@ -237,11 +237,10 @@ if "rice_expanded" not in st.session_state:
 # --- Sidebar Styling ---
 st.sidebar.markdown("""
 <style>
-/* ============ MAIN BUTTONS ============ */
 div.stButton > button:first-child {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;  /* places arrow at right edge */
+    justify-content: space-between !important;  /* pushes arrow to right edge */
     text-align: left !important;
     padding: 10px 14px !important;
     border-radius: 8px !important;
@@ -264,24 +263,23 @@ div.stButton > button[kind="primary"] {
     border-color: #0d6efd !important;
 }
 
-/* ============ CHEVRON ============ */
-.chevron {
-    font-size: 16px;
-    color: #555;
-    transition: transform 0.25s ease-in-out;
-    transform-origin: center;
-}
-.chevron.rotate {
-    transform: rotate(90deg);
-    color: #0d6efd;
-}
-
-/* ============ SUBTABS ============ */
+/* Subtab indentation */
 .subtab-button {
     margin-left: 1.5rem;
 }
 
-/* Gear icon animation */
+/* Arrow icon on right edge */
+.arrow-icon {
+    font-size: 14px;
+    color: #555;
+    margin-left: auto;
+    transition: transform 0.25s ease-in-out;
+}
+.arrow-icon.expanded {
+    transform: rotate(90deg);
+}
+
+/* Gear icon hover animation */
 .gear-icon {
     display: inline-block;
     transition: transform 0.3s ease-in-out;
@@ -292,50 +290,29 @@ div.stButton > button[kind="primary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Tabs ---
+# --- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        chevron_symbol = "›"
-        chevron_html = (
-            f"<span class='chevron rotate'>{chevron_symbol}</span>"
-            if st.session_state["rice_expanded"]
-            else f"<span class='chevron'>{chevron_symbol}</span>"
-        )
+        # Right-aligned arrow
+        arrow = "›" if not st.session_state["rice_expanded"] else "⌄"
+        button_label = f"{label} {arrow}"
 
-        # Whole text + arrow inside one button
-        button_label = f"{label} {chevron_html}"
-
-        # Render the styled button
-        clicked = st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True)
-        st.markdown(
-            f"""
-            <style>
-            div[data-testid="stSidebar"] button[key="tab_{tab_key}"] span {{
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        if clicked:
+        # Create a horizontal layout: label left, arrow right
+        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
             st.session_state["active_page"] = tab_key
             st.rerun()
 
-        # Subtabs when expanded
+        # Show subtabs if expanded
         if st.session_state["rice_expanded"]:
             for sub_key, sub_label in rice_subtabs.items():
                 sub_active = (
                     st.session_state["active_page"] == "Rice Mapping"
                     and st.session_state["active_subtab"] == sub_key
                 )
-                sub_button_label = f"    {sub_label}"
 
-                if "Data and Methods" in sub_key:
-                    sub_button_label = "    ⚙️ Data & Methods"
+                # Add indentation
+                sub_button_label = f"    {sub_label}"
 
                 if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
                     st.session_state["active_page"] = "Rice Mapping"
@@ -343,13 +320,13 @@ for tab_key, label in tabs.items():
                     st.rerun()
 
     else:
-        # Normal tabs
+        # Regular main tab
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
             st.session_state["rice_expanded"] = False
             st.rerun()
 
-# Assign active values
+# Assign current values
 page = st.session_state["active_page"]
 subpage = st.session_state["active_subtab"]
 
