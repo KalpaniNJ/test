@@ -380,37 +380,28 @@ div[data-testid="stSidebar"] div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# --- Light blue background for Rice Mapping subtabs only ---
+# --- Change only Rice Mapping subtabs font color ---
 st.markdown("""
 <style>
-/* Light blue style only for Rice Mapping subtabs */
-section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"] {
-    background-color: #e9f5ff !important;  /* light blue */
-    color: #003366 !important;             /* navy text */
-    border: 1px solid #b3d9ff !important;  /* soft border */
-    border-radius: 6px !important;
-    font-weight: 500 !important;
+/* Select all buttons with IDs that start with subtab_ */
+div[data-testid="stSidebar"] button[id^="subtab_"] {
+    color: #0d6efd !important;          /* IWMI Blue */
+    font-weight: 600 !important;        /* Slightly bold for emphasis */
     font-size: 14px !important;
+    background-color: transparent !important; /* Keep normal background */
+    border: none !important;            /* Optional: cleaner look */
+    text-align: left !important;
+}
+
+/* Hover effect */
+div[data-testid="stSidebar"] button[id^="subtab_"]:hover {
+    color: #ffffff !important;          /* White text */
+    background-color: #0d6efd !important; /* Blue background */
+    border-radius: 6px !important;
     transition: all 0.2s ease-in-out;
-}
-
-/* Hover effect for subtabs */
-section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"]:hover {
-    background-color: #0d6efd !important;  /* IWMI blue */
-    color: white !important;
-    border-color: #0d6efd !important;
-}
-
-/* Optional: highlight active subtab */
-section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"].active {
-    background-color: #0d6efd !important;
-    color: white !important;
-    border-color: #0d6efd !important;
-    font-weight: 600 !important;
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 
 
