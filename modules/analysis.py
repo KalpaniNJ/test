@@ -184,6 +184,8 @@ def run_statistics(params):
     if "total_area_ha" in st.session_state:
         st.subheader(f"🌾 Total Paddy Extent: {st.session_state['total_area_ha']:,.2f} ha")
 
+    st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
+    
     # --- Always display charts if any available ---
     if any(k in st.session_state for k in [
         "stats_bar_month", "stats_bar_day",
