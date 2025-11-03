@@ -665,34 +665,35 @@ elif page == "Weather Forecast":
 #         from utils.readme_section import show_readme
 #         show_readme()
 
-
-
 elif page == "Rice Mapping":
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
 
-    # ==============================
+    # ==========================================
     # SEASONAL ANALYSIS
-    # ==============================
+    # ==========================================
     if subpage == "Seasonal Analysis":
+        # --- HEADER ---
         st.markdown("## 🌾 Seasonal Analysis")
         st.markdown("""
-            <p style="color:#444; font-size:16px; text-align:justify;">
-                Analyze rice growth over time using <b>mean mRVI</b> at sample points.
-                Each step below represents a part of the rice-mapping workflow.
-            </p>
+        <p style="color:#444; font-size:16px;">
+            Analyze rice growth over time using <b>mean mRVI</b> at sample points.
+            Select the analysis step below to view its controls and outputs.
+        </p>
         """, unsafe_allow_html=True)
 
-        # Create sub-tabs (1–4)
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "① Time Series Analysis",
-            "② Outlier Analysis",
-            "③ Rice Mapping",
-            "④ Statistical Analysis"
-        ])
+        # --- STEP NAVIGATION (internal mini tabs) ---
+        step = st.radio(
+            "Select Analysis Step:",
+            ["Time Series Analysis", "Outlier Analysis", "Rice Mapping", "Statistical Analysis"],
+            horizontal=True,
+            key="seasonal_step",
+        )
 
-        # --- TIME SERIES ANALYSIS TAB ---
-        with tab1:
-            col1, col2 = st.columns([0.4, 1.3])
+        # --- DIVIDE INTO TWO COLUMNS ---
+        col1, col2 = st.columns([0.4, 1.3])
+
+        # =============== TIME SERIES ===============
+        if step == "Time Series Analysis":
             with col1:
                 st.markdown("### 🧭 Input Parameters")
                 aoi_option = st.selectbox(
@@ -703,39 +704,43 @@ elif page == "Rice Mapping":
                 start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
                 end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
                 run_ts = st.button("Run Time Series Analysis")
+
                 params = {
                     "aoi": aoi_option,
                     "start_date": str(start_date),
                     "end_date": str(end_date),
-                    "run_ts": run_ts
+                    "run_ts": run_ts,
                 }
 
             with col2:
-                st.markdown("### 🗺️ Output: Time Series Analysis")
-                analysis.show(params)
+                st.markdown("### 📊 Output: Time Series Analysis")
+                if run_ts:
+                    analysis.show(params)
+                else:
+                    st.info("Run the time series analysis to view results.")
 
-        # --- OUTLIER ANALYSIS TAB ---
-        with tab2:
-            col1, col2 = st.columns([0.4, 1.3])
+        # =============== OUTLIER ANALYSIS ===============
+        elif step == "Outlier Analysis":
             with col1:
-                st.markdown("### 🧩 Outlier Analysis Parameters")
-                st.info("Perform Time Series Analysis before running this step.")
+                st.markdown("### 🧩 Outlier Detection")
+                st.info("Perform Time Series analysis before running this step.")
                 run_outlier = st.button("Run Outlier Analysis")
                 params = {"run_outlier": run_outlier}
 
             with col2:
-                st.markdown("### 🗺️ Output: Outlier Analysis")
+                st.markdown("### 📊 Output: Outlier Analysis")
                 if run_outlier:
                     analysis.show(params)
+                else:
+                    st.info("Click 'Run Outlier Analysis' to begin.")
 
-        # --- RICE MAPPING TAB ---
-        with tab3:
-            col1, col2 = st.columns([0.4, 1.3])
+        # =============== RICE MAPPING ===============
+        elif step == "Rice Mapping":
             with col1:
-                st.markdown("### 🌾 Rice Mapping Dates")
-                season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
-                peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
-                harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
+                st.markdown("### 🌾 Rice Mapping Inputs")
+                season_start_date = st.date_input("Start of Season", pd.to_datetime("2021-12-13"))
+                peak_date = st.date_input("Peak of Season", pd.to_datetime("2022-02-25"))
+                harvest_date = st.date_input("Harvest Date", pd.to_datetime("2022-04-01"))
                 run_paddy = st.button("Run Paddy Season Analysis")
                 params = {
                     "season_dates": {
@@ -747,23 +752,27 @@ elif page == "Rice Mapping":
                 }
 
             with col2:
-                st.markdown("### 🗺️ Output: Rice Mapping")
+                st.markdown("### 📊 Output: Rice Mapping")
                 if run_paddy:
                     analysis.show(params)
+                else:
+                    st.info("Run the rice mapping analysis to see outputs.")
 
-        # --- STATISTICAL ANALYSIS TAB ---
-        with tab4:
-            col1, col2 = st.columns([0.4, 1.3])
+        # =============== STATISTICAL ANALYSIS ===============
+        elif step == "Statistical Analysis":
             with col1:
-                st.markdown("### 📊 Statistical Analysis Parameters")
+                st.markdown("### 📈 Statistical Computation")
                 st.info("Calculate total paddy area, area by month, and start-date-based classification.")
                 run_stats = st.button("Run Statistical Analysis")
                 params = {"run_stats": run_stats}
 
             with col2:
-                st.markdown("### 🗺️ Output: Statistical Analysis")
+                st.markdown("### 📊 Output: Statistical Summary")
                 if run_stats:
                     analysis.show(params)
+                else:
+                    st.info("Run the statistical analysis to view the summary.")
+
 
 
 
