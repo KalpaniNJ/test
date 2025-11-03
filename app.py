@@ -147,34 +147,6 @@ from modules import analysis, monitoring, rainfall, weather_forecast, water_prod
 from utils.readme_section import show_readme
 from utils.other_gee_layers import (get_worldcover, get_dem, get_roads_layer, get_rivers_layer, get_surface_water_layer, get_admin_layer)
 
-# Add custom CSS for a fade overlay
-st.markdown("""
-    <style>
-    .fade-overlay {
-        position: absolute;
-        top: 70px;  /* adjust based on header height */
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.6);
-        z-index: 1000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2em;
-        color: #333;
-    }
-    .fade-overlay.active {
-        display: flex;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
 
@@ -338,7 +310,7 @@ if page == "Rainfall Distribution":
             }
 
     with col2:
-        # Always create the base map parameters
+        # --- Always show base map ---
         base_params = {
             "analysis_type": analysis_type,
             "district": selected_aoi if analysis_type == "Administrative" else None,
@@ -346,34 +318,14 @@ if page == "Rainfall Distribution":
             "temporal_method": temporal_method,
             "start_date": start_str,
             "end_date": end_str,
-            "run_forecast": False,
+            "run_forecast": False,  # default: no rainfall yet
         }
-    
-        # Container for map
-        map_container = st.container()
-    
-        # Display base map first
-        with map_container:
+
+        # If no button pressed, show only base map
+        if not run_forecast:
             rainfall.show(base_params)
-    
-        # Add a fade overlay for loading
-        overlay_html = """
-            <div id="fadeOverlay" class="fade-overlay">
-                <div>⏳ Loading rainfall data...</div>
-            </div>
-            <script>
-            const overlay = document.getElementById('fadeOverlay');
-            function showOverlay() { overlay.classList.add('active'); }
-            function hideOverlay() { overlay.classList.remove('active'); }
-            </script>
-        """
-        st.markdown(overlay_html, unsafe_allow_html=True)
-    
-        # Run rainfall analysis when button is pressed
-        if run_forecast:
-            st.markdown("<script>showOverlay();</script>", unsafe_allow_html=True)
+        else:
             rainfall.show(params)
-            st.markdown("<script>hideOverlay();</script>", unsafe_allow_html=True)
 
 
 # ==============================
