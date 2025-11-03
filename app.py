@@ -330,12 +330,6 @@ if page == "Rainfall Distribution":
     
         if run_forecast:
             rainfall.show(params)   # this should render its own map
-        else:
-            Map.add_basemap("OPENSTREETMAP")
-            try:
-                Map.to_streamlit(height=650)
-            except Exception as e:
-                st.error(f"Map render error: {e}")
 
 
 
