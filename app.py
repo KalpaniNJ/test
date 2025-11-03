@@ -686,13 +686,15 @@ elif page == "Rice Mapping":
                                 unsafe_allow_html=True)
 
     elif subpage == "Seasonal Monitoring":
-        st.markdown("### 🌾 Seasonal Monitoring")
+        st.markdown("### Seasonal Monitoring")
         st.markdown("""
         <p style="color:#444; font-size:16px;">
-            Monitor crop growth in near real-time using Sentinel-1 SAR time series.
-            Analyze mRVI-based dynamics for the current or recent growing season.
+            Perform near real-time monitoring of the active rice season using Sentinel-1 mRVI time series. 
+            Select your Area of Interest (AOI) and date range, then run the analysis.
         </p>
         """, unsafe_allow_html=True)
+
+        st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
 
         # Initialize params for monitoring
         params = {
