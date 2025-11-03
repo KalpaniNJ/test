@@ -561,7 +561,7 @@ elif page == "Rice Mapping":
     # SEASONAL ANALYSIS
     if subpage == "Seasonal Analysis":
         with col1:
-            with st.sidebar.expander("Time Series Analysis"):
+            with st.expander("Time Series Analysis"):
                 st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
     
                 aoi_option = st.selectbox(
@@ -574,18 +574,18 @@ elif page == "Rice Mapping":
                 end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
                 run_ts = st.button("Run Time Series Analysis")
     
-            with st.sidebar.expander("Outlier Analysis"):
+            with st.expander("Outlier Analysis"):
                 st.info("Perform Time Series analysis before Outlier analysis.")
                 run_outlier = st.button("Run Outlier Analysis")
     
-            with st.sidebar.expander("Rice Mapping"):
+            with st.expander("Rice Mapping"):
                 st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
                 season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
                 peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
                 harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
                 run_paddy = st.button("Run Paddy Season Analysis")
     
-            with st.sidebar.expander("Statistical Analysis"):
+            with st.expander("Statistical Analysis"):
                 st.info("Calculate total paddy area, area by month, and area by start date.")
                 run_stats = st.button("Run Statistical Analysis")
     
@@ -608,26 +608,31 @@ elif page == "Rice Mapping":
 
     # SEASONAL MONITORING
     elif subpage == "Seasonal Monitoring":
-        with st.sidebar.expander("Monitoring"):
-            st.info("Monitor seasonal rice growth. Select the period and run the analysis.")
+        col1, col2 = st.columns([0.4, 1.3])
 
-            aoi_option_mnt = st.selectbox(
-                "Select AOI",
-                ["Walawa Irrigation Scheme"],
-                key="aoi_select_tab2",
-            )
+        with col1:
+            with st.expander("Monitoring"):
+                st.info("Monitor seasonal rice growth. Select the period and run the analysis.")
+    
+                aoi_option_mnt = st.selectbox(
+                    "Select AOI",
+                    ["Walawa Irrigation Scheme"],
+                    key="aoi_select_tab2",
+                )
+    
+                start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
+                end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"), key="end_tab2")
+                run_monitor = st.button("Run Analysis")
+    
+            params = {
+                "aoi_mnt": aoi_option_mnt,
+                "start_date_mnt": str(start_date_mnt),
+                "end_date_mnt": str(end_date_mnt),
+                "run_monitor": run_monitor,
+            }
 
-            start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
-            end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"), key="end_tab2")
-            run_monitor = st.button("Run Analysis")
-
-        params = {
-            "aoi_mnt": aoi_option_mnt,
-            "start_date_mnt": str(start_date_mnt),
-            "end_date_mnt": str(end_date_mnt),
-            "run_monitor": run_monitor,
-        }
-        monitoring.show(params)
+        with col1:
+            monitoring.show(params)
 
     # COMPARE SEASONS
     elif subpage == "Compare Seasons":
