@@ -621,7 +621,43 @@ elif page == "Weather Forecast":
 # PADDY MAPPING MODULE
 # ==============================
 elif page == "Rice Mapping":
-    subpage = st.session_state["active_subtab"]  # comes from sidebar dropdown selection
+    # subpage = st.session_state["active_subtab"]  # comes from sidebar dropdown selection
+
+    from streamlit_option_menu import option_menu
+
+    # --- Sidebar Subtab Menu ---
+    with st.sidebar:
+        subtab = option_menu(
+            "🌾 Rice Mapping",
+            ["Seasonal Analysis", "Seasonal Monitoring", "Compare Seasons", "Data and Methods"],
+            icons=["graph-up", "activity", "arrow-repeat", "gear"],
+            menu_icon="flower3",
+            default_index=0,
+            styles={
+                "container": {
+                    "background-color": "#e9f5ff", 
+                    "padding": "5px",
+                    "border-radius": "8px"
+                },
+                "icon": {"color": "#0d6efd", "font-size": "18px"},
+                "nav-link": {
+                    "font-size": "15px", 
+                    "color": "#003366", 
+                    "text-align": "left", 
+                    "margin": "4px 0",
+                    "--hover-color": "#e7f1ff"
+                },
+                "nav-link-selected": {
+                    "background-color": "#0d6efd", 
+                    "color": "white",
+                    "font-weight": "600",
+                    "border-radius": "6px"
+                },
+            }
+        )
+
+    # Match the selection to subpage
+    subpage = subtab
 
     # SEASONAL ANALYSIS
     if subpage == "Seasonal Analysis":
