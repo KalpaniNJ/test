@@ -309,17 +309,29 @@ if page == "Rainfall Distribution":
 
         run_forecast = st.button("Apply Layers")
 
-        params = {
-            "analysis_type": analysis_type,
-            "aoi": selected_aoi,
-            "temporal_method": temporal_method,
-            "start_date": start_str,
-            "end_date": end_str,
-            "run_forecast": run_forecast,
-        }
+        if analysis_type == "Administrative":
+            params = {
+                "analysis_type": analysis_type,
+                "district": selected_aoi,   # ✅ correct key
+                "basin": None,
+                "temporal_method": temporal_method,
+                "start_date": start_str,
+                "end_date": end_str,
+                "run_forecast": run_forecast,
+            }
+        else:
+            params = {
+                "analysis_type": analysis_type,
+                "district": None,
+                "basin": selected_aoi,      # ✅ correct key
+                "temporal_method": temporal_method,
+                "start_date": start_str,
+                "end_date": end_str,
+                "run_forecast": run_forecast,
+            }
+
 
     with col2:
-        st.markdown("### 🗺️ Map View")
         Map = geemap.Map(center=[7.8, 80.7], zoom=7)
 
         if run_forecast:
