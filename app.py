@@ -312,7 +312,7 @@ if page == "Rainfall Distribution":
         if analysis_type == "Administrative":
             params = {
                 "analysis_type": analysis_type,
-                "district": selected_aoi,   # ✅ correct key
+                "district": selected_aoi,
                 "basin": None,
                 "temporal_method": temporal_method,
                 "start_date": start_str,
@@ -323,37 +323,17 @@ if page == "Rainfall Distribution":
             params = {
                 "analysis_type": analysis_type,
                 "district": None,
-                "basin": selected_aoi,      # ✅ correct key
+                "basin": selected_aoi,
                 "temporal_method": temporal_method,
                 "start_date": start_str,
                 "end_date": end_str,
                 "run_forecast": run_forecast,
             }
 
-
-    with col2:
-        Map = geemap.Map(center=[7.8, 80.7], zoom=7)
-
+     with col2:
         if run_forecast:
-            # --- Load selected shapefile only when user clicks ---
-            if analysis_type == "Administrative":
-                sel = districts[districts["ADM2_EN"] == selected_aoi]
-            else:
-                sel = basins[basins["WSHD_NAME"] == selected_aoi]
-
-            if sel.empty:
-                st.warning("No geometry found for the selected area.")
-            else:
-                # Ensure CRS = EPSG:4326
-                sel = sel.to_crs(4326)
-                Map.add_gdf(sel, layer_name=f"{selected_aoi}", style={"color": "#007bff", "weight": 3, "fillOpacity": 0.2})
-                Map.fit_bounds(sel.total_bounds.reshape(2, 2).tolist())
-
-            # --- Now run rainfall analysis ---
             rainfall.show(params)
-        else:
-            Map.add_basemap("OPENSTREETMAP")
-            Map.to_streamlit(height=650)
+
 
 
 
