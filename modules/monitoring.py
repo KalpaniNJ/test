@@ -625,7 +625,7 @@ def show(params):
                 maskedStartMonth = finalStartMonth.updateMask(maskedPaddyClassification).updateMask(finalStartMonth.neq(0))
                 maskedStartMonthDay = finalStartMonthDay.updateMask(maskedPaddyClassification).updateMask(finalStartMonthDay.neq(0))
     
-                # st.subheader("Paddy Maps:")
+                st.markdown("Paddy Maps:")
                 aoi_centroid_mt = aoi_mt.centroid().coordinates().getInfo()
                 Map_SM = geemap.Map(center=[aoi_centroid_mt[1], aoi_centroid_mt[0]], zoom=12)
                 Map_SM.add_basemap("SATELLITE")
@@ -656,7 +656,7 @@ def show(params):
                 Map_SM.to_streamlit()
     
     
-                # st.subheader("Paddy Area Statistics:")
+                st.markdown("Paddy Area Statistics:")
                 # Total area (all paddy pixels)
                 total_area = maskedPaddyClassification.multiply(ee.Image.pixelArea()) \
                     .reduceRegion(
