@@ -292,6 +292,10 @@ div.stButton > button[kind="primary"] {
 
 # --- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
+    # if tab_key == "Rice Mapping":
+    #     expand_label = "▼ " if st.session_state["rice_expanded"] else "▶ "
+    #     button_label = f"{expand_label}{label}"
+
     if tab_key == "Rice Mapping":
         # --- Create rotating chevron ---
         expand_label = "›"
@@ -314,12 +318,8 @@ for tab_key, label in tabs.items():
         # Create the label text with inline chevron
         button_label = f"🌾 Rice Mapping <span class='chevron {arrow_class}'>{expand_label}</span>"
     
-        # Render the button
-        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
-            st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-            st.session_state["active_page"] = tab_key
-            st.rerun()
 
+                                                                
         # Create a horizontal layout: label left, arrow right
         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
