@@ -383,24 +383,34 @@ div[data-testid="stSidebar"] div.stButton > button:hover {
 # --- Light blue background for Rice Mapping subtabs only ---
 st.markdown("""
 <style>
-/* Target only indented subtabs (we can identify them by margin or indentation) */
-section[data-testid="stSidebar"] div.stButton > button[data-baseweb="button"][style*="margin-left"] {
-    background-color: #e9f5ff !important;  /* Light blue */
-    color: #003366 !important;             /* Dark navy text */
-    border: 1px solid #b3d9ff !important;  /* Soft blue border */
+/* Light blue style only for Rice Mapping subtabs */
+section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"] {
+    background-color: #e9f5ff !important;  /* light blue */
+    color: #003366 !important;             /* navy text */
+    border: 1px solid #b3d9ff !important;  /* soft border */
     border-radius: 6px !important;
     font-weight: 500 !important;
+    font-size: 14px !important;
     transition: all 0.2s ease-in-out;
 }
 
 /* Hover effect for subtabs */
-section[data-testid="stSidebar"] div.stButton > button[data-baseweb="button"][style*="margin-left"]:hover {
+section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"]:hover {
     background-color: #0d6efd !important;  /* IWMI blue */
     color: white !important;
     border-color: #0d6efd !important;
 }
+
+/* Optional: highlight active subtab */
+section[data-testid="stSidebar"] div.stButton > button[id^="subtab_"].active {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+    font-weight: 600 !important;
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 
 
