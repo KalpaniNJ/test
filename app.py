@@ -359,6 +359,20 @@ div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+/* Only affect indented (sub) buttons */
+div[data-testid="stSidebar"] div.stButton:nth-child(n+3) > button {
+    background-color: #f1f3f4 !important; /* Light gray background */
+    color: #333 !important;
+}
+div[data-testid="stSidebar"] div.stButton:nth-child(n+3) > button:hover {
+    background-color: #0d6efd !important;
+    color: white !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Render sidebar tabs (simple + clean) ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
