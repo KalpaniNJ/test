@@ -380,28 +380,31 @@ div[data-testid="stSidebar"] div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# --- Change only Rice Mapping subtabs font color ---
-st.markdown("""
-<style>
-/* Select all buttons with IDs that start with subtab_ */
-div[data-testid="stSidebar"] button[id^="subtab_"] {
-    color: #0d6efd !important;          /* IWMI Blue */
-    font-weight: 600 !important;        /* Slightly bold for emphasis */
-    font-size: 14px !important;
-    background-color: transparent !important; /* Keep normal background */
-    border: none !important;            /* Optional: cleaner look */
-    text-align: left !important;
-}
+# --- Force apply color style for Rice Mapping subtabs ---
+st.sidebar.markdown("""
+    <style>
+        /* Streamlit places sidebar content inside an element with role="complementary" */
+        [data-testid="stSidebar"] div:has(> button[id^="subtab_"]) > button {
+            color: #0d6efd !important;       /* IWMI Blue */
+            font-weight: 600 !important;
+        }
 
-/* Hover effect */
-div[data-testid="stSidebar"] button[id^="subtab_"]:hover {
-    color: #ffffff !important;          /* White text */
-    background-color: #0d6efd !important; /* Blue background */
-    border-radius: 6px !important;
-    transition: all 0.2s ease-in-out;
-}
-</style>
+        /* Even safer fallback selector: target any button whose id starts with subtab_ */
+        [data-testid="stSidebar"] button[id^="subtab_"] {
+            color: #0d6efd !important;
+            font-weight: 600 !important;
+        }
+
+        /* Hover style */
+        [data-testid="stSidebar"] button[id^="subtab_"]:hover {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-radius: 6px !important;
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
 """, unsafe_allow_html=True)
+
 
 
 
