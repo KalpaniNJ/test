@@ -575,7 +575,9 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
-        # TIME SERIES ANALYSIS
+        # ============================
+        # 1️⃣ TIME SERIES ANALYSIS
+        # ============================
         if step == "Time Series Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -598,9 +600,19 @@ elif page == "Rice Mapping":
                     "end_date": str(end_date),
                     "run_ts": run_ts
                 }
-                analysis.run_time_series(params)
+                # ✅ Only run heavy computation if button clicked
+                if run_ts:
+                    analysis.run_time_series(params)
+                # ✅ Otherwise, just re-display stored results if available
+                elif "ts_df_line" in st.session_state:
+                    analysis.run_time_series({"aoi": aoi_option})
+                else:
+                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                                unsafe_allow_html=True)
 
-        # OUTLIER ANALYSIS
+        # ============================
+        # 2️⃣ OUTLIER ANALYSIS
+        # ============================
         elif step == "Outlier Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -613,9 +625,17 @@ elif page == "Rice Mapping":
                     "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
                     "run_outlier": run_outlier
                 }
-                analysis.run_outlier(params)
+                if run_outlier:
+                    analysis.run_outlier(params)
+                elif "outlier_boxplot" in st.session_state:
+                    analysis.run_outlier({"aoi": st.session_state["aoi"]})
+                else:
+                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                                unsafe_allow_html=True)
 
-        # RICE MAPPING
+        # ============================
+        # 3️⃣ RICE MAPPING
+        # ============================
         elif step == "Rice Mapping":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -638,9 +658,18 @@ elif page == "Rice Mapping":
                     },
                     "run_paddy": run_paddy
                 }
-                analysis.run_rice_mapping(params)
 
-        # STATISTICAL ANALYSIS
+                if run_paddy:
+                    analysis.run_rice_mapping(params)
+                elif "map_SA" in st.session_state:
+                    analysis.run_rice_mapping({"aoi": st.session_state["aoi"]})
+                else:
+                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                                unsafe_allow_html=True)
+
+        # ============================
+        # 4️⃣ STATISTICAL ANALYSIS
+        # ============================
         elif step == "Statistical Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -653,32 +682,32 @@ elif page == "Rice Mapping":
                     "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
                     "run_stats": run_stats
                 }
-                analysis.run_statistics(params)
+                if run_stats:
+                    analysis.run_statistics(params)
+                elif "stats_bar_month" in st.session_state:
+                    analysis.run_statistics({"aoi": st.session_state["aoi"]})
+                else:
+                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                                unsafe_allow_html=True)
 
-    # SEASONAL MONITORING (placeholder for later)
+    # Other subtabs
     elif subpage == "Seasonal Monitoring":
         st.markdown("### Seasonal Monitoring")
         st.info("Monitor crop growth in near-real-time using Sentinel-1 time series.")
 
-
     elif subpage == "Compare Seasons":
         st.markdown("""
-        <div style="
-            background-color:#fff8e6;
-            border-left:6px solid #f7c948;
-            padding:20px;
-            border-radius:8px;
-            margin-top:20px;">
-            <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
-            <p style="color:#555; font-size:16px;">
-                Compare seasonal mRVI patterns, paddy extent, and crop dynamics.
-            </p>
+        <div style="background-color:#fff8e6; border-left:6px solid #f7c948;
+        padding:20px; border-radius:8px; margin-top:20px;">
+        <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
+        <p style="color:#555; font-size:16px;">Compare seasonal mRVI patterns, paddy extent, and crop dynamics.</p>
         </div>
         """, unsafe_allow_html=True)
 
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
         show_readme()
+
 
 
 
