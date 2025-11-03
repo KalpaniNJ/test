@@ -380,6 +380,29 @@ div[data-testid="stSidebar"] div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
+# --- Force light-blue background for all sidebar buttons ---
+st.markdown("""
+<style>
+/* Stronger selector to override previous button styles */
+section[data-testid="stSidebar"] div.stButton > button {
+    background-color: #e9f5ff !important;  /* Light blue */
+    color: #003366 !important;             /* Dark navy text */
+    border: 1px solid #b3d9ff !important;  /* Soft blue border */
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover effect */
+section[data-testid="stSidebar"] div.stButton > button:hover {
+    background-color: #0d6efd !important;  /* IWMI blue */
+    color: white !important;
+    border-color: #0d6efd !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # --- Render sidebar tabs (simple + clean) ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
