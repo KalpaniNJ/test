@@ -147,6 +147,7 @@ from modules import analysis, monitoring, rainfall, weather_forecast, water_prod
 from utils.readme_section import show_readme
 from utils.other_gee_layers import (get_worldcover, get_dem, get_roads_layer, get_rivers_layer, get_surface_water_layer, get_admin_layer)
 from streamlit_option_menu import option_menu
+from utils.config import AOI_OPTIONS
 
 # ee.Authenticate()
 # ee.Initialize(project='rice-mapping-472904')
@@ -581,7 +582,8 @@ elif page == "Rice Mapping":
             with col1:
                 st.subheader("Time Series Analysis")
                 st.info("Use a limited date range (e.g., one season) for faster processing.")
-                aoi_option = st.selectbox("Select AOI", ["Walawa Irrigation Scheme"], key="aoi_ts")
+                aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_ts")
+                st.session_state["aoi"] = aoi_option
                 start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"), key="start_ts")
                 end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"), key="end_ts")
                 run_ts = st.button("Run Time Series Analysis")
@@ -616,9 +618,10 @@ elif page == "Rice Mapping":
 
             with col2:
                 params = {
-                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "aoi": st.session_state.get("aoi"),
                     "run_outlier": run_outlier
                 }
+
                 if run_outlier:
                     analysis.run_outlier(params)
                 elif "outlier_boxplot" in st.session_state:
@@ -640,7 +643,7 @@ elif page == "Rice Mapping":
 
             with col2:
                 params = {
-                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "aoi": st.session_state.get("aoi"),
                     "start_date": st.session_state.get("start_date", "2021-12-01"),
                     "end_date": st.session_state.get("end_date", "2022-05-31"),
                     "season_dates": {
@@ -669,7 +672,7 @@ elif page == "Rice Mapping":
 
             with col2:
                 params = {
-                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "aoi": st.session_state.get("aoi"),
                     "run_stats": run_stats
                 }
                 if run_stats:
