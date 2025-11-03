@@ -44,7 +44,13 @@ def _get_sri_lanka_geometry() -> ee.Geometry:
 
 # ---------- Rainfall (GPM IMERG V07) ----------
 def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
-    """Aggregate GPM rainfall over time using Sum, Mean, or Median."""
+    """Aggregate GPM rainfall over time.
+    - Sum: total rainfall (all 30-min values)
+    - Mean: average of daily mean rainfall
+    - Median: median of daily mean rainfall
+    """
+
+    # Load the 30-minute IMERG data
     ic = (
         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
         .filterDate(ee.Date(start_date), ee.Date(end_date))
@@ -52,13 +58,45 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
     )
 
     method = temporal_method.lower()
+
+    # Group images by day → compute daily mean
+    def daily_mean(date):
+        date = ee.Date(date)
+        daily_ic = ic.filterDate(date, date.advance(1, "day"))
+        return daily_ic.mean().set("system:time_start", date.millis())
+
+    # Generate a list of daily mean images
+    daily_means = ee.ImageCollection.fromImages(
+        ee.List.sequence(0, ee.Date(end_date).difference(ee.Date(start_date), "day").subtract(1))
+        .map(lambda d: daily_mean(ee.Date(start_date).advance(d, "day")))
+    )
+
+    # Aggregate based on user selection
     if method == "mean":
-        img = ic.mean()
+        img = daily_means.mean()  # mean of daily means
     elif method == "median":
-        img = ic.median()
+        img = daily_means.median()  # median of daily means
     else:
-        img = ic.sum()  # default (total rainfall)
+        img = ic.sum()  # total rainfall
+
     return img
+
+# def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
+#     """Aggregate GPM rainfall over time using Sum, Mean, or Median."""
+#     ic = (
+#         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
+#         .filterDate(ee.Date(start_date), ee.Date(end_date))
+#         .select("precipitation")
+#     )
+
+#     method = temporal_method.lower()
+#     if method == "mean":
+#         img = ic.mean()
+#     elif method == "median":
+#         img = ic.median()
+#     else:
+#         img = ic.sum()  # default (total rainfall)
+#     return img
 
 # ---------- ESA/WorldCover (LULC) ----------
 def _worldcover_2021():
