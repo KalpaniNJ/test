@@ -361,14 +361,21 @@ div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
 
 st.markdown("""
 <style>
-/* Only affect indented (sub) buttons */
-div[data-testid="stSidebar"] div.stButton:nth-child(n+3) > button {
-    background-color: #f1f3f4 !important; /* Light gray background */
-    color: #333 !important;
+/* Give all sidebar buttons a soft light-blue background */
+div[data-testid="stSidebar"] div.stButton > button {
+    background-color: #e9f5ff !important;  /* light blue */
+    color: #003366 !important;             /* dark text */
+    border: 1px solid #b3d9ff !important;  /* soft border */
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-in-out;
 }
-div[data-testid="stSidebar"] div.stButton:nth-child(n+3) > button:hover {
-    background-color: #0d6efd !important;
+
+/* Hover effect */
+div[data-testid="stSidebar"] div.stButton > button:hover {
+    background-color: #0d6efd !important;  /* IWMI blue */
     color: white !important;
+    border-color: #0d6efd !important;
 }
 </style>
 """, unsafe_allow_html=True)
