@@ -685,6 +685,7 @@ elif page == "Rice Mapping":
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
 
+    # --- seasonal monitoring module ---
     elif subpage == "Seasonal Monitoring":
         st.markdown("### Seasonal Monitoring")
         st.markdown("""
@@ -704,9 +705,7 @@ elif page == "Rice Mapping":
             "run_monitor": st.session_state.get("run_monitor", False)
         }
 
-        # --- Call monitoring module ---
         monitoring.show(params)
-
 
     elif subpage == "Compare Seasons":
         st.markdown("""
