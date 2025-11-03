@@ -76,24 +76,6 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
 
     return img
 
-
-# def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
-#     """Aggregate GPM rainfall over time using Sum, Mean, or Median."""
-#     ic = (
-#         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
-#         .filterDate(ee.Date(start_date), ee.Date(end_date))
-#         .select("precipitation")
-#     )
-
-#     method = temporal_method.lower()
-#     if method == "mean":
-#         img = ic.mean()
-#     elif method == "median":
-#         img = ic.median()
-#     else:
-#         img = ic.sum()  # default (total rainfall)
-#     return img
-
 # ---------- ESA/WorldCover (LULC) ----------
 def _worldcover_2021():
     return ee.ImageCollection("ESA/WorldCover/v200").first().select("Map").clip(_get_sri_lanka_geometry())
@@ -194,26 +176,42 @@ def show(params: dict):
         with st.spinner(
             f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
         ):
-    
-            # Rainfall aggregation
+            # Compute rainfall image
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
-            rain_vis = {
-                "min": 0,
-                "max": 500,
-                "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
-            }
-    
-            Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
-    
-            # Colorbar legend
+        
+            # ----- Dynamic visualization setup -----
+            palette = [
+                "#000096", "#0064ff", "#00b4ff", "#33db80", "#9beb4a",
+                "#ffeb00", "#ffb300", "#ff6400", "#eb1e00", "#af0000"
+            ]
+        
+            method_lower = temporal_method.lower()
+        
+            if method_lower == "sum":
+                vis_params = {"min": 0, "max": 200, "palette": palette}
+                legend_label = "Total Rainfall (mm)"
+            elif method_lower == "mean":
+                vis_params = {"min": 0, "max": 15, "palette": palette}
+                legend_label = "Mean Rainfall Rate (mm/hr)"
+            elif method_lower == "max":
+                vis_params = {"min": 0, "max": 15, "palette": palette}
+                legend_label = "Maximum Rainfall Rate (mm/hr)"
+            else:
+                vis_params = {"min": 0, "max": 100, "palette": palette}
+                legend_label = "Rainfall (mm)"
+        
+            # Add layer to map
+            Map.addLayer(rain_img, vis_params, f"GPM Rainfall ({temporal_method})")
+        
+            # Add colorbar with dynamic label
             Map.add_colorbar(
-                vis_params=rain_vis,
-                label=f"GPM Rainfall ({temporal_method}) [mm]",
+                vis_params=vis_params,
+                label=legend_label,
                 layer_name=f"GPM Rainfall ({temporal_method})",
                 font_size=16,
                 label_font_size=18
             )
-    
+
     # ---- Final map ----
     Map.addLayerControl()
     Map.to_streamlit()
