@@ -290,11 +290,20 @@ div.stButton > button[kind="primary"] {
 </style>
 """, unsafe_allow_html=True)
 
+# --- Sidebar Styling ---
+st.sidebar.markdown("""
+<style>
+/* your existing button styles here */
+...
+</style>
+""", unsafe_allow_html=True)
+
+# --- Add clean subtab style fix below ---
 st.sidebar.markdown("""
 <style>
 /* --- CLEAN FIX for Streamlit Markdown styling --- */
 .stMarkdown a.subtab {
-    all: unset !important;                  /* remove Streamlit markdown link defaults */
+    all: unset !important;
     display: block !important;
     background: #f9fafb;
     border: 1px solid #e0e0e0;
