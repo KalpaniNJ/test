@@ -2,11 +2,46 @@ import streamlit as st
 import ee
 import geemap.foliumap as geemap
 import pandas as pd
+from utils import gee_helpers, rice_algorithms
 from utils.config import AOI_OPTIONS
+from modules.analysis import _get_aoi  # reuse your helper
 
-# --- HELPER: Get SAR stack image ---
-def get_sar_stack(aoi, start_date, season_start, peak_date, end_date):
-    """Generate a 3-band VV SAR stack (pre, mid, post season)."""
+
+# --- Helper: Generate Paddy Map (with outlier detection) ---
+def generate_paddy_map(aoi, start_date, end_date, season_dates):
+    """Run outlier detection + rice mapping to produce final paddy map."""
+    # Time-series extraction for AOI points
+    df_line, df_points = gee_helpers.get_time_series(
+        aoi=aoi,
+        start_date=start_date,
+        end_date=end_date
+    )
+
+    # Outlier detection (get thresholds, no plots)
+    outlier_params = rice_algorithms.detect_outliers(df_points, season_dates)
+
+    # Mosaic generation
+    mosaicCollectionUInt16, filteredDekadList = gee_helpers.get_mosaic_collection(
+        aoi=aoi,
+        start_date=start_date,
+        end_date=end_date
+    )
+
+    # Perform rice mapping
+    maskedPaddyClassification, _, _, _ = rice_algorithms.perform_rice_mapping(
+        aoi=aoi,
+        mosaicCollectionUInt16=mosaicCollectionUInt16,
+        filteredDekadList=filteredDekadList,
+        outlier_params=outlier_params,
+        dates=season_dates
+    )
+
+    return maskedPaddyClassification
+
+
+# --- Helper: Generate SAR Stack ---
+def generate_sar_stack(aoi, start_date, season_start, peak_date, end_date):
+    """Generate a 3-band VV SAR stack."""
     collectionVV = (
         ee.ImageCollection('COPERNICUS/S1_GRD')
         .filterBounds(aoi)
@@ -23,63 +58,39 @@ def get_sar_stack(aoi, start_date, season_start, peak_date, end_date):
     return im1.addBands(im2).addBands(im3)
 
 
-# --- HELPER: Create comparison map ---
-def create_comparison_map(aoi, season_row):
-    """Create map with both Paddy Map and SAR stack for a given season."""
-    st_date = season_row["start_date"]
-    s_start = season_row["season_start"]
-    s_peak = season_row["peak_date"]
-    e_date = season_row["end_date"]
-
-    # Create SAR stack
-    sar_stack = get_sar_stack(aoi, st_date, s_start, s_peak, e_date)
-
-    # Replace below with ee.Image("your/paddy/classification/asset") if available
-    paddy_map = sar_stack.select(0).gt(-15).rename("paddy_map")
-  
-    Map = geemap.Map(add_google_map=False)
-    Map.add_basemap("SATELLITE")
-    Map.addLayer(sar_stack, {"min": -25, "max": 0}, "SAR VV Stack")
-    Map.addLayer(paddy_map, {"min": 0, "max": 1, "palette": ["red", "green"]}, "Paddy Map", False)
-    Map.addLayerControl()
-    return Map
-
-
-# ---------- MAIN FUNCTION ----------
+# --- Main Function ---
 def show(params):
     st.markdown("""
     <div style="background-color:#fff8e6; border-left:6px solid #f7c948;
     padding:20px; border-radius:8px; margin-top:20px;">
-    <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
+    <h3 style="color:#b58900;">Compare Seasons</h3>
     <p style="color:#555; font-size:16px;">
-    Compare seasonal mRVI patterns, paddy extent, and crop dynamics side-by-side.
-    Select two seasons from the list to visualize their SAR stacks and paddy maps.
+    Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series.
+    Each map is generated with automatic outlier detection and thresholding.
     </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- Load season info CSV ---
+    # Load season CSV
     season_df = pd.read_csv("data/season_dates.csv", parse_dates=[
         "start_date", "season_start", "peak_date", "harvest_date", "end_date"
     ])
 
+    # Season selection
     col1, col2 = st.columns(2)
-
     with col1:
         season_left = st.selectbox(
             "Select Left Season",
-            [f"{row.year} {row.season}" for _, row in season_df.iterrows()],
+            [f"{r.year} {r.season}" for _, r in season_df.iterrows()],
             key="season_left"
         )
-
     with col2:
         season_right = st.selectbox(
             "Select Right Season",
-            [f"{row.year} {row.season}" for _, row in season_df.iterrows()],
+            [f"{r.year} {r.season}" for _, r in season_df.iterrows()],
             key="season_right"
         )
 
-    # Get selected season data
     left_row = season_df.loc[
         (season_df["year"].astype(str) + " " + season_df["season"]) == season_left
     ].iloc[0]
@@ -87,24 +98,73 @@ def show(params):
         (season_df["year"].astype(str) + " " + season_df["season"]) == season_right
     ].iloc[0]
 
-    # Select AOI
+    # AOI selection
     aoi_name = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
     aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
 
-    # Generate maps
-    Map_left = create_comparison_map(aoi, left_row)
-    Map_right = create_comparison_map(aoi, right_row)
+    if st.button("Run Comparison"):
+        with st.spinner("Generating paddy maps for both seasons..."):
 
-    # Split Panel
-    split_map = geemap.SplitMapControl(
-        left_layer=Map_left.layers[1],
-        right_layer=Map_right.layers[1],
-        left_label=season_left,
-        right_label=season_right
-    )
+            # Define date sets
+            left_dates = {
+                "start": str(left_row["season_start"]),
+                "peak": str(left_row["peak_date"]),
+                "harvest": str(left_row["harvest_date"])
+            }
+            right_dates = {
+                "start": str(right_row["season_start"]),
+                "peak": str(right_row["peak_date"]),
+                "harvest": str(right_row["harvest_date"])
+            }
 
-    # Display map
-    st.markdown("### Split View: SAR & Paddy Maps Comparison")
-    Map = geemap.Map(center=[7.8, 80.7], zoom=10)
-    Map.add(split_map)
-    Map.to_streamlit(height=600)
+            # Generate Paddy Maps (with outlier analysis)
+            paddy_left = generate_paddy_map(
+                aoi,
+                str(left_row["start_date"]),
+                str(left_row["end_date"]),
+                left_dates
+            )
+            paddy_right = generate_paddy_map(
+                aoi,
+                str(right_row["start_date"]),
+                str(right_row["end_date"]),
+                right_dates
+            )
+
+            # Generate SAR Stacks
+            sar_left = generate_sar_stack(
+                aoi,
+                str(left_row["start_date"]),
+                str(left_row["season_start"]),
+                str(left_row["peak_date"]),
+                str(left_row["end_date"])
+            )
+            sar_right = generate_sar_stack(
+                aoi,
+                str(right_row["start_date"]),
+                str(right_row["season_start"]),
+                str(right_row["peak_date"]),
+                str(right_row["end_date"])
+            )
+
+            # Visualization setup
+            aoi_center = aoi.centroid().coordinates().getInfo()
+            Map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=12)
+            Map.add_basemap("SATELLITE")
+
+            # Visualize layers
+            left_layer = paddy_left.visualize(min=0, max=1, palette=["red", "green"]) \
+                .blend(sar_left.visualize(min=-25, max=0))
+            right_layer = paddy_right.visualize(min=0, max=1, palette=["red", "green"]) \
+                .blend(sar_right.visualize(min=-25, max=0))
+
+            # Split map control
+            split_control = geemap.SplitMapControl(
+                left_layer=left_layer,
+                right_layer=right_layer,
+                left_label=season_left,
+                right_label=season_right
+            )
+
+            Map.add(split_control)
+            Map.to_streamlit(height=600)
