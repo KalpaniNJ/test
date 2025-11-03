@@ -239,8 +239,9 @@ st.sidebar.markdown("""
 <style>
 /* Main and Sub-tab Buttons */
 div.stButton > button:first-child {
-    text-align: left !important;
-    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important; 
     padding: 10px 14px !important;
     border-radius: 8px !important;
     border: 1px solid #ddd !important;
