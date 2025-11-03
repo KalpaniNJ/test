@@ -294,7 +294,7 @@ div.stButton > button[kind="primary"] {
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
         # Right-aligned arrow
-        arrow = "›" if not st.session_state["rice_expanded"] else "⌄"
+        arrow = "›" if not st.session_state["rice_expanded"] else "∧"
         button_label = f"{label} {arrow}"
 
         # Create a horizontal layout: label left, arrow right
