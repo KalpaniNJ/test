@@ -132,7 +132,7 @@ def plot_statistics(month_stats, mmdd_stats, season_start=10):
     ax_1.bar(df_month["Month_Name"], df_month["Area_ha"], color="skyblue")
     ax_1.set_xlabel("Month")
     ax_1.set_ylabel("Area (ha)")
-    ax_1.set_title("Paddy Area by Month (Seasonal Order)")
+    ax_1.set_title("Paddy Area by Month")
     plt.xticks(rotation=45)
     st.session_state[f"stats_bar_month"] = fig_1
 
@@ -141,7 +141,7 @@ def plot_statistics(month_stats, mmdd_stats, season_start=10):
     ax_2.bar(df_mmdd["Month_Day"], df_mmdd["Area_ha"], color="lightgreen")
     ax_2.set_xlabel("Start Date (MM-DD)")
     ax_2.set_ylabel("Area (ha)")
-    ax_2.set_title("Paddy Area by Start Date (Seasonal Order)")
+    ax_2.set_title("Paddy Area by Start Date (MM-DD)")
     plt.xticks(rotation=90)
     st.session_state[f"stats_bar_day"] = fig_2
 
@@ -159,7 +159,7 @@ def plot_statistics(month_stats, mmdd_stats, season_start=10):
         wedges, df_month["Month_Name"], title="Start Month",
         loc="center left", bbox_to_anchor=(1, 0, 0.5, 1)
     )
-    ax_3.set_title("Paddy Area % by Month (Seasonal Order)")
+    ax_3.set_title("Paddy Area % by Month")
     st.session_state[f"stats_pie_month"] = fig_3
 
     # --- Plot 4: Pie chart by MMDD
@@ -181,7 +181,7 @@ def plot_statistics(month_stats, mmdd_stats, season_start=10):
         wedges, labels, title="Start Date (MM-DD)",
         loc="center left", bbox_to_anchor=(1, 0, 0.5, 1)
     )
-    ax_4.set_title("Paddy Area % by Start Date (Seasonal Order)", fontsize=14)
+    ax_4.set_title("Paddy Area % by Start Date (MM-DD)", fontsize=14)
     st.session_state[f"stats_pie_day"] = fig_4
 
     # --- Month-level Bar + Cumulative Line ---
