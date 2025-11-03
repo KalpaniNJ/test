@@ -255,7 +255,7 @@ if page == "Rainfall Distribution":
     data_dir = os.path.join(os.path.dirname(__file__), "data")
 
     # --- Create two columns: left for controls, right for map ---
-    col1, col2 = st.columns([0.9, 1.3])
+    col1, col2 = st.columns([0.6, 1.3])
     
     with col1:
         st.markdown("### 🌧️ Rainfall Distribution")
