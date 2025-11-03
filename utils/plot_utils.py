@@ -14,7 +14,7 @@ def plot_time_series(df_line, show=True):
     Plot time series of mRVI values for each point and the mean across points.
     Returns the matplotlib figure object.
     """
-    st.subheader("Time Series of Mean mRVI at Sample Points")
+    # st.subheader("Time Series of Mean mRVI at Sample Points")
     
     if df_line is None or df_line.empty:
         st.warning("No data available for time series plot.")
@@ -52,7 +52,7 @@ def plot_point_series(df_points, show=True):
     Plot mRVI values per individual point over time.
     Returns the matplotlib figure object.
     """
-    st.subheader("Time Series of mRVI at Sample Points")
+    # st.subheader("Time Series of mRVI at Sample Points")
 
     if df_points is None or df_points.empty:
         st.warning("No data available for point-wise plot.")
