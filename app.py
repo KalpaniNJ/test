@@ -290,6 +290,67 @@ div.stButton > button[kind="primary"] {
 </style>
 """, unsafe_allow_html=True)
 
+st.sidebar.markdown("""
+<style>
+/* --- CLEAN FIX for Streamlit Markdown styling --- */
+.stMarkdown a.subtab {
+    all: unset !important;                  /* remove Streamlit markdown link defaults */
+    display: block !important;
+    background: #f9fafb;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin: 4px 0 4px 1.4rem;
+    padding: 8px 12px;
+    color: #444 !important;
+    font-size: 14px !important;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* Hover effect */
+.stMarkdown a.subtab:hover {
+    background-color: #e7f1ff;
+    color: #0d6efd !important;
+    border-color: #0d6efd;
+    transform: translateX(3px);
+}
+
+/* Active state */
+.stMarkdown a.subtab.active {
+    background-color: #0d6efd;
+    color: white !important;
+    border-color: #0d6efd;
+    box-shadow: 0 2px 6px rgba(13,110,253,0.25);
+    font-weight: 600;
+}
+
+/* Left accent bar for active item */
+.stMarkdown a.subtab.active::before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 8px;
+    width: 4px;
+    height: calc(100% - 16px);
+    background-color: #0d6efd;
+    border-radius: 2px;
+}
+
+/* Remove the copy icon Streamlit adds */
+[data-testid="stMarkdownContainer"] a[href]:after {
+    display: none !important;
+}
+
+/* Prevent unwanted text selection highlight */
+.stMarkdown a.subtab:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
