@@ -576,7 +576,7 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
-        <hr style="border:0.5px solid #ccc; margin-top:40px; margin-bottom:10px;">
+        st.markdown("<hr style='border:0.5px solid #ccc; margin-top:40px; margin-bottom:10px;'>", unsafe_allow_html=True)
 
         # TIME SERIES ANALYSIS
         if step == "Time Series Analysis":
