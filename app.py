@@ -556,53 +556,55 @@ elif page == "Weather Forecast":
 elif page == "Rice Mapping":
     # Read selected subtab (default: Seasonal Analysis)
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
+    col1, col2 = st.columns([0.4, 1.3])
 
     # SEASONAL ANALYSIS
     if subpage == "Seasonal Analysis":
-        with st.sidebar.expander("Time Series Analysis"):
-            st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
-
-            aoi_option = st.selectbox(
-                "Select AOI",
-                ["Walawa Irrigation Scheme"],
-                key="aoi_select_tab1",
-            )
-
-            start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-            end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
-            run_ts = st.button("Run Time Series Analysis")
-
-        with st.sidebar.expander("Outlier Analysis"):
-            st.info("Perform Time Series analysis before Outlier analysis.")
-            run_outlier = st.button("Run Outlier Analysis")
-
-        with st.sidebar.expander("Rice Mapping"):
-            st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
-            season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
-            peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
-            harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
-            run_paddy = st.button("Run Paddy Season Analysis")
-
-        with st.sidebar.expander("Statistical Analysis"):
-            st.info("Calculate total paddy area, area by month, and area by start date.")
-            run_stats = st.button("Run Statistical Analysis")
-
-        params = {
-            "aoi": aoi_option,
-            "start_date": str(start_date),
-            "end_date": str(end_date),
-            "run_ts": run_ts,
-            "run_outlier": run_outlier,
-            "run_paddy": run_paddy,
-            "run_stats": run_stats,
-            "season_dates": {
-                "start": str(season_start_date),
-                "peak": str(peak_date),
-                "harvest": str(harvest_date),
-            },
-        }
-
-        analysis.show(params)
+        with col1:
+            with st.sidebar.expander("Time Series Analysis"):
+                st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
+    
+                aoi_option = st.selectbox(
+                    "Select AOI",
+                    ["Walawa Irrigation Scheme"],
+                    key="aoi_select_tab1",
+                )
+    
+                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
+                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
+                run_ts = st.button("Run Time Series Analysis")
+    
+            with st.sidebar.expander("Outlier Analysis"):
+                st.info("Perform Time Series analysis before Outlier analysis.")
+                run_outlier = st.button("Run Outlier Analysis")
+    
+            with st.sidebar.expander("Rice Mapping"):
+                st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
+                season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
+                peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
+                harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
+                run_paddy = st.button("Run Paddy Season Analysis")
+    
+            with st.sidebar.expander("Statistical Analysis"):
+                st.info("Calculate total paddy area, area by month, and area by start date.")
+                run_stats = st.button("Run Statistical Analysis")
+    
+            params = {
+                "aoi": aoi_option,
+                "start_date": str(start_date),
+                "end_date": str(end_date),
+                "run_ts": run_ts,
+                "run_outlier": run_outlier,
+                "run_paddy": run_paddy,
+                "run_stats": run_stats,
+                "season_dates": {
+                    "start": str(season_start_date),
+                    "peak": str(peak_date),
+                    "harvest": str(harvest_date),
+                },
+            }
+        with col2:
+            analysis.show(params)
 
     # SEASONAL MONITORING
     elif subpage == "Seasonal Monitoring":
