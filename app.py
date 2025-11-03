@@ -575,9 +575,7 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
-        # ============================
-        # 1️⃣ TIME SERIES ANALYSIS
-        # ============================
+        # TIME SERIES ANALYSIS
         if step == "Time Series Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -600,19 +598,15 @@ elif page == "Rice Mapping":
                     "end_date": str(end_date),
                     "run_ts": run_ts
                 }
-                # ✅ Only run heavy computation if button clicked
                 if run_ts:
                     analysis.run_time_series(params)
-                # ✅ Otherwise, just re-display stored results if available
                 elif "ts_df_line" in st.session_state:
                     analysis.run_time_series({"aoi": aoi_option})
                 else:
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
 
-        # ============================
-        # 2️⃣ OUTLIER ANALYSIS
-        # ============================
+        # OUTLIER ANALYSIS
         elif step == "Outlier Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -633,9 +627,7 @@ elif page == "Rice Mapping":
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
 
-        # ============================
-        # 3️⃣ RICE MAPPING
-        # ============================
+        # RICE MAPPING
         elif step == "Rice Mapping":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -667,9 +659,7 @@ elif page == "Rice Mapping":
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
 
-        # ============================
-        # 4️⃣ STATISTICAL ANALYSIS
-        # ============================
+        # STATISTICAL ANALYSIS
         elif step == "Statistical Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
