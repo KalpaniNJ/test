@@ -278,7 +278,7 @@ if page == "Rainfall Distribution":
             basin_names = sorted(basins["WSHD_NAME"].unique())
             selected_aoi = st.selectbox("Select Basin", basin_names)
 
-        temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
+        temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Max"], horizontal=True)
 
         wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
         wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
