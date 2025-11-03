@@ -550,104 +550,121 @@ elif page == "Weather Forecast":
     """, unsafe_allow_html=True)
 
 
-# ==============================
-# PADDY MAPPING MODULE
-# ==============================
 elif page == "Rice Mapping":
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
 
-    # SEASONAL ANALYSIS
-    if subpage == "Seasonal Analysis":
-        st.markdown("## 🌾 Seasonal Analysis")
-        st.markdown("""
-        <p style="color:#444; font-size:16px;">
-            Analyze rice growth over time using <b>mean mRVI</b> at sample points.
-            Select the analysis step below to view its controls and outputs.
-        </p>
-        """, unsafe_allow_html=True)
+    st.markdown("## 🌾 Seasonal Analysis")
+    st.markdown("""
+    <p style="color:#444; font-size:16px;">
+        Step through the workflow to analyze rice growth patterns using <b>Sentinel-1 mRVI</b>.
+    </p>
+    """, unsafe_allow_html=True)
 
-        step = st.radio(
-            "Select Analysis Step:",
-            ["Time Series Analysis", "Outlier Analysis", "Rice Mapping", "Statistical Analysis"],
-            horizontal=True,
-            key="seasonal_step",
-        )
+    # Step selector
+    step = st.radio(
+        "Select Analysis Step:",
+        ["Time Series Analysis", "Outlier Analysis", "Rice Mapping", "Statistical Analysis"],
+        horizontal=True,
+        key="seasonal_step",
+    )
 
-        col1, col2 = st.columns([0.4, 1.3])
+    col1, col2 = st.columns([0.4, 1.3])
 
-        # TIME SERIES
-        if step == "Time Series Analysis":
-            with col1:
-                st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
-                aoi_option = st.selectbox(
-                    "Select AOI",
-                    ["Walawa Irrigation Scheme"],
-                    key="aoi_select_tab1",
+    # -------------------------
+    # 1️⃣ TIME SERIES ANALYSIS
+    # -------------------------
+    if step == "Time Series Analysis":
+        with col1:
+            st.info("Use a limited date range (e.g., one season) for faster processing.")
+            aoi_option = st.selectbox("Select AOI", ["Walawa Irrigation Scheme"])
+            start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
+            end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
+            run_ts = st.button("Run Time Series Analysis")
+
+            params = {
+                "aoi": aoi_option,
+                "start_date": str(start_date),
+                "end_date": str(end_date),
+                "run_ts": run_ts,
+            }
+
+        with col2:
+            if run_ts:
+                analysis.show(params)
+            else:
+                st.markdown(
+                    "<div style='background-color:#f1f1f1; color:#555; text-align:center; "
+                    "padding:10px; border-radius:6px;'>🕒 Results will appear here after running the analysis.</div>",
+                    unsafe_allow_html=True,
                 )
-                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
-                run_ts = st.button("Run Time Series Analysis")
 
-                params = {
-                    "aoi": aoi_option,
-                    "start_date": str(start_date),
-                    "end_date": str(end_date),
-                    "run_ts": run_ts,
-                }
+    # -------------------------
+    # 2️⃣ OUTLIER ANALYSIS
+    # -------------------------
+    elif step == "Outlier Analysis":
+        with col1:
+            st.info("Detect and visualize potential outliers in mRVI values.")
+            run_outlier = st.button("Run Outlier Analysis")
+            params = {"run_outlier": run_outlier}
 
-            with col2:
-                if run_ts:
-                    analysis.show(params)
-                else:
-                    st.markdown("Results will be displayed here.")
+        with col2:
+            if run_outlier:
+                analysis.show(params)
+            else:
+                st.markdown(
+                    "<div style='background-color:#f1f1f1; color:#555; text-align:center; "
+                    "padding:10px; border-radius:6px;'>🕒 Results will appear here after running the analysis.</div>",
+                    unsafe_allow_html=True,
+                )
 
-        # OUTLIER ANALYSIS
-        elif step == "Outlier Analysis":
-            with col1:
-                st.info("Perform Time Series analysis before running this step.")
-                run_outlier = st.button("Run Outlier Analysis")
-                params = {"run_outlier": run_outlier}
+    # -------------------------
+    # 3️⃣ RICE MAPPING
+    # -------------------------
+    elif step == "Rice Mapping":
+        with col1:
+            st.info("Define season boundaries based on previous analysis.")
+            season_start_date = st.date_input("Start of Season", pd.to_datetime("2021-12-13"))
+            peak_date = st.date_input("Peak of Season", pd.to_datetime("2022-02-25"))
+            harvest_date = st.date_input("Harvest Date", pd.to_datetime("2022-04-01"))
+            run_paddy = st.button("Run Paddy Season Analysis")
 
-            with col2:
-                if run_outlier:
-                    analysis.show(params)
-                else:
-                    st.markdown("Results will be displayed here.")
+            params = {
+                "season_dates": {
+                    "start": str(season_start_date),
+                    "peak": str(peak_date),
+                    "harvest": str(harvest_date),
+                },
+                "run_paddy": run_paddy,
+            }
 
-        # RICE MAPPING
-        elif step == "Rice Mapping":
-            with col1:
-                season_start_date = st.date_input("Start of Season", pd.to_datetime("2021-12-13"))
-                peak_date = st.date_input("Peak of Season", pd.to_datetime("2022-02-25"))
-                harvest_date = st.date_input("Harvest Date", pd.to_datetime("2022-04-01"))
-                run_paddy = st.button("Run Paddy Season Analysis")
-                params = {
-                    "season_dates": {
-                        "start": str(season_start_date),
-                        "peak": str(peak_date),
-                        "harvest": str(harvest_date),
-                    },
-                    "run_paddy": run_paddy,
-                }
+        with col2:
+            if run_paddy:
+                analysis.show(params)
+            else:
+                st.markdown(
+                    "<div style='background-color:#f1f1f1; color:#555; text-align:center; "
+                    "padding:10px; border-radius:6px;'>🕒 Results will appear here after running the analysis.</div>",
+                    unsafe_allow_html=True,
+                )
 
-            with col2:
-                if run_paddy:
-                    analysis.show(params)
-                else:
-                    st.markdown("Results will be displayed here.")
+    # -------------------------
+    # 4️⃣ STATISTICAL ANALYSIS
+    # -------------------------
+    elif step == "Statistical Analysis":
+        with col1:
+            st.info("Calculate paddy extent and seasonal distribution metrics.")
+            run_stats = st.button("Run Statistical Analysis")
+            params = {"run_stats": run_stats}
 
-        # STATISTICAL ANALYSIS
-        elif step == "Statistical Analysis":
-            with col1:
-                st.info("Calculate total paddy area, area by month, and start-date-based classification.")
-                run_stats = st.button("Run Statistical Analysis")
-                params = {"run_stats": run_stats}
-
-            with col2:
-                if run_stats:
-                    analysis.show(params)
-                else:
-                    st.markdown("Results will be displayed here.")
+        with col2:
+            if run_stats:
+                analysis.show(params)
+            else:
+                st.markdown(
+                    "<div style='background-color:#f1f1f1; color:#555; text-align:center; "
+                    "padding:10px; border-radius:6px;'>🕒 Results will appear here after running the analysis.</div>",
+                    unsafe_allow_html=True,
+                )
 
 
 
