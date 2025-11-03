@@ -219,7 +219,7 @@ tabs = {
     "Water Productivity": "💧 Water Productivity"
 }
 
-# Sub-tabs for Rice Mapping (⚙️ added to Data & Methods)
+# Sub-tabs for Rice Mapping
 rice_subtabs = {
     "Seasonal Analysis": "📈 Seasonal Analysis",
     "Seasonal Monitoring": "🌾 Seasonal Monitoring",
@@ -420,47 +420,6 @@ page = st.session_state["active_page"]
 subpage = st.session_state.get("active_subtab", None)
 
 
-# # --- Render main sidebar tabs ---
-# for tab_key, label in tabs.items():
-#     if tab_key == "Rice Mapping":
-#         # Right-aligned arrow
-#         arrow = "›" if not st.session_state["rice_expanded"] else " "
-#         button_label = f"{label} {arrow}"
-
-#         # Create a horizontal layout: label left, arrow right
-#         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
-#             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
-#             st.session_state["active_page"] = tab_key
-#             st.rerun()
-
-#         # Show subtabs if expanded
-#         if st.session_state["rice_expanded"]:
-#             for sub_key, sub_label in rice_subtabs.items():
-#                 sub_active = (
-#                     st.session_state["active_page"] == "Rice Mapping"
-#                     and st.session_state["active_subtab"] == sub_key
-#                 )
-
-#                 # Add indentation
-#                 sub_button_label = f"    {sub_label}"
-
-#                 if st.sidebar.button(sub_button_label, key=f"subtab_{sub_key}", use_container_width=True):
-#                     st.session_state["active_page"] = "Rice Mapping"
-#                     st.session_state["active_subtab"] = sub_key
-#                     st.rerun()
-
-#     else:
-#         # Regular main tab
-#         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
-#             st.session_state["active_page"] = tab_key
-#             st.session_state["rice_expanded"] = False
-#             st.rerun()
-
-# # Assign current values
-# page = st.session_state["active_page"]
-# subpage = st.session_state["active_subtab"]
-
-
 # ==============================
 # HOME MODULE
 # ==============================
@@ -594,9 +553,6 @@ elif page == "Weather Forecast":
 # ==============================
 # PADDY MAPPING MODULE
 # ==============================
-# ==============================
-# PADDY MAPPING MODULE
-# ==============================
 elif page == "Rice Mapping":
     # Read selected subtab (default: Seasonal Analysis)
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
@@ -699,94 +655,7 @@ elif page == "Rice Mapping":
     # DATA AND METHODS
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
-
         show_readme()
-
-
-
-# elif page == "Paddy Mapping":
-#     # Select sub-section under Paddy Mapping
-#     subpage = st.sidebar.radio(
-#         "Select Subsection",
-#         ["Seasonal Analysis", "Seasonal Monitoring", "Data and Methods"],
-#         key="paddy_subpage"
-#     )
-
-#     # SEASONAL ANALYSIS CONTROLS
-#     if subpage == "Seasonal Analysis":
-#         with st.sidebar.expander("Time Series Analysis"):
-#             st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
-
-#             aoi_option = st.selectbox(
-#                 "Select AOI",
-#                 ["Walawa Irrigation Scheme"],
-#                 # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
-#                 key="aoi_select_tab1"
-#             )
-
-#             start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-#             end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
-#             run_ts = st.button("Run Time Series Analysis")
-
-#         with st.sidebar.expander("Outlier Analysis"):
-#             st.info("Perform Time Series analysis before Outlier analysis.")
-#             run_outlier = st.button("Run Outlier Analysis")
-
-#         with st.sidebar.expander("Rice Mapping"):
-#             st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
-#             season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
-#             peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
-#             harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
-#             run_paddy = st.button("Run Paddy Season Analysis")
-
-#         with st.sidebar.expander("Statistical Analysis"):
-#             st.info("Calculate total paddy area, area by month, and area by start date.")
-#             run_stats = st.button("Run Statistical Analysis")
-
-#         params = {
-#             "aoi": aoi_option,
-#             "start_date": str(start_date),
-#             "end_date": str(end_date),
-#             "run_ts": run_ts,
-#             "run_outlier": run_outlier,
-#             "run_paddy": run_paddy,
-#             "run_stats": run_stats,
-#             "season_dates": {
-#                 "start": str(season_start_date),
-#                 "peak": str(peak_date),
-#                 "harvest": str(harvest_date)
-#             }
-#         }
-#         analysis.show(params)
-
-#     # SEASONAL MONITORING CONTROLS
-#     elif subpage == "Seasonal Monitoring":
-#         with st.sidebar.expander("Monitoring"):
-#             st.info("Monitor seasonal rice growth. Select the period and run the analysis")
-
-#             aoi_option_mnt = st.selectbox(
-#                 "Select AOI",
-#                 ["Walawa Irrigation Scheme"],
-#                 # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
-#                 key="aoi_select_tab2"
-#             )
-
-#             start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
-#             end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"), key="end_tab2")
-#             run_monitor = st.button("Run Analysis")
-
-#         params = {
-#             "aoi_mnt": aoi_option_mnt,
-#             "start_date_mnt": str(start_date_mnt),
-#             "end_date_mnt": str(end_date_mnt),
-#             "run_monitor": run_monitor
-#         }
-#         monitoring.show(params)
-
-#     # ABOUT SECTION
-#     elif subpage == "Data and Methods":
-#         from utils.readme_section import show_readme
-#         show_readme()
 
 
 # ==============================
