@@ -293,8 +293,8 @@ div.stButton > button[kind="primary"] {
 # --- Sub Tabs Sidebar Styling ---
 st.sidebar.markdown("""
 <style>
-/* --- Main Tab Buttons --- */
-div.stButton > button:first-child {
+/* --- MAIN TABS --- */
+div[data-testid="stSidebar"] div.stButton > button:first-child {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -309,22 +309,24 @@ div.stButton > button:first-child {
     transition: all 0.2s ease-in-out;
     width: 100% !important;
 }
-div.stButton > button:first-child:hover {
+
+div[data-testid="stSidebar"] div.stButton > button:first-child:hover {
     background-color: #e7f1ff !important;
     color: #0d6efd !important;
     border-color: #0d6efd !important;
 }
-div.stButton > button[kind="primary"] {
+
+div[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     background-color: #0d6efd !important;
     color: white !important;
     border-color: #0d6efd !important;
 }
 
-/* --- Subtab Buttons --- */
+/* --- RICE MAPPING SUBTABS --- */
 div[data-testid="stSidebar"] div.stButton.subtab > button:first-child {
-    margin-left: 1.5rem !important;
-    background-color: #f9fafb !important;
-    border: 1px solid #e0e0e0 !important;
+    margin-left: 1.3rem !important;
+    background-color: #fafafa !important;
+    border: 1px solid #eee !important;
     border-radius: 6px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
@@ -333,21 +335,30 @@ div[data-testid="stSidebar"] div.stButton.subtab > button:first-child {
     transition: all 0.2s ease-in-out;
     width: calc(100% - 1.5rem) !important;
 }
+
 div[data-testid="stSidebar"] div.stButton.subtab > button:first-child:hover {
     background-color: #e7f1ff !important;
     color: #0d6efd !important;
     border-color: #0d6efd !important;
-    transform: translateX(3px);
+    transform: translateX(2px);
 }
+
+/* Active subtab */
 div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
     background-color: #0d6efd !important;
     color: white !important;
     border-color: #0d6efd !important;
-    box-shadow: 0 2px 6px rgba(13,110,253,0.25) !important;
+    box-shadow: 0 2px 5px rgba(13,110,253,0.25) !important;
     font-weight: 600 !important;
+}
+
+/* Remove copy/link icon completely */
+[data-testid="stMarkdownContainer"] a[href]:after {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # --- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
