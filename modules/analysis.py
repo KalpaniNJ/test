@@ -7,6 +7,7 @@ import geemap.foliumap as geemap
 from streamlit_folium import folium_static
 
 
+
 def run_time_series(params):
     aoi_name = params["aoi"]
     aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
