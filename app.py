@@ -311,9 +311,22 @@ if page == "Rainfall Distribution":
             }
 
     with col2:
-        if run_forecast:
+        # --- Always show base map ---
+        base_params = {
+            "analysis_type": analysis_type,
+            "district": selected_aoi if analysis_type == "Administrative" else None,
+            "basin": selected_aoi if analysis_type == "Hydrological" else None,
+            "temporal_method": temporal_method,
+            "start_date": start_str,
+            "end_date": end_str,
+            "run_forecast": False,
+        }
+
+        if not run_forecast:
+            rainfall.show(base_params)
+        else:
             rainfall.show(params)
-            
+
 
 # ==============================
 # WEATHER FORECAST MODULE
