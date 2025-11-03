@@ -143,7 +143,7 @@ import pandas as pd
 import json
 from shapely.geometry import mapping
 sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
-from modules import analysis, monitoring, rainfall, weather_forecast, water_productivity
+from modules import analysis, monitoring, rainfall, weather_forecast, water_productivity, compare
 from utils.readme_section import show_readme
 from utils.other_gee_layers import (get_worldcover, get_dem, get_roads_layer, get_rivers_layer, get_surface_water_layer, get_admin_layer)
 from streamlit_option_menu import option_menu
@@ -708,13 +708,7 @@ elif page == "Rice Mapping":
         monitoring.show(params)
 
     elif subpage == "Compare Seasons":
-        st.markdown("""
-        <div style="background-color:#fff8e6; border-left:6px solid #f7c948;
-        padding:20px; border-radius:8px; margin-top:20px;">
-        <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
-        <p style="color:#555; font-size:16px;">Compare seasonal mRVI patterns, paddy extent, and crop dynamics.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        compare.show(params)
 
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
