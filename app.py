@@ -279,7 +279,7 @@ div.stButton > button[kind="primary"] {
 </style>
 """, unsafe_allow_html=True)
 
---- Render main sidebar tabs ---
+#--- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
         # Expand/collapse toggle for Rice Mapping
