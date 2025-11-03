@@ -330,12 +330,10 @@ if page == "Rainfall Distribution":
                 "run_forecast": run_forecast,
             }
 
-     with col2:
+    with col2:
         if run_forecast:
             rainfall.show(params)
-
-
-
+            
 
 # ==============================
 # WEATHER FORECAST MODULE
