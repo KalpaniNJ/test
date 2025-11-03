@@ -667,41 +667,34 @@ elif page == "Weather Forecast":
 
 
 
-# ==============================
-# RICE MAPPING MODULE
-# ==============================
 elif page == "Rice Mapping":
-    # Get current subtab
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
-
-    # --- PAGE TITLE AND SUB-SECTION TABS ---
-    st.markdown(f"## {subpage}")
-
-    # Optional: mini tabs across top of page (for step indicators)
-    st.markdown("""
-        <div style='margin-top:-10px; margin-bottom:20px;'>
-            <span style='background:#e7f1ff; color:#0d6efd; padding:4px 8px; border-radius:4px; font-weight:500;'>1️⃣ Time Series Analysis</span>
-            <span style='background:#e7f1ff; color:#0d6efd; padding:4px 8px; border-radius:4px; font-weight:500; margin-left:5px;'>2️⃣ Outlier Analysis</span>
-            <span style='background:#e7f1ff; color:#0d6efd; padding:4px 8px; border-radius:4px; font-weight:500; margin-left:5px;'>3️⃣ Rice Mapping</span>
-            <span style='background:#e7f1ff; color:#0d6efd; padding:4px 8px; border-radius:4px; font-weight:500; margin-left:5px;'>4️⃣ Statistical Analysis</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(
-        "Analyze rice growth over time using <b>mean mRVI</b> at sample points. Select an AOI and date range to generate the time series chart.",
-        unsafe_allow_html=True
-    )
-
-    # --- CREATE TWO MAIN COLUMNS ---
-    col1, col2 = st.columns([0.4, 1.3])
 
     # ==============================
     # SEASONAL ANALYSIS
     # ==============================
     if subpage == "Seasonal Analysis":
-        with col1:
-            with st.expander("Time Series Analysis", expanded=True):
-                st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
+        st.markdown("## 🌾 Seasonal Analysis")
+        st.markdown("""
+            <p style="color:#444; font-size:16px; text-align:justify;">
+                Analyze rice growth over time using <b>mean mRVI</b> at sample points.
+                Each step below represents a part of the rice-mapping workflow.
+            </p>
+        """, unsafe_allow_html=True)
+
+        # Create sub-tabs (1–4)
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "① Time Series Analysis",
+            "② Outlier Analysis",
+            "③ Rice Mapping",
+            "④ Statistical Analysis"
+        ])
+
+        # --- TIME SERIES ANALYSIS TAB ---
+        with tab1:
+            col1, col2 = st.columns([0.4, 1.3])
+            with col1:
+                st.markdown("### 🧭 Input Parameters")
                 aoi_option = st.selectbox(
                     "Select AOI",
                     ["Walawa Irrigation Scheme"],
@@ -710,39 +703,68 @@ elif page == "Rice Mapping":
                 start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
                 end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
                 run_ts = st.button("Run Time Series Analysis")
+                params = {
+                    "aoi": aoi_option,
+                    "start_date": str(start_date),
+                    "end_date": str(end_date),
+                    "run_ts": run_ts
+                }
 
-            with st.expander("Outlier Analysis"):
-                st.info("Perform Time Series analysis before Outlier analysis.")
+            with col2:
+                st.markdown("### 🗺️ Output: Time Series Analysis")
+                analysis.show(params)
+
+        # --- OUTLIER ANALYSIS TAB ---
+        with tab2:
+            col1, col2 = st.columns([0.4, 1.3])
+            with col1:
+                st.markdown("### 🧩 Outlier Analysis Parameters")
+                st.info("Perform Time Series Analysis before running this step.")
                 run_outlier = st.button("Run Outlier Analysis")
+                params = {"run_outlier": run_outlier}
 
-            with st.expander("Rice Mapping"):
-                st.info("Select the Start, Peak, and Harvest dates for the season.")
+            with col2:
+                st.markdown("### 🗺️ Output: Outlier Analysis")
+                if run_outlier:
+                    analysis.show(params)
+
+        # --- RICE MAPPING TAB ---
+        with tab3:
+            col1, col2 = st.columns([0.4, 1.3])
+            with col1:
+                st.markdown("### 🌾 Rice Mapping Dates")
                 season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
                 peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
                 harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
                 run_paddy = st.button("Run Paddy Season Analysis")
+                params = {
+                    "season_dates": {
+                        "start": str(season_start_date),
+                        "peak": str(peak_date),
+                        "harvest": str(harvest_date),
+                    },
+                    "run_paddy": run_paddy,
+                }
 
-            with st.expander("Statistical Analysis"):
-                st.info("Calculate total paddy area, area by month, and area by start date.")
+            with col2:
+                st.markdown("### 🗺️ Output: Rice Mapping")
+                if run_paddy:
+                    analysis.show(params)
+
+        # --- STATISTICAL ANALYSIS TAB ---
+        with tab4:
+            col1, col2 = st.columns([0.4, 1.3])
+            with col1:
+                st.markdown("### 📊 Statistical Analysis Parameters")
+                st.info("Calculate total paddy area, area by month, and start-date-based classification.")
                 run_stats = st.button("Run Statistical Analysis")
+                params = {"run_stats": run_stats}
 
-            params = {
-                "aoi": aoi_option,
-                "start_date": str(start_date),
-                "end_date": str(end_date),
-                "run_ts": run_ts,
-                "run_outlier": run_outlier,
-                "run_paddy": run_paddy,
-                "run_stats": run_stats,
-                "season_dates": {
-                    "start": str(season_start_date),
-                    "peak": str(peak_date),
-                    "harvest": str(harvest_date),
-                },
-            }
+            with col2:
+                st.markdown("### 🗺️ Output: Statistical Analysis")
+                if run_stats:
+                    analysis.show(params)
 
-        with col2:
-            analysis.show(params)
 
 
 
