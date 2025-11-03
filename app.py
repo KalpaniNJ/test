@@ -254,57 +254,63 @@ if page == "Rainfall Distribution":
     
     data_dir = os.path.join(os.path.dirname(__file__), "data")
 
-    # Sidebar options
-    with st.sidebar.expander("View Rainfall"):
+    # --- Create two columns: left for controls, right for map ---
+    col1, col2 = st.columns([1.2, 2.8])  # Adjust ratios as needed
+    
+    with col1:
+        st.markdown("### 🌧️ Rainfall Distribution Controls")
         st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
-
+    
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
-
+    
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
+    
         # --- Administrative: District only ---
         if analysis_type == "Administrative":
             districts_path = os.path.join(data_dir, "lka_dis.shp")
-
+    
             if not os.path.exists(districts_path):
                 st.error(f"District shapefile not found at: {districts_path}")
             else:
                 districts = gpd.read_file(districts_path)
                 district_names = sorted(districts["ADM2_EN"].unique())
                 selected_district = st.selectbox("Select District", district_names)
-
+    
         # --- Hydrological: Basin only ---
         else:
             basins_path = os.path.join(data_dir, "lka_basins.shp")
-
+    
             if not os.path.exists(basins_path):
                 st.error(f"Basin shapefile not found at: {basins_path}")
             else:
                 basins = gpd.read_file(basins_path)
                 basin_names = sorted(basins["WSHD_NAME"].unique())
                 selected_basin = st.selectbox("Select Basin", basin_names)
-
-        # --- Temporal settings ---
+    
         temporal_method = st.radio(
             "Temporal Aggregation",
             ["Sum", "Mean", "Median"],
             horizontal=True
         )
+    
         wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
         wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
-        run_forecast = st.button("Run Analysis")
+        run_forecast = st.button("Apply Layers")
+    
+        params = {
+            "analysis_type": analysis_type,
+            "district": selected_district if analysis_type == "Administrative" else None,
+            "basin": selected_basin if analysis_type == "Hydrological" else None,
+            "temporal_method": temporal_method,
+            "start_date": str(wea_start_date),
+            "end_date": str(wea_end_date),
+            "run_forecast": run_forecast,
+        }
+    
+    with col2:
+        st.markdown("### 🗺️ Map View")
+        rainfall.show(params)
 
-    # --- Build params for processing ---
-    params = {
-        "analysis_type": analysis_type,
-        "district": selected_district if analysis_type == "Administrative" else None,
-        "basin": selected_basin if analysis_type == "Hydrological" else None,
-        "temporal_method": temporal_method,
-        "start_date": str(wea_start_date),
-        "end_date": str(wea_end_date),
-        "run_forecast": run_forecast,
-    }
-
-    # --- Run the forecast analysis ---
-    rainfall.show(params)
 
 
 # ==============================
@@ -333,8 +339,6 @@ elif page == "Weather Forecast":
             </p>
         </div>
     """, unsafe_allow_html=True)
-
-
 
 
 # ==============================
