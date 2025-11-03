@@ -26,7 +26,6 @@ def run_time_series(params):
 
     # --- Always re-display stored results ---
     if "ts_df_line" in st.session_state and "ts_df_points" in st.session_state:
-        st.subheader("Mean mRVI Time Series")
         plot_utils.plot_time_series(st.session_state["ts_df_line"])
         plot_utils.plot_point_series(st.session_state["ts_df_points"])
     else:
@@ -46,7 +45,6 @@ def run_outlier(params):
 
     # --- Always show stored plot if available ---
     if "outlier_boxplot" in st.session_state:
-        st.subheader("mRVI Dispersion and Outlier Analysis")
         st.pyplot(st.session_state["outlier_boxplot"])
     else:
         st.markdown("<p style='color:gray;'>Results will be displayed here after analysis.</p>", unsafe_allow_html=True)
@@ -83,6 +81,7 @@ def run_rice_mapping(params):
 
             st.session_state.update({
                 "maskedPaddyClassification": maskedPaddyClassification,
+                "growingSeason": growingSeason,
                 "maskedStartMonth": maskedStartMonth,
                 "maskedStartMonthDay": maskedStartMonthDay
             })
@@ -97,13 +96,13 @@ def run_rice_mapping(params):
             Map.addLayerControl()
             st.session_state["map_SA"] = Map
 
-    # --- Always show existing map ---
     if "map_SA" in st.session_state:
         st.subheader("Rice Mapping Results")
         st.session_state["map_SA"].to_streamlit(height=600)
     else:
         st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>", unsafe_allow_html=True)
-  
+
+
 
 def run_statistics(params):
     aoi_name = params["aoi"]
