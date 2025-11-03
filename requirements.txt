@@ -12,3 +12,4 @@ leafmap==0.54.0
 geopandas==1.1.1
 rasterio==1.4.0
 PyCRS==1.0.2
+streamlit-option-menu==0.4.0
