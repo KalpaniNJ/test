@@ -181,8 +181,7 @@ def show(params: dict):
         
             # ----- Dynamic visualization setup -----
             palette = [
-                "#000096", "#0064ff", "#00b4ff", "#33db80", "#9beb4a",
-                "#ffeb00", "#ffb300", "#ff6400", "#eb1e00", "#af0000"
+                "#af0000", "#eb1e00", "#ff6400", "#ffb300", "#ffeb00", "#9beb4a", "#33db80", "#00b4ff", "#0064ff", "#000096"
             ]
         
             method_lower = temporal_method.lower()
