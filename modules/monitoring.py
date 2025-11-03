@@ -14,14 +14,6 @@ from utils.config import AOI_OPTIONS, load_assets
 
 def show(params):
     """Streamlined layout: Inputs on left, outputs on right."""
-    st.markdown("### Seasonal Monitoring")
-    st.markdown("""
-    <p style="color:#444; font-size:16px;">
-        Perform near real-time monitoring of the active rice season using Sentinel-1 mRVI time series.
-        Select your Area of Interest (AOI) and date range, then run the analysis.
-    </p>
-    """, unsafe_allow_html=True)
-
     # --- Two-column layout ---
     col1, col2 = st.columns([0.4, 1.3])
 
