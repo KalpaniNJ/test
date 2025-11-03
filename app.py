@@ -255,10 +255,10 @@ if page == "Rainfall Distribution":
     data_dir = os.path.join(os.path.dirname(__file__), "data")
 
     # --- Create two columns: left for controls, right for map ---
-    col1, col2 = st.columns([1.2, 2.8])  # Adjust ratios as needed
+    col1, col2 = st.columns([0.9, 1.3])
     
     with col1:
-        st.markdown("### 🌧️ Rainfall Distribution Controls")
+        st.markdown("### 🌧️ Rainfall Distribution")
         st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
     
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
@@ -308,7 +308,6 @@ if page == "Rainfall Distribution":
         }
     
     with col2:
-        st.markdown("### 🗺️ Map View")
         rainfall.show(params)
 
 
