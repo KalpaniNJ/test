@@ -235,27 +235,33 @@ if "active_page" not in st.session_state:
 # Sidebar styling
 st.sidebar.markdown("""
 <style>
-.sidebar-tab {
-    display: block;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
+/* General button alignment and reset */
+div.stButton > button:first-child {
+    text-align: left !important;         /* Left align text and icon */
+    justify-content: flex-start !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
     transition: all 0.2s ease-in-out;
+    width: 100% !important;
 }
-.sidebar-tab:hover {
-    background-color: #e7f1ff;
-    border-color: #0d6efd;
-    color: #0d6efd;
+
+/* Hover effect */
+div.stButton > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
 }
-.sidebar-tab.active {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+
+/* Active (selected) tab style */
+div.stButton > button[kind="primary"] {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
 }
 </style>
 """, unsafe_allow_html=True)
