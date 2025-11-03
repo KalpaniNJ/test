@@ -171,41 +171,25 @@ def show(params: dict):
             Map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
         else:
             st.warning(f"Could not find {aoi_label} in shapefile for zooming.")
-    
+
         # --- Proceed with rainfall analysis ---
         with st.spinner(
             f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
         ):
-            # Compute rainfall image
+            # Rainfall aggregation
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
+            rain_vis = {
+                "min": 0,
+                "max": 500,
+                "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
+            }
         
-            # ----- Dynamic visualization setup -----
-            palette = [
-                "#af0000", "#eb1e00", "#ff6400", "#ffb300", "#ffeb00", "#9beb4a", "#33db80", "#00b4ff", "#0064ff", "#000096"
-            ]
+            Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
         
-            method_lower = temporal_method.lower()
-        
-            if method_lower == "sum":
-                vis_params = {"min": 0, "max": 200, "palette": palette}
-                legend_label = "Total Rainfall (mm)"
-            elif method_lower == "mean":
-                vis_params = {"min": 0, "max": 15, "palette": palette}
-                legend_label = "Mean Rainfall Rate (mm/hr)"
-            elif method_lower == "max":
-                vis_params = {"min": 0, "max": 15, "palette": palette}
-                legend_label = "Maximum Rainfall Rate (mm/hr)"
-            else:
-                vis_params = {"min": 0, "max": 100, "palette": palette}
-                legend_label = "Rainfall (mm)"
-        
-            # Add layer to map
-            Map.addLayer(rain_img, vis_params, f"GPM Rainfall ({temporal_method})")
-        
-            # Add colorbar with dynamic label
+            # Colorbar legend
             Map.add_colorbar(
-                vis_params=vis_params,
-                label=legend_label,
+                vis_params=rain_vis,
+                label=f"GPM Rainfall ({temporal_method}) [mm]",
                 layer_name=f"GPM Rainfall ({temporal_method})",
                 font_size=16,
                 label_font_size=18
