@@ -556,11 +556,9 @@ elif page == "Weather Forecast":
 elif page == "Rice Mapping":
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
 
-    # ------------------------------------------
-    # 🌾 SEASONAL ANALYSIS MODULE (4-step flow)
-    # ------------------------------------------
+    # SEASONAL ANALYSIS MODULE (4-step flow)
     if subpage == "Seasonal Analysis":
-        st.markdown("## 🌾 Seasonal Analysis")
+        st.markdown("### Seasonal Analysis")
         st.markdown("""
         <p style="color:#444; font-size:16px;">
             Analyze rice growth dynamics using Sentinel-1 mRVI data.
@@ -569,7 +567,7 @@ elif page == "Rice Mapping":
         </p>
         """, unsafe_allow_html=True)
 
-        # ---- Step Selector ----
+        # ---- Step selector ----
         step = st.radio(
             "Select Analysis Step:",
             ["Time Series Analysis", "Outlier Analysis", "Rice Mapping", "Statistical Analysis"],
@@ -577,35 +575,32 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
-        # ============================
-        # 1️⃣ TIME SERIES ANALYSIS
-        # ============================
+        # TIME SERIES ANALYSIS
         if step == "Time Series Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
                 st.subheader("Time Series Analysis")
                 st.info("Use a limited date range (e.g., one season) for faster processing.")
-                aoi_option = st.selectbox("Select AOI", ["Walawa Irrigation Scheme"])
-                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
+                aoi_option = st.selectbox("Select AOI", ["Walawa Irrigation Scheme"], key="aoi_ts")
+                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"), key="start_ts")
+                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"), key="end_ts")
                 run_ts = st.button("Run Time Series Analysis")
 
-            with col2:
-                if run_ts:
-                    params = {
-                        "aoi": aoi_option,
-                        "start_date": str(start_date),
-                        "end_date": str(end_date),
-                        "run_ts": True
-                    }
-                    analysis.run_time_series(params)
-                else:
-                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
-                                unsafe_allow_html=True)
+                # Save for persistence
+                st.session_state["aoi"] = aoi_option
+                st.session_state["start_date"] = str(start_date)
+                st.session_state["end_date"] = str(end_date)
 
-        # ============================
-        # 2️⃣ OUTLIER ANALYSIS
-        # ============================
+            with col2:
+                params = {
+                    "aoi": aoi_option,
+                    "start_date": str(start_date),
+                    "end_date": str(end_date),
+                    "run_ts": run_ts
+                }
+                analysis.run_time_series(params)
+
+        # OUTLIER ANALYSIS
         elif step == "Outlier Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -614,16 +609,13 @@ elif page == "Rice Mapping":
                 run_outlier = st.button("Run Outlier Analysis")
 
             with col2:
-                if run_outlier:
-                    params = {"aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme")}
-                    analysis.run_outlier(params)
-                else:
-                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
-                                unsafe_allow_html=True)
+                params = {
+                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "run_outlier": run_outlier
+                }
+                analysis.run_outlier(params)
 
-        # ============================
-        # 3️⃣ RICE MAPPING
-        # ============================
+        # RICE MAPPING
         elif step == "Rice Mapping":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -635,26 +627,20 @@ elif page == "Rice Mapping":
                 run_paddy = st.button("Run Rice Mapping")
 
             with col2:
-                if run_paddy:
-                    params = {
-                        "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
-                        "start_date": "2021-12-01",  # optional, can be stored dynamically
-                        "end_date": "2022-05-31",
-                        "season_dates": {
-                            "start": str(season_start_date),
-                            "peak": str(peak_date),
-                            "harvest": str(harvest_date),
-                        },
-                        "run_paddy": True
-                    }
-                    analysis.run_rice_mapping(params)
-                else:
-                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
-                                unsafe_allow_html=True)
+                params = {
+                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "start_date": st.session_state.get("start_date", "2021-12-01"),
+                    "end_date": st.session_state.get("end_date", "2022-05-31"),
+                    "season_dates": {
+                        "start": str(season_start_date),
+                        "peak": str(peak_date),
+                        "harvest": str(harvest_date),
+                    },
+                    "run_paddy": run_paddy
+                }
+                analysis.run_rice_mapping(params)
 
-        # ============================
-        # 4️⃣ STATISTICAL ANALYSIS
-        # ============================
+        # STATISTICAL ANALYSIS
         elif step == "Statistical Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
@@ -663,40 +649,17 @@ elif page == "Rice Mapping":
                 run_stats = st.button("Run Statistical Analysis")
 
             with col2:
-                if run_stats:
-                    params = {"aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"), "run_stats": True}
-                    analysis.run_statistics(params)
-                else:
-                    st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
-                                unsafe_allow_html=True)
+                params = {
+                    "aoi": st.session_state.get("aoi", "Walawa Irrigation Scheme"),
+                    "run_stats": run_stats
+                }
+                analysis.run_statistics(params)
 
-    # -------------------------------------------------------
-    # 🌿 SEASONAL MONITORING OR OTHER SUBPAGES (if any)
-    # -------------------------------------------------------
+    # SEASONAL MONITORING (placeholder for later)
     elif subpage == "Seasonal Monitoring":
-        st.markdown("### 🌿 Seasonal Monitoring")
+        st.markdown("### Seasonal Monitoring")
         st.info("Monitor crop growth in near-real-time using Sentinel-1 time series.")
-        # You can later add monitoring-specific logic here
-        # Example: analysis.run_monitoring(params)
 
-    # ==========================================================
-    # OTHER SUBPAGES
-    # ==========================================================
-    elif subpage == "Seasonal Monitoring":
-        st.subheader("🌾 Seasonal Monitoring")
-        st.info("Monitor current rice growth patterns.")
-        aoi_option_mnt = st.selectbox("Select AOI", ["Walawa Irrigation Scheme"])
-        start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"))
-        end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"))
-        run_monitor = st.button("Run Monitoring")
-
-        if run_monitor:
-            monitoring.show({
-                "aoi_mnt": aoi_option_mnt,
-                "start_date_mnt": str(start_date_mnt),
-                "end_date_mnt": str(end_date_mnt),
-                "run_monitor": run_monitor
-            })
 
     elif subpage == "Compare Seasons":
         st.markdown("""
