@@ -60,23 +60,6 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
         img = ic.sum()  # default (total rainfall)
     return img
 
-# ---------- Sentinel-1 SAR median for user period ----------
-def _sentinel1_period_vv(start_date: str, end_date: str) -> ee.Image:
-    """Median VV backscatter over user-defined period."""
-    sl = _get_sri_lanka_geometry()
-    s1 = (
-        ee.ImageCollection("COPERNICUS/S1_GRD")
-        .filterDate(ee.Date(start_date), ee.Date(end_date))
-        .filterBounds(sl)
-        .filter(ee.Filter.eq("instrumentMode", "IW"))
-        .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
-        .select("VV")
-        .median()
-        .clip(sl)
-    )
-    return s1
-
-
 # ---------- ESA/WorldCover (LULC) ----------
 def _worldcover_2021():
     return ee.ImageCollection("ESA/WorldCover/v200").first().select("Map").clip(_get_sri_lanka_geometry())
@@ -94,67 +77,28 @@ def _jrc_permanent_water():
 
 # MAIN FUNCTION
 def show(params: dict):
-    # st.title("Accumulated Rainfall")
-
     Map = geemap.Map(center=[7.8, 80.7], zoom=8)
 
-    # ---- Add static local layers ----
-    layer_options = {
-        "Rivers": "lka_rivers.shp",
-        "Roads": "lka_roads.shp",
-        "Basins": "lka_basins.shp",
-        "Districts": "lka_dis.shp"
-    }
-
-    layer_styles = {
-        "Rivers": {"color": "#0000FF", "weight": 1.0, "fillOpacity": 0},
-        "Roads": {"color": "#FF0000", "weight": 0.8, "fillOpacity": 0},
-        "Basins": {"color": "#9B5DE0", "weight": 0.8, "fillOpacity": 0},
-        "Districts": {"color": "#3A3B3C", "weight": 0.6, "fillOpacity": 0}
-    }
-
-    selected_layers = st.sidebar.multiselect(
-        "Select Layers to Display",
-        options=list(layer_options.keys()),
-        default=["Districts"]
-    )
-
-    for lname in selected_layers:
-        fpath = _safe_path(DATA_DIR, layer_options[lname])
-        if os.path.exists(fpath):
-            Map.add_shapefile(
-                fpath,
-                layer_name=lname,
-                style=layer_styles.get(lname, {"color": "#555555", "weight": 0.8, "fillOpacity": 0}),
-                shown=True,
-            )
-
     # ---- Add static GEE layers ----
-    Map.addLayer(
-        _worldcover_2021(),
-        {
-            "min": 10, "max": 100,
+    Map.addLayer(_worldcover_2021(), {"min": 10, "max": 100,
             "palette": [
                 "#006400", "#ffbb22", "#ffff4c", "#f096ff", "#fa0000",
                 "#b4b4b4", "#f0f0f0", "#0064c8", "#0096a0", "#00cf75",
                 "#fae6a0", "#000000", "#f0ffa0", "#a0dcff"
             ],
-        },
+        }, 
         "LULC (ESA WorldCover 2021)", False
     )
 
-    palette = [
-        "#2E8B57", "#9ACD32", "#EEE8AA", 
-        "#CD853F", "#D2691E", "#A0522D", 
-        "#FFFFFF"
-    ]
-    Map.addLayer(_srtm_dem(), {"min": 0, "max": 3000, "palette": palette}, "Elevation (SRTM)", False)
-
-    Map.addLayer(
-    _jrc_permanent_water(), 
-    {"palette": ["#0000FF"], "opacity": 0.6},
-    "Permanent Water (JRC)", False
+    Map.addLayer(_srtm_dem(), {"min": 0, "max": 3000,
+            "palette": [
+                "#2E8B57", "#9ACD32", "#EEE8AA", "#CD853F", "#D2691E", "#A0522D", "#FFFFFF"
+            ],
+        }, 
+        "Elevation (SRTM)", False
     )
+    
+    Map.addLayer(_jrc_permanent_water(), {"palette": ["#0000FF"], "opacity": 0.6}, "Permanent Water (JRC)", False)
 
     # ---- Build AOI ----
     aoi = None
@@ -205,7 +149,7 @@ def show(params: dict):
             style={"color": "#333333", "weight": 0.8, "fillOpacity": 0}
         )
     
-        # --- Zoom to AOI bounds only (no AOI visualization) ---
+        # --- Zoom to AOI bounds only ---
         if not aoi_gdf.empty:
             bounds = aoi_gdf.total_bounds  # [minx, miny, maxx, maxy]
             Map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
@@ -216,13 +160,6 @@ def show(params: dict):
         with st.spinner(
             f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
         ):
-            # Sentinel-1 median VV
-            Map.addLayer(
-                _sentinel1_period_vv(start_date, end_date).clip(aoi),
-                {"min": -20, "max": 5, "palette": ["#000000", "#ffffff"]},
-                f"Sentinel-1 VV Median ({start_date}–{end_date})",
-                False
-            )
     
             # Rainfall aggregation
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
@@ -245,7 +182,7 @@ def show(params: dict):
     
     # ---- Final map ----
     Map.addLayerControl()
-    Map.to_streamlit(height=720)
+    Map.to_streamlit()
     
 
 
