@@ -144,41 +144,52 @@ def run_rice_mapping(params):
 def run_statistics(params):
     aoi, aoi_name = _get_aoi(params)
 
+    # Check if rice mapping results exist
     if not all(k in st.session_state for k in [
         "maskedPaddyClassification", "maskedStartMonth", "maskedStartMonthDay"
     ]):
         st.warning("Please run the Rice Mapping step before calculating statistics.")
         return
 
-    with st.spinner("Calculating rice statistics..."):
-        maskedPaddyClassification = st.session_state["maskedPaddyClassification"]
-        maskedStartMonth = st.session_state["maskedStartMonth"]
-        maskedStartMonthDay = st.session_state["maskedStartMonthDay"]
+    # Only compute if button was pressed
+    if params.get("run_stats"):
+        with st.spinner("Calculating rice statistics..."):
+            maskedPaddyClassification = st.session_state["maskedPaddyClassification"]
+            maskedStartMonth = st.session_state["maskedStartMonth"]
+            maskedStartMonthDay = st.session_state["maskedStartMonthDay"]
 
-        total_area_ha, month_stats, mmdd_stats = gee_helpers.compute_statistics(
-            aoi,
-            maskedPaddyClassification,
-            maskedStartMonth,
-            maskedStartMonthDay
-        )
+            total_area_ha, month_stats, mmdd_stats = gee_helpers.compute_statistics(
+                aoi,
+                maskedPaddyClassification,
+                maskedStartMonth,
+                maskedStartMonthDay
+            )
 
-        st.session_state.update({
-            "total_area_ha": total_area_ha,
-            "month_stats": month_stats,
-            "mmdd_stats": mmdd_stats
-        })
+            # Save results for reuse
+            st.session_state.update({
+                "total_area_ha": total_area_ha,
+                "month_stats": month_stats,
+                "mmdd_stats": mmdd_stats
+            })
 
-        plot_utils.plot_statistics(month_stats, mmdd_stats)
-        st.subheader(f"🌾 Total Paddy Extent: {total_area_ha:,.2f} ha")
+            plots = plot_utils.plot_statistics(month_stats, mmdd_stats)
 
-    # --- Display charts ---
+            # If function returns figures (not stored internally)
+            if isinstance(plots, dict):
+                st.session_state.update(plots)
+
+            st.success("Rice statistics successfully calculated!")
+
+    # --- Always show stored results if available ---
+    if "total_area_ha" in st.session_state:
+        st.subheader(f"🌾 Total Paddy Extent: {st.session_state['total_area_ha']:,.2f} ha")
+
+    # --- Always display charts if any available ---
     if any(k in st.session_state for k in [
         "stats_bar_month", "stats_bar_day",
         "stats_pie_month", "stats_pie_day",
         "stats_combo_month", "stats_combo_day"
     ]):
-        st.markdown("---")
-
         c1, c2 = st.columns(2)
         with c1:
             if "stats_combo_month" in st.session_state:
@@ -203,5 +214,7 @@ def run_statistics(params):
             if "stats_pie_day" in st.session_state:
                 st.pyplot(st.session_state["stats_pie_day"])
     else:
-        st.markdown("<p style='color:gray;'>No statistics available yet. Please run the analysis.</p>",
-                    unsafe_allow_html=True)
+        st.markdown(
+            "<p style='color:gray;'>No statistics available yet. Please run the analysis.</p>",
+            unsafe_allow_html=True
+        )
