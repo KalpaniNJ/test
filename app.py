@@ -290,19 +290,11 @@ div.stButton > button[kind="primary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Styling ---
-st.sidebar.markdown("""
-<style>
-/* your existing button styles here */
-...
-</style>
-""", unsafe_allow_html=True)
-
-# --- Add clean subtab style fix below ---
-st.sidebar.markdown("""
+# --- Sub Tabs Sidebar Styling ---
+st.markdown("""
 <style>
 /* --- CLEAN FIX for Streamlit Markdown styling --- */
-.stMarkdown a.subtab {
+.stSidebar .stMarkdown a.subtab {
     all: unset !important;
     display: block !important;
     background: #f9fafb;
@@ -316,10 +308,11 @@ st.sidebar.markdown("""
     text-decoration: none !important;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
+    position: relative;
 }
 
 /* Hover effect */
-.stMarkdown a.subtab:hover {
+.stSidebar .stMarkdown a.subtab:hover {
     background-color: #e7f1ff;
     color: #0d6efd !important;
     border-color: #0d6efd;
@@ -327,7 +320,7 @@ st.sidebar.markdown("""
 }
 
 /* Active state */
-.stMarkdown a.subtab.active {
+.stSidebar .stMarkdown a.subtab.active {
     background-color: #0d6efd;
     color: white !important;
     border-color: #0d6efd;
@@ -336,7 +329,7 @@ st.sidebar.markdown("""
 }
 
 /* Left accent bar for active item */
-.stMarkdown a.subtab.active::before {
+.stSidebar .stMarkdown a.subtab.active::before {
     content: "";
     position: absolute;
     left: -8px;
@@ -347,13 +340,13 @@ st.sidebar.markdown("""
     border-radius: 2px;
 }
 
-/* Remove the copy icon Streamlit adds */
+/* Remove Streamlit’s link copy icon */
 [data-testid="stMarkdownContainer"] a[href]:after {
     display: none !important;
 }
 
-/* Prevent unwanted text selection highlight */
-.stMarkdown a.subtab:focus {
+/* Prevent focus outline */
+.stSidebar .stMarkdown a.subtab:focus {
     outline: none !important;
     box-shadow: none !important;
 }
