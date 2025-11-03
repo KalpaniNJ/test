@@ -22,7 +22,6 @@ def show(params):
     
             # AOI selector
             aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_mnt")
-            st.session_state["aoi_mnt"] = aoi_option
     
             # Date range
             start_date_mnt = st.date_input("Start Date", pd.to_datetime("2022-01-01"), key="start_mnt")
@@ -33,7 +32,7 @@ def show(params):
     
             # Store parameters
             params = {
-                "aoi_mnt": aoi_option,
+                "aoi_mnt": st.session_state.get("aoi_mnt", aoi_option),
                 "start_date_mnt": str(start_date_mnt),
                 "end_date_mnt": str(end_date_mnt),
                 "run_monitor": run_monitor
