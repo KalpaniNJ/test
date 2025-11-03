@@ -3,15 +3,26 @@ import ee
 import geemap.foliumap as geemap
 from utils import gee_helpers, plot_utils, rice_algorithms
 from utils.config import AOI_OPTIONS
-import geemap.foliumap as geemap
 from streamlit_folium import folium_static
 
 
-def run_time_series(params):
-    aoi_name = params["aoi"]
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
+# Helper: safely fetch AOI from params or session state
+def _get_aoi(params):
+    """Safely fetch AOI geometry and name."""
+    aoi_name = params.get("aoi") or st.session_state.get("aoi")
+    if not aoi_name:
+        st.error("Please select an AOI before running this analysis.")
+        st.stop()
+    if aoi_name not in AOI_OPTIONS:
+        st.error(f"Invalid AOI: {aoi_name}. Please check config.py.")
+        st.stop()
+    return ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry(), aoi_name
 
-    # Run only if explicitly triggered
+
+# TIME SERIES ANALYSIS
+def run_time_series(params):
+    aoi, aoi_name = _get_aoi(params)
+
     if params.get("run_ts"):
         with st.spinner(f"Running Time Series Analysis for {aoi_name} "
                         f"({params['start_date']} → {params['end_date']})..."):
@@ -21,18 +32,22 @@ def run_time_series(params):
                 end_date=params["end_date"]
             )
 
-            st.session_state["ts_df_line"] = df_line
-            st.session_state["ts_df_points"] = df_points
+            st.session_state.update({
+                "aoi": aoi_name,
+                "ts_df_line": df_line,
+                "ts_df_points": df_points
+            })
 
     # --- Always re-display stored results ---
     if "ts_df_line" in st.session_state and "ts_df_points" in st.session_state:
         plot_utils.plot_time_series(st.session_state["ts_df_line"])
         plot_utils.plot_point_series(st.session_state["ts_df_points"])
     else:
-        st.markdown("<p style='color:gray;'>No results yet. Run the Time Series Analysis.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:gray;'>No results yet. Run the Time Series Analysis.</p>",
+                    unsafe_allow_html=True)
 
 
-    
+# OUTLIER ANALYSIS
 def run_outlier(params):
     if "ts_df_points" not in st.session_state:
         st.error("Please run the Time Series Analysis first.")
@@ -47,18 +62,24 @@ def run_outlier(params):
     if "outlier_boxplot" in st.session_state:
         st.pyplot(st.session_state["outlier_boxplot"])
     else:
-        st.markdown("<p style='color:gray;'>Results will be displayed here after analysis.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:gray;'>Results will be displayed here after analysis.</p>",
+                    unsafe_allow_html=True)
 
 
-
+# RICE MAPPING
 def run_rice_mapping(params):
     if "ts_df_points" not in st.session_state:
         st.error("Please complete Time Series and Outlier Analysis first.")
         return
 
-    aoi_name = params["aoi"]
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
-    dates = params["season_dates"]
+    aoi, aoi_name = _get_aoi(params)
+    dates = params.get("season_dates") or st.session_state.get("season_dates")
+
+    if not dates:
+        st.warning("Please specify season dates before running the mapping.")
+        return
+
+    st.session_state["season_dates"] = dates
 
     if params.get("run_paddy"):
         df_points = st.session_state["ts_df_points"]
@@ -71,7 +92,10 @@ def run_rice_mapping(params):
                 end_date=params["end_date"]
             )
 
-            (maskedPaddyClassification, growingSeason, maskedStartMonth, maskedStartMonthDay) = rice_algorithms.perform_rice_mapping(
+            (maskedPaddyClassification,
+             growingSeason,
+             maskedStartMonth,
+             maskedStartMonthDay) = rice_algorithms.perform_rice_mapping(
                 aoi=aoi,
                 mosaicCollectionUInt16=mosaicCollectionUInt16,
                 filteredDekadList=filteredDekadList,
@@ -80,6 +104,7 @@ def run_rice_mapping(params):
             )
 
             st.session_state.update({
+                "aoi": aoi_name,
                 "maskedPaddyClassification": maskedPaddyClassification,
                 "growingSeason": growingSeason,
                 "maskedStartMonth": maskedStartMonth,
@@ -89,24 +114,35 @@ def run_rice_mapping(params):
             aoi_centroid = aoi.centroid().coordinates().getInfo()
             Map = geemap.Map(center=[aoi_centroid[1], aoi_centroid[0]], zoom=12)
             Map.add_basemap("SATELLITE")
-            Map.addLayer(maskedPaddyClassification, {"min": 0, "max": 1, "palette": ["red", "green"]}, "Paddy Map")
-            Map.addLayer(growingSeason, {"min": 0, "max": 2, "palette": ["blue", "green", "orange"]}, "Growing Season", False)
-            Map.addLayer(maskedStartMonth, {"min": 1, "max": 12, "palette": ["blue", "cyan", "green", "lime", "yellow", "orange", "red", "pink", "purple", "brown", "gray", "black"]}, "Start Month", False)
-            Map.addLayer(maskedStartMonthDay, {"min": 101, "max": 1231, "palette": ["blue", "cyan", "green", "yellow", "orange", "red"]}, "Start Month–Day", False)
+            Map.addLayer(maskedPaddyClassification,
+                         {"min": 0, "max": 1, "palette": ["red", "green"]}, "Paddy Map")
+            Map.addLayer(growingSeason,
+                         {"min": 0, "max": 2, "palette": ["blue", "green", "orange"]},
+                         "Growing Season", False)
+            Map.addLayer(maskedStartMonth,
+                         {"min": 1, "max": 12,
+                          "palette": ["blue", "cyan", "green", "lime", "yellow", "orange",
+                                      "red", "pink", "purple", "brown", "gray", "black"]},
+                         "Start Month", False)
+            Map.addLayer(maskedStartMonthDay,
+                         {"min": 101, "max": 1231,
+                          "palette": ["blue", "cyan", "green", "yellow", "orange", "red"]},
+                         "Start Month–Day", False)
             Map.addLayerControl()
             st.session_state["map_SA"] = Map
 
+    # --- Always show map if available ---
     if "map_SA" in st.session_state:
         st.subheader("Rice Mapping Results")
         st.session_state["map_SA"].to_streamlit(height=600)
     else:
-        st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                    unsafe_allow_html=True)
 
 
-
+# STATISTICAL ANALYSIS
 def run_statistics(params):
-    aoi_name = params["aoi"]
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
+    aoi, aoi_name = _get_aoi(params)
 
     if not all(k in st.session_state for k in [
         "maskedPaddyClassification", "maskedStartMonth", "maskedStartMonthDay"
@@ -115,12 +151,10 @@ def run_statistics(params):
         return
 
     with st.spinner("Calculating rice statistics..."):
-        # --- Retrieve stored layers ---
         maskedPaddyClassification = st.session_state["maskedPaddyClassification"]
         maskedStartMonth = st.session_state["maskedStartMonth"]
         maskedStartMonthDay = st.session_state["maskedStartMonthDay"]
 
-        # --- Compute statistics ---
         total_area_ha, month_stats, mmdd_stats = gee_helpers.compute_statistics(
             aoi,
             maskedPaddyClassification,
@@ -128,18 +162,16 @@ def run_statistics(params):
             maskedStartMonthDay
         )
 
-        # --- Store results in session_state for reuse ---
-        st.session_state["total_area_ha"] = total_area_ha
-        st.session_state["month_stats"] = month_stats
-        st.session_state["mmdd_stats"] = mmdd_stats
+        st.session_state.update({
+            "total_area_ha": total_area_ha,
+            "month_stats": month_stats,
+            "mmdd_stats": mmdd_stats
+        })
 
-        # --- Plot and store charts ---
-        plots = plot_utils.plot_statistics(month_stats, mmdd_stats)
-        # (Assuming plot_utils.plot_statistics internally sets session_state plots like before)
-
+        plot_utils.plot_statistics(month_stats, mmdd_stats)
         st.subheader(f"🌾 Total Paddy Extent: {total_area_ha:,.2f} ha")
 
-    # --- Display charts in 3x2 layout if available ---
+    # --- Display charts ---
     if any(k in st.session_state for k in [
         "stats_bar_month", "stats_bar_day",
         "stats_pie_month", "stats_pie_day",
@@ -147,39 +179,29 @@ def run_statistics(params):
     ]):
         st.markdown("---")
 
-        # Row 1
         c1, c2 = st.columns(2)
         with c1:
             if "stats_combo_month" in st.session_state:
-                # st.subheader("Monthly & Cumulative Paddy Area")
                 st.pyplot(st.session_state["stats_combo_month"])
         with c2:
             if "stats_combo_day" in st.session_state:
-                # st.subheader("Dekadal & Cumulative Paddy Area")
                 st.pyplot(st.session_state["stats_combo_day"])
 
-        # Row 2
         c3, c4 = st.columns(2)
         with c3:
             if "stats_bar_month" in st.session_state:
-                # st.subheader("Paddy Area by Month")
                 st.pyplot(st.session_state["stats_bar_month"])
         with c4:
             if "stats_bar_day" in st.session_state:
-                # st.subheader("Paddy Area by Start Date (MM-DD)")
                 st.pyplot(st.session_state["stats_bar_day"])
 
-        # Row 3
         c5, c6 = st.columns(2)
         with c5:
             if "stats_pie_month" in st.session_state:
-                # st.subheader("Paddy Area % by Month")
                 st.pyplot(st.session_state["stats_pie_month"])
         with c6:
             if "stats_pie_day" in st.session_state:
-                # st.subheader("Paddy Area % by Start Date (MM-DD)")
                 st.pyplot(st.session_state["stats_pie_day"])
-
     else:
-        st.markdown("<p style='color:gray;'>No statistics available yet. Please run the analysis.</p>", unsafe_allow_html=True)
-
+        st.markdown("<p style='color:gray;'>No statistics available yet. Please run the analysis.</p>",
+                    unsafe_allow_html=True)
