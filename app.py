@@ -293,9 +293,10 @@ div.stButton > button[kind="primary"] {
 # --- Render main sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        expand_label = "▼ " if st.session_state["rice_expanded"] else "▶ "
-        button_label = f"{expand_label}{label}"
-                                                           
+        # Right-aligned arrow
+        arrow = "›" if not st.session_state["rice_expanded"] else "▴"
+        button_label = f"{label} {arrow}"
+
         # Create a horizontal layout: label left, arrow right
         if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
@@ -329,73 +330,6 @@ for tab_key, label in tabs.items():
 page = st.session_state["active_page"]
 subpage = st.session_state["active_subtab"]
 
-
-
-# # --- Sidebar Tab Navigation ---
-# tabs = {
-#     "Home": "🏠 Home",
-#     "Rainfall Distribution": "🌧 Rainfall Distribution",
-#     "Rice Mapping": "🌾 Rice Mapping",
-#     "Weather Forecast": "☁ Weather Forecast",
-#     "Water Productivity": "💧 Water Productivity"
-# }
-
-# # Current active page (stored in session_state)
-# if "active_page" not in st.session_state:
-#     st.session_state["active_page"] = "Home"
-
-# # Sidebar styling
-# st.sidebar.markdown("""
-# <style>
-# /* General button alignment and reset */
-# div.stButton > button:first-child {
-#     text-align: left !important;         /* Left align text and icon */
-#     justify-content: flex-start !important;
-#     padding: 10px 14px !important;
-#     border-radius: 8px !important;
-#     border: 1px solid #ddd !important;
-#     background-color: #f8f9fa !important;
-#     color: #333 !important;
-#     font-weight: 500 !important;
-#     font-size: 15px !important;
-#     transition: all 0.2s ease-in-out;
-#     width: 100% !important;
-# }
-
-# /* Hover effect */
-# div.stButton > button:first-child:hover {
-#     background-color: #e7f1ff !important;
-#     color: #0d6efd !important;
-#     border-color: #0d6efd !important;
-# }
-
-# /* Active (selected) tab style */
-# div.stButton > button[kind="primary"] {
-#     background-color: #0d6efd !important;
-#     color: white !important;
-#     border-color: #0d6efd !important;
-# }
-# </style>
-# """, unsafe_allow_html=True)
-
-# # Render sidebar tabs (buttons)
-# for tab_key, label in tabs.items():
-#     active_class = "active" if st.session_state["active_page"] == tab_key else ""
-#     # Use markdown with CSS styling for visual consistency
-#     if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
-#         st.session_state["active_page"] = tab_key
-#         st.rerun()  # re-render app to show selected page
-
-# # Assign current page variable for later use
-# page = st.session_state["active_page"]
-
-# # Page selector
-# page = st.sidebar.selectbox(
-#     "Select Module",
-#     ["Home", "Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
-#     key="main_page_select"
-# )
-# st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
 # ==============================
 # HOME MODULE
