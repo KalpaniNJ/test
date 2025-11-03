@@ -220,33 +220,39 @@ params = sidebar_controls()
 
 
 # --- Sidebar Tab Navigation ---
-st.sidebar.markdown("""
-<style>
-.sidebar-tabs {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+tabs = {
+    "Home": "🏠 Home",
+    "Rainfall Distribution": "🌧 Rainfall Distribution",
+    "Rice Mapping": "🌾 Rice Mapping",
+    "Weather Forecast": "☁ Weather Forecast",
+    "Water Productivity": "💧 Water Productivity"
 }
 
+# Current page
+query_params = st.query_params
+current_page = query_params.get("page", ["Home"])[0]
+
+# Styling
+st.sidebar.markdown("""
+<style>
 .sidebar-tab {
     display: block;
     padding: 10px 14px;
-    background-color: #f8f9fa;
+    margin-bottom: 6px;
     border-radius: 8px;
     text-decoration: none;
     color: #333;
     font-weight: 500;
     border: 1px solid #ddd;
+    background-color: #f8f9fa;
     transition: all 0.2s ease-in-out;
+    text-align: left;
 }
-
 .sidebar-tab:hover {
     background-color: #e7f1ff;
     border-color: #0d6efd;
     color: #0d6efd;
 }
-
 .sidebar-tab.active {
     background-color: #0d6efd;
     color: white;
@@ -255,31 +261,12 @@ st.sidebar.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Create sidebar tab links
-tabs_html = """
-<div class="sidebar-tabs">
-    <a class="sidebar-tab {home_active}" href="?page=Home">🏠 Home</a>
-    <a class="sidebar-tab {rainfall_active}" href="?page=Rainfall+Distribution">🌧 Rainfall Distribution</a>
-    <a class="sidebar-tab {rice_active}" href="?page=Rice+Mapping">🌾 Rice Mapping</a>
-    <a class="sidebar-tab {weather_active}" href="?page=Weather+Forecast">☁ Weather Forecast</a>
-    <a class="sidebar-tab {water_active}" href="?page=Water+Productivity">💧 Water Productivity</a>
-</div>
-"""
-
-# Detect current tab from URL
-query_params = st.query_params
-current_page = query_params.get("page", ["Home"])[0]
-
-# Highlight active tab
-page_tabs = tabs_html.format(
-    home_active="active" if current_page == "Home" else "",
-    rainfall_active="active" if current_page == "Rainfall Distribution" else "",
-    rice_active="active" if current_page == "Rice Mapping" else "",
-    weather_active="active" if current_page == "Weather Forecast" else "",
-    water_active="active" if current_page == "Water Productivity" else "",
-)
-
-st.sidebar.markdown(page_tabs, unsafe_allow_html=True)
+# Render tabs
+for page_name, label in tabs.items():
+    active = "active" if current_page == page_name else ""
+    if st.sidebar.button(label, key=f"tab_{page_name}", use_container_width=True):
+        st.experimental_set_query_params(page=page_name)
+        st.rerun()  # refresh content dynamically
 
 
 # # Page selector
