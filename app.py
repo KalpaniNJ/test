@@ -235,7 +235,7 @@ if "active_subtab" not in st.session_state:
 if "rice_expanded" not in st.session_state:
     st.session_state["rice_expanded"] = False
 
---- Sidebar Styling ---
+#--- Sidebar Styling ---
 st.sidebar.markdown("""
 <style>
 /* Main and Sub-tab Buttons */
