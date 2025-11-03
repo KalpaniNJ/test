@@ -228,11 +228,11 @@ tabs = {
     "Water Productivity": "💧 Water Productivity"
 }
 
-# Current page
-query_params = st.query_params
-current_page = query_params.get("page", ["Home"])[0]
+# Current active page (stored in session_state)
+if "active_page" not in st.session_state:
+    st.session_state["active_page"] = "Home"
 
-# Styling
+# Sidebar styling
 st.sidebar.markdown("""
 <style>
 .sidebar-tab {
@@ -246,7 +246,6 @@ st.sidebar.markdown("""
     border: 1px solid #ddd;
     background-color: #f8f9fa;
     transition: all 0.2s ease-in-out;
-    text-align: left;
 }
 .sidebar-tab:hover {
     background-color: #e7f1ff;
@@ -261,13 +260,16 @@ st.sidebar.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Render tabs
-for page_name, label in tabs.items():
-    active = "active" if current_page == page_name else ""
-    if st.sidebar.button(label, key=f"tab_{page_name}", use_container_width=True):
-        st.experimental_set_query_params(page=page_name)
-        st.rerun()  # refresh content dynamically
+# Render sidebar tabs (buttons)
+for tab_key, label in tabs.items():
+    active_class = "active" if st.session_state["active_page"] == tab_key else ""
+    # Use markdown with CSS styling for visual consistency
+    if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
+        st.session_state["active_page"] = tab_key
+        st.rerun()  # re-render app to show selected page
 
+# Assign current page variable for later use
+page = st.session_state["active_page"]
 
 # # Page selector
 # page = st.sidebar.selectbox(
