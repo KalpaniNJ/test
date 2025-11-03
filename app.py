@@ -553,118 +553,6 @@ elif page == "Weather Forecast":
 # ==============================
 # PADDY MAPPING MODULE
 # ==============================
-# elif page == "Rice Mapping":
-#     # Read selected subtab (default: Seasonal Analysis)
-#     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
-#     col1, col2 = st.columns([0.4, 1.3])
-
-    # # SEASONAL ANALYSIS
-    # if subpage == "Seasonal Analysis":
-    #     with col1:
-    #         with st.expander("Time Series Analysis"):
-    #             st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
-    
-    #             aoi_option = st.selectbox(
-    #                 "Select AOI",
-    #                 ["Walawa Irrigation Scheme"],
-    #                 key="aoi_select_tab1",
-    #             )
-    
-    #             start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-    #             end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
-    #             run_ts = st.button("Run Time Series Analysis")
-    
-#             with st.expander("Outlier Analysis"):
-#                 st.info("Perform Time Series analysis before Outlier analysis.")
-#                 run_outlier = st.button("Run Outlier Analysis")
-    
-#             with st.expander("Rice Mapping"):
-#                 st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
-#                 season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
-#                 peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
-#                 harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
-#                 run_paddy = st.button("Run Paddy Season Analysis")
-    
-#             with st.expander("Statistical Analysis"):
-#                 st.info("Calculate total paddy area, area by month, and area by start date.")
-#                 run_stats = st.button("Run Statistical Analysis")
-    
-#             params = {
-#                 "aoi": aoi_option,
-#                 "start_date": str(start_date),
-#                 "end_date": str(end_date),
-#                 "run_ts": run_ts,
-#                 "run_outlier": run_outlier,
-#                 "run_paddy": run_paddy,
-#                 "run_stats": run_stats,
-#                 "season_dates": {
-#                     "start": str(season_start_date),
-#                     "peak": str(peak_date),
-#                     "harvest": str(harvest_date),
-#                 },
-#             }
-#         with col2:
-#             analysis.show(params)
-
-#     # SEASONAL MONITORING
-#     elif subpage == "Seasonal Monitoring":
-#         col1, col2 = st.columns([0.4, 1.3])
-
-#         with col1:
-#             with st.expander("Monitoring"):
-#                 st.info("Monitor seasonal rice growth. Select the period and run the analysis.")
-    
-#                 aoi_option_mnt = st.selectbox(
-#                     "Select AOI",
-#                     ["Walawa Irrigation Scheme"],
-#                     key="aoi_select_tab2",
-#                 )
-    
-#                 start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
-#                 end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"), key="end_tab2")
-#                 run_monitor = st.button("Run Analysis")
-    
-#             params = {
-#                 "aoi_mnt": aoi_option_mnt,
-#                 "start_date_mnt": str(start_date_mnt),
-#                 "end_date_mnt": str(end_date_mnt),
-#                 "run_monitor": run_monitor,
-#             }
-
-#         with col2:
-#             monitoring.show(params)
-
-#     # COMPARE SEASONS
-#     elif subpage == "Compare Seasons":
-#         st.markdown(
-#             """
-#             <div style="
-#                 background-color:#fff8e6;
-#                 border-left: 6px solid #f7c948;
-#                 padding: 20px;
-#                 border-radius: 8px;
-#                 box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-#                 margin-top: 20px;
-#             ">
-#                 <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
-#                 <p style="color:#555; font-size:16px;">
-#                     This section will soon allow users to compare rice growing patterns,
-#                     mRVI curves, and classification results between multiple seasons.
-#                 </p>
-#                 <p style="color:#777; font-size:14px;">
-#                     Tools will include season overlay maps, growth timeline comparisons,
-#                     and pixel-wise change detection analytics.
-#                 </p>
-#             </div>
-#             """,
-#             unsafe_allow_html=True,
-#         )
-
-#     # DATA AND METHODS
-#     elif subpage == "Data and Methods":
-#         from utils.readme_section import show_readme
-#         show_readme()
-
 elif page == "Rice Mapping":
     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
 
@@ -690,6 +578,7 @@ elif page == "Rice Mapping":
         # TIME SERIES
         if step == "Time Series Analysis":
             with col1:
+                st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
                 aoi_option = st.selectbox(
                     "Select AOI",
                     ["Walawa Irrigation Scheme"],
@@ -710,7 +599,7 @@ elif page == "Rice Mapping":
                 if run_ts:
                     analysis.show(params)
                 else:
-                    st.info("Run the time series analysis to view results.")
+                    st.markdown("Results will be displayed here.")
 
         # OUTLIER ANALYSIS
         elif step == "Outlier Analysis":
@@ -723,7 +612,7 @@ elif page == "Rice Mapping":
                 if run_outlier:
                     analysis.show(params)
                 else:
-                    st.info("Click 'Run Outlier Analysis' to begin.")
+                    st.markdown("Results will be displayed here.")
 
         # RICE MAPPING
         elif step == "Rice Mapping":
@@ -745,7 +634,7 @@ elif page == "Rice Mapping":
                 if run_paddy:
                     analysis.show(params)
                 else:
-                    st.info("Run the rice mapping analysis to see outputs.")
+                    st.markdown("Results will be displayed here.")
 
         # STATISTICAL ANALYSIS
         elif step == "Statistical Analysis":
@@ -758,7 +647,7 @@ elif page == "Rice Mapping":
                 if run_stats:
                     analysis.show(params)
                 else:
-                    st.info("Run the statistical analysis to view the summary.")
+                    st.markdown("Results will be displayed here.")
 
 
 
