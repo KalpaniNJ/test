@@ -24,8 +24,8 @@ def show(params):
             aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_mnt")
     
             # Date range
-            start_date_mnt = st.date_input("Start Date", pd.to_datetime("2022-01-01"), key="start_mnt")
-            end_date_mnt = st.date_input("End Date", pd.to_datetime("2022-05-31"), key="end_mnt")
+            start_date_mnt = st.date_input("Start Date", pd.to_datetime("2021-12-01"), key="start_mnt")
+            end_date_mnt = st.date_input("End Date", pd.to_datetime("2022-02-28"), key="end_mnt")
     
             # Run button
             run_monitor = st.button("Run Seasonal Monitoring")
@@ -193,7 +193,7 @@ def show(params):
                 
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.subheader("Time Series Analysis:")
+                    # st.subheader("Time Series Analysis:")
                     # --- Line Graph Visualization ---
                     # sample each image at all points and add time property
                     def sample_image(image, fc):
@@ -294,7 +294,7 @@ def show(params):
                     st.pyplot(plt.gcf())
     
                 with col3:
-                    st.subheader("Outlier Analysis:")
+                    # st.subheader("Outlier Analysis:")
                     # --- Plot Boxplot ---
                     # Reshape data (long format) for boxplot
                     df_long = df.melt(
@@ -625,7 +625,7 @@ def show(params):
                 maskedStartMonth = finalStartMonth.updateMask(maskedPaddyClassification).updateMask(finalStartMonth.neq(0))
                 maskedStartMonthDay = finalStartMonthDay.updateMask(maskedPaddyClassification).updateMask(finalStartMonthDay.neq(0))
     
-                st.subheader("Paddy Maps:")
+                # st.subheader("Paddy Maps:")
                 aoi_centroid_mt = aoi_mt.centroid().coordinates().getInfo()
                 Map_SM = geemap.Map(center=[aoi_centroid_mt[1], aoi_centroid_mt[0]], zoom=12)
                 Map_SM.add_basemap("SATELLITE")
@@ -656,7 +656,7 @@ def show(params):
                 Map_SM.to_streamlit()
     
     
-                st.subheader("Paddy Area Statistics:")
+                # st.subheader("Paddy Area Statistics:")
                 # Total area (all paddy pixels)
                 total_area = maskedPaddyClassification.multiply(ee.Image.pixelArea()) \
                     .reduceRegion(
