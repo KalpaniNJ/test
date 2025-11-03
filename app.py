@@ -406,24 +406,22 @@ st.sidebar.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
-
 # --- Render sidebar tabs (simple + clean) ---
-from streamlit_option_menu import option_menu
-
-# --- Render sidebar tabs ---
 for tab_key, label in tabs.items():
     if tab_key == "Rice Mapping":
-        # Main button for Rice Mapping
-        if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
+        # --- Expand/collapse logic ---
+        arrow = "›" if not st.session_state["rice_expanded"] else "⌃"
+        button_label = f"{label} {arrow}"
+
+        # --- Main Rice Mapping button ---
+        if st.sidebar.button(button_label, key=f"tab_{tab_key}", use_container_width=True):
+            st.session_state["rice_expanded"] = not st.session_state["rice_expanded"]
             st.session_state["active_page"] = tab_key
             st.rerun()
 
-        # --- Show the subtab menu only if user is on Rice Mapping ---
-        if st.session_state["active_page"] == "Rice Mapping":
+        # --- When expanded, show subtabs as option_menu ---
+        if st.session_state["rice_expanded"]:
             with st.sidebar:
-                st.markdown("<div style='margin-left:10px;'></div>", unsafe_allow_html=True)
                 subtab = option_menu(
                     "🌾 Rice Mapping",
                     ["Seasonal Analysis", "Seasonal Monitoring", "Compare Seasons", "Data and Methods"],
@@ -435,6 +433,7 @@ for tab_key, label in tabs.items():
                             "background-color": "#e9f5ff",
                             "padding": "5px",
                             "border-radius": "8px",
+                            "margin-left": "10px"
                         },
                         "icon": {"color": "#0d6efd", "font-size": "18px"},
                         "nav-link": {
@@ -452,17 +451,16 @@ for tab_key, label in tabs.items():
                         },
                     },
                 )
-                # Save selected subtab to session state
                 st.session_state["active_subtab"] = subtab
 
     else:
-        # Normal main tabs
+        # --- Regular main tabs ---
         if st.sidebar.button(label, key=f"tab_{tab_key}", use_container_width=True):
             st.session_state["active_page"] = tab_key
-            st.session_state["active_subtab"] = None
+            st.session_state["rice_expanded"] = False
             st.rerun()
 
-# Assign current page and subpage
+# Assign current values
 page = st.session_state["active_page"]
 subpage = st.session_state.get("active_subtab", None)
 
