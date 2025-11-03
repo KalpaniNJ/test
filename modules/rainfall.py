@@ -45,12 +45,12 @@ def _get_sri_lanka_geometry() -> ee.Geometry:
 # ---------- Rainfall (GPM IMERG V07) ----------
 def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
     """Aggregate GPM rainfall over time.
-    - Sum: total rainfall (all 30-min values)
-    - Mean: average of daily mean rainfall
-    - Median: median of daily mean rainfall
+    - Sum: total rainfall (mm) from 30-min data
+    - Mean: mean rainfall rate (mm/hr)
+    - Max: maximum rainfall rate (mm/hr)
     """
 
-    # Load the 30-minute IMERG data
+    # Load IMERG 30-minute precipitation rate (mm/hr)
     ic = (
         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
         .filterDate(ee.Date(start_date), ee.Date(end_date))
@@ -59,27 +59,23 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
 
     method = temporal_method.lower()
 
-    # Group images by day → compute daily mean
-    def daily_mean(date):
-        date = ee.Date(date)
-        daily_ic = ic.filterDate(date, date.advance(1, "day"))
-        return daily_ic.mean().set("system:time_start", date.millis())
-
-    # Generate a list of daily mean images
-    daily_means = ee.ImageCollection.fromImages(
-        ee.List.sequence(0, ee.Date(end_date).difference(ee.Date(start_date), "day").subtract(1))
-        .map(lambda d: daily_mean(ee.Date(start_date).advance(d, "day")))
-    )
-
-    # Aggregate based on user selection
     if method == "mean":
-        img = daily_means.mean()  # mean of daily means
-    elif method == "median":
-        img = daily_means.median()  # median of daily means
+        # Mean rainfall rate (mm/hr) across period
+        img = ic.mean()
+
+    elif method == "max":
+        # Maximum rainfall rate (mm/hr) observed in period
+        img = ic.max()
+
     else:
-        img = ic.sum()  # total rainfall
+        # Total rainfall (mm): each image represents 0.5 hour of rate (mm/hr)
+        img = ic.sum().multiply(0.5)
+
+    # Mask very small or invalid values
+    img = img.updateMask(img.gt(0.1))
 
     return img
+
 
 # def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
 #     """Aggregate GPM rainfall over time using Sum, Mean, or Median."""
