@@ -187,41 +187,54 @@ def show(params: dict):
         start_date = params["start_date"]
         end_date = params["end_date"]
         temporal_method = params.get("temporal_method", "Sum")
-
+    
+        # --- Load and display entire shapefile ---
+        if params["analysis_type"] == "Administrative":
+            full_gdf = _read_vector(_safe_path(DATA_DIR, "lka_dis.shp")).to_crs(4326)
+            layer_name = "District Boundaries"
+            aoi_gdf = full_gdf[full_gdf[COL_DISTRICT] == params["district"]]
+        else:
+            full_gdf = _read_vector(_safe_path(DATA_DIR, "lka_basins.shp")).to_crs(4326)
+            layer_name = "River Basins"
+            aoi_gdf = full_gdf[full_gdf[COL_BASIN] == params["basin"]]
+    
+        # --- Add the entire shapefile to the map ---
+        Map.add_gdf(
+            full_gdf,
+            layer_name=layer_name,
+            style={"color": "#333333", "weight": 0.8, "fillOpacity": 0}
+        )
+    
+        # --- Zoom to AOI bounds only (no AOI visualization) ---
+        if not aoi_gdf.empty:
+            bounds = aoi_gdf.total_bounds  # [minx, miny, maxx, maxy]
+            Map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
+        else:
+            st.warning(f"Could not find {aoi_label} in shapefile for zooming.")
+    
+        # --- Proceed with rainfall analysis ---
         with st.spinner(
             f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
         ):
-            
+            # Sentinel-1 median VV
             Map.addLayer(
                 _sentinel1_period_vv(start_date, end_date).clip(aoi),
                 {"min": -20, "max": 5, "palette": ["#000000", "#ffffff"]},
                 f"Sentinel-1 VV Median ({start_date}–{end_date})",
                 False
             )
-            
-            # ---- Temporal aggregation ----
+    
+            # Rainfall aggregation
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
-
-            # ---- Fixed visualization range ----
             rain_vis = {
                 "min": 0,
-                "max": 500,  # adjust this range based on expected rainfall intensity
+                "max": 500,
                 "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
             }
-
-            # ---- Add rainfall layer ----
+    
             Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
-
-            # ---- AOI outline ----
-            # Map.addLayer(
-            #     ee.FeatureCollection(ee.Feature(aoi)).style(
-            #         color="red", width=1, fillColor="00000000"
-            #     ),
-            #     {},
-            #     f"AOI – {aoi_label}",
-            # )
-
-            # ---- Static colorbar legend ----
+    
+            # Colorbar legend
             Map.add_colorbar(
                 vis_params=rain_vis,
                 label=f"GPM Rainfall ({temporal_method}) [mm]",
@@ -229,7 +242,62 @@ def show(params: dict):
                 font_size=16,
                 label_font_size=18
             )
-
+    
     # ---- Final map ----
     Map.addLayerControl()
     Map.to_streamlit(height=720)
+    
+
+
+    
+    # # ---- Main analysis ----
+    # if params.get("run_forecast") and aoi is not None:
+    #     start_date = params["start_date"]
+    #     end_date = params["end_date"]
+    #     temporal_method = params.get("temporal_method", "Sum")
+
+    #     with st.spinner(
+    #         f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
+    #     ):
+            
+    #         Map.addLayer(
+    #             _sentinel1_period_vv(start_date, end_date).clip(aoi),
+    #             {"min": -20, "max": 5, "palette": ["#000000", "#ffffff"]},
+    #             f"Sentinel-1 VV Median ({start_date}–{end_date})",
+    #             False
+    #         )
+            
+    #         # ---- Temporal aggregation ----
+    #         rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
+
+    #         # ---- Fixed visualization range ----
+    #         rain_vis = {
+    #             "min": 0,
+    #             "max": 500,  # adjust this range based on expected rainfall intensity
+    #             "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
+    #         }
+
+    #         # ---- Add rainfall layer ----
+    #         Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
+
+    #         # ---- AOI outline ----
+    #         # Map.addLayer(
+    #         #     ee.FeatureCollection(ee.Feature(aoi)).style(
+    #         #         color="red", width=1, fillColor="00000000"
+    #         #     ),
+    #         #     {},
+    #         #     f"AOI – {aoi_label}",
+    #         # )
+
+    #         # ---- Static colorbar legend ----
+    #         Map.add_colorbar(
+    #             vis_params=rain_vis,
+    #             label=f"GPM Rainfall ({temporal_method}) [mm]",
+    #             layer_name=f"GPM Rainfall ({temporal_method})",
+    #             font_size=16,
+    #             label_font_size=18
+    #         )
+
+    # # ---- Final map ----
+    # Map.addLayerControl()
+    # Map.to_streamlit(height=720)
