@@ -308,8 +308,27 @@ if page == "Rainfall Distribution":
         }
     
     with col2:
-        rainfall.show(params)
-
+        Map = geemap.Map(center=[7.8, 80.7], zoom=7)
+    
+        # --- Display shapefile and zoom to selected feature ---
+        if analysis_type == "Administrative" and "selected_district" in locals():
+            selected_geom = districts[districts["ADM2_EN"] == selected_district]
+            geojson_data = json.loads(selected_geom.to_json())
+            Map.add_gdf(selected_geom, layer_name=f"{selected_district} District", style={"color": "blue", "fillOpacity": 0.2})
+            Map.centerObject(ee.Geometry(geojson_data["features"][0]["geometry"]), zoom=9)
+    
+        elif analysis_type == "Hydrological" and "selected_basin" in locals():
+            selected_geom = basins[basins["WSHD_NAME"] == selected_basin]
+            geojson_data = json.loads(selected_geom.to_json())
+            Map.add_gdf(selected_geom, layer_name=f"{selected_basin} Basin", style={"color": "green", "fillOpacity": 0.2})
+            Map.centerObject(ee.Geometry(geojson_data["features"][0]["geometry"]), zoom=8)
+    
+        # --- Show rainfall results if requested ---
+        if run_forecast:
+            rainfall.show(params)
+        else:
+            Map.add_basemap("OPENSTREETMAP")
+            Map.to_streamlit(height=650)
 
 
 # ==============================
