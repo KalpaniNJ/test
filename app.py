@@ -218,13 +218,77 @@ st.sidebar.markdown("""
 
 params = sidebar_controls()
 
-# Page selector
-page = st.sidebar.selectbox(
-    "Select Module",
-    ["Home", "Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
-    key="main_page_select"
+
+# --- Sidebar Tab Navigation ---
+st.sidebar.markdown("""
+<style>
+.sidebar-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.sidebar-tab {
+    display: block;
+    padding: 10px 14px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-tab:hover {
+    background-color: #e7f1ff;
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.sidebar-tab.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Create sidebar tab links
+tabs_html = """
+<div class="sidebar-tabs">
+    <a class="sidebar-tab {home_active}" href="?page=Home">🏠 Home</a>
+    <a class="sidebar-tab {rainfall_active}" href="?page=Rainfall+Distribution">🌧 Rainfall Distribution</a>
+    <a class="sidebar-tab {rice_active}" href="?page=Rice+Mapping">🌾 Rice Mapping</a>
+    <a class="sidebar-tab {weather_active}" href="?page=Weather+Forecast">☁ Weather Forecast</a>
+    <a class="sidebar-tab {water_active}" href="?page=Water+Productivity">💧 Water Productivity</a>
+</div>
+"""
+
+# Detect current tab from URL
+query_params = st.query_params
+current_page = query_params.get("page", ["Home"])[0]
+
+# Highlight active tab
+page_tabs = tabs_html.format(
+    home_active="active" if current_page == "Home" else "",
+    rainfall_active="active" if current_page == "Rainfall Distribution" else "",
+    rice_active="active" if current_page == "Rice Mapping" else "",
+    weather_active="active" if current_page == "Weather Forecast" else "",
+    water_active="active" if current_page == "Water Productivity" else "",
 )
-st.sidebar.markdown("<br>", unsafe_allow_html=True)
+
+st.sidebar.markdown(page_tabs, unsafe_allow_html=True)
+
+
+# # Page selector
+# page = st.sidebar.selectbox(
+#     "Select Module",
+#     ["Home", "Rainfall Distribution", "Weather Forecast", "Paddy Mapping", "Water Productivity"],
+#     key="main_page_select"
+# )
+# st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
 # ==============================
 # HOME MODULE
