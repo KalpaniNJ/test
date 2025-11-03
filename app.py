@@ -576,7 +576,7 @@ elif page == "Rice Mapping":
             key="seasonal_step",
         )
 
-        st.markdown("<hr style='border:0.5px solid #ccc; margin-top:40px; margin-bottom:10px;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:0.5px solid #ccc; margin-top:10px; margin-bottom:20px;'>", unsafe_allow_html=True)
 
         # TIME SERIES ANALYSIS
         if step == "Time Series Analysis":
@@ -702,7 +702,6 @@ elif page == "Rice Mapping":
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
         show_readme()
-
 
 
 
