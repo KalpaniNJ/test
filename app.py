@@ -558,21 +558,21 @@ elif page == "Weather Forecast":
 #     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
 #     col1, col2 = st.columns([0.4, 1.3])
 
-    # SEASONAL ANALYSIS
-    if subpage == "Seasonal Analysis":
-        with col1:
-            with st.expander("Time Series Analysis"):
-                st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
+    # # SEASONAL ANALYSIS
+    # if subpage == "Seasonal Analysis":
+    #     with col1:
+    #         with st.expander("Time Series Analysis"):
+    #             st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
     
-                aoi_option = st.selectbox(
-                    "Select AOI",
-                    ["Walawa Irrigation Scheme"],
-                    key="aoi_select_tab1",
-                )
+    #             aoi_option = st.selectbox(
+    #                 "Select AOI",
+    #                 ["Walawa Irrigation Scheme"],
+    #                 key="aoi_select_tab1",
+    #             )
     
-                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
-                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
-                run_ts = st.button("Run Time Series Analysis")
+    #             start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
+    #             end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
+    #             run_ts = st.button("Run Time Series Analysis")
     
 #             with st.expander("Outlier Analysis"):
 #                 st.info("Perform Time Series analysis before Outlier analysis.")
