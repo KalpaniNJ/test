@@ -255,82 +255,93 @@ if page == "Home":
 # ==============================
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
-if page == "Rainfall Distribution": 
-    # --- Load shapefiles once ---
-    data_dir = os.path.join(os.path.dirname(__file__), "data")
-    districts_path = os.path.join(data_dir, "lka_dis.shp")
-    basins_path = os.path.join(data_dir, "lka_basins.shp")
+if page == "Rainfall Distribution":
+    # --- Tool description ---
+    st.markdown("""
+        <div style="
+            background-color:#f8f9fa;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: justify;
+        ">
+            <p style="font-size:17px; color:#333;">
+                <b>RiceWater Analytics Hub</b> is a digital platform combining 
+                <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
+                to strengthen <i>climate-smart rice production</i>. 
+                It provides an integrated view of <i>water availability, crop performance,</i> 
+                and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
-    districts = gpd.read_file(districts_path) if os.path.exists(districts_path) else None
-    basins = gpd.read_file(basins_path) if os.path.exists(basins_path) else None
-
-    # --- Two columns layout ---
+    # --- Sidebar/controls column ---
     col1, col2 = st.columns([0.4, 1.3])
-    
+
     with col1:
         st.markdown("### 🌧️ Rainfall Distribution")
         st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
-    
+
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
 
-        if analysis_type == "Administrative" and districts is not None:
+        # --- Select AOI ---
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
+        if analysis_type == "Administrative":
+            districts_path = os.path.join(data_dir, "lka_dis.shp")
+            districts = gpd.read_file(districts_path)
             district_names = sorted(districts["ADM2_EN"].unique())
-            selected_district = st.selectbox("Select District", district_names)
-
-        elif analysis_type == "Hydrological" and basins is not None:
-            basin_names = sorted(basins["WSHD_NAME"].unique())
-            selected_basin = st.selectbox("Select Basin", basin_names)
-
+            selected_aoi = st.selectbox("Select District", district_names)
         else:
-            st.error("Shapefile not found in the data folder.")
+            basins_path = os.path.join(data_dir, "lka_basins.shp")
+            basins = gpd.read_file(basins_path)
+            basin_names = sorted(basins["WSHD_NAME"].unique())
+            selected_aoi = st.selectbox("Select Basin", basin_names)
 
-        temporal_method = st.radio(
-            "Temporal Aggregation",
-            ["Sum", "Mean", "Median"],
-            horizontal=True
-        )
-    
+        temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Median"], horizontal=True)
+
         wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
         wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
+
+        # Convert to serializable strings
+        start_str = wea_start_date.strftime("%Y-%m-%d")
+        end_str = wea_end_date.strftime("%Y-%m-%d")
+
         run_forecast = st.button("Apply Layers")
-    
+
         params = {
             "analysis_type": analysis_type,
-            "district": selected_district if analysis_type == "Administrative" else None,
-            "basin": selected_basin if analysis_type == "Hydrological" else None,
+            "aoi": selected_aoi,
             "temporal_method": temporal_method,
-            "start_date": str(wea_start_date),
-            "end_date": str(wea_end_date),
+            "start_date": start_str,
+            "end_date": end_str,
             "run_forecast": run_forecast,
         }
 
-
     with col2:
+        st.markdown("### 🗺️ Map View")
         Map = geemap.Map(center=[7.8, 80.7], zoom=7)
-    
-        def add_and_zoom(gdf, name, color="#007bff", zoom_padding=0.02):
-            if gdf is None or gdf.empty:
-                st.warning("No geometry found for the selection.")
-                return
-            gdf_wgs84 = gdf.to_crs(4326) if gdf.crs is not None and gdf.crs.to_epsg() != 4326 else gdf
-            Map.add_gdf(gdf_wgs84, layer_name=name, style={"color": color, "weight": 3, "fillOpacity": 0.2})
-            minx, miny, maxx, maxy = gdf_wgs84.total_bounds
-            # add a tiny padding
-            dx = (maxx - minx) * zoom_padding
-            dy = (maxy - miny) * zoom_padding
-            Map.fit_bounds([[miny - dy, minx - dx], [maxy + dy, maxx + dx]])
-    
-        if analysis_type == "Administrative" and "selected_district" in locals():
-            sel = districts[districts["ADM2_EN"] == selected_district]
-            add_and_zoom(sel, f"{selected_district} District", color="#007bff")
-    
-        elif analysis_type == "Hydrological" and "selected_basin" in locals():
-            sel = basins[basins["WSHD_NAME"] == selected_basin]
-            add_and_zoom(sel, f"{selected_basin} Basin", color="#28a745")
-    
-        if run_forecast:
-            rainfall.show(params)   # this should render its own map
 
+        if run_forecast:
+            # --- Load selected shapefile only when user clicks ---
+            if analysis_type == "Administrative":
+                sel = districts[districts["ADM2_EN"] == selected_aoi]
+            else:
+                sel = basins[basins["WSHD_NAME"] == selected_aoi]
+
+            if sel.empty:
+                st.warning("No geometry found for the selected area.")
+            else:
+                # Ensure CRS = EPSG:4326
+                sel = sel.to_crs(4326)
+                Map.add_gdf(sel, layer_name=f"{selected_aoi}", style={"color": "#007bff", "weight": 3, "fillOpacity": 0.2})
+                Map.fit_bounds(sel.total_bounds.reshape(2, 2).tolist())
+
+            # --- Now run rainfall analysis ---
+            rainfall.show(params)
+        else:
+            Map.add_basemap("OPENSTREETMAP")
+            Map.to_streamlit(height=650)
 
 
 
