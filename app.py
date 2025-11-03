@@ -256,32 +256,12 @@ if page == "Home":
 # RAINFALL DISTRIBUTION MODULE
 # ==============================
 if page == "Rainfall Distribution":
-    # --- Tool description ---
-    st.markdown("""
-        <div style="
-            background-color:#f8f9fa;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            text-align: justify;
-        ">
-            <p style="font-size:17px; color:#333;">
-                <b>RiceWater Analytics Hub</b> is a digital platform combining 
-                <i>satellite data, rainfall analytics,</i> and <i>water productivity assessments</i> 
-                to strengthen <i>climate-smart rice production</i>. 
-                It provides an integrated view of <i>water availability, crop performance,</i> 
-                and <i>irrigation efficiency, advancing water</i> and <i>food security goals</i>.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
     # --- Sidebar/controls column ---
     col1, col2 = st.columns([0.4, 1.3])
 
     with col1:
         st.markdown("### 🌧️ Rainfall Distribution")
-        st.info("Visualize GPM rainfall aggregated by basin or administrative boundaries.")
+        st.info("Visualize GPM rainfall aggregated by administrative or basin boundaries.")
 
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
 
