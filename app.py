@@ -594,9 +594,13 @@ elif page == "Weather Forecast":
 # ==============================
 # PADDY MAPPING MODULE
 # ==============================
+# ==============================
+# PADDY MAPPING MODULE
+# ==============================
 elif page == "Rice Mapping":
-     subpage = st.session_state.get("active_subtab", "Seasonal Analysis")  # comes from sidebar dropdown selection
-    
+    # Read selected subtab (default: Seasonal Analysis)
+    subpage = st.session_state.get("active_subtab", "Seasonal Analysis")
+
     # SEASONAL ANALYSIS
     if subpage == "Seasonal Analysis":
         with st.sidebar.expander("Time Series Analysis"):
@@ -605,8 +609,7 @@ elif page == "Rice Mapping":
             aoi_option = st.selectbox(
                 "Select AOI",
                 ["Walawa Irrigation Scheme"],
-                # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
-                key="aoi_select_tab1"
+                key="aoi_select_tab1",
             )
 
             start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
@@ -639,8 +642,8 @@ elif page == "Rice Mapping":
             "season_dates": {
                 "start": str(season_start_date),
                 "peak": str(peak_date),
-                "harvest": str(harvest_date)
-            }
+                "harvest": str(harvest_date),
+            },
         }
         analysis.show(params)
 
@@ -652,8 +655,7 @@ elif page == "Rice Mapping":
             aoi_option_mnt = st.selectbox(
                 "Select AOI",
                 ["Walawa Irrigation Scheme"],
-                # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
-                key="aoi_select_tab2"
+                key="aoi_select_tab2",
             )
 
             start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
@@ -664,36 +666,40 @@ elif page == "Rice Mapping":
             "aoi_mnt": aoi_option_mnt,
             "start_date_mnt": str(start_date_mnt),
             "end_date_mnt": str(end_date_mnt),
-            "run_monitor": run_monitor
+            "run_monitor": run_monitor,
         }
         monitoring.show(params)
 
     # COMPARE SEASONS
     elif subpage == "Compare Seasons":
-        st.markdown("""
-        <div style="
-            background-color:#fff8e6;
-            border-left: 6px solid #f7c948;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        ">
-            <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
-            <p style="color:#555; font-size:16px;">
-                This section will soon allow users to compare rice growing patterns, 
-                mRVI curves, and classification results between multiple seasons.
-            </p>
-            <p style="color:#777; font-size:14px;">
-                Tools will include season overlay maps, growth timeline comparisons, 
-                and pixel-wise change detection analytics.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style="
+                background-color:#fff8e6;
+                border-left: 6px solid #f7c948;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                margin-top: 20px;
+            ">
+                <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
+                <p style="color:#555; font-size:16px;">
+                    This section will soon allow users to compare rice growing patterns,
+                    mRVI curves, and classification results between multiple seasons.
+                </p>
+                <p style="color:#777; font-size:14px;">
+                    Tools will include season overlay maps, growth timeline comparisons,
+                    and pixel-wise change detection analytics.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     # DATA AND METHODS
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
+
         show_readme()
 
 
