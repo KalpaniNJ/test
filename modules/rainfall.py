@@ -106,7 +106,7 @@ def show(params: dict):
 
     if params["analysis_type"] == "Administrative":
         # --- Administrative level: District only ---
-        dist_gdf = _read_vector(_safe_path(DATA_DIR, "lka_dis.shp"))
+        dist_gdf = _read_vector(_safe_path(DATA_DIR, "lka_districts.shp"))
 
         dist_sel = dist_gdf[dist_gdf[COL_DISTRICT] == params.get("district")]
         if not dist_sel.empty:
@@ -134,7 +134,7 @@ def show(params: dict):
     
         # --- Load and display entire shapefile ---
         if params["analysis_type"] == "Administrative":
-            full_gdf = _read_vector(_safe_path(DATA_DIR, "lka_dis.shp")).to_crs(4326)
+            full_gdf = _read_vector(_safe_path(DATA_DIR, "lka_districts.shp")).to_crs(4326)
             layer_name = "District Boundaries"
             aoi_gdf = full_gdf[full_gdf[COL_DISTRICT] == params["district"]]
         else:
