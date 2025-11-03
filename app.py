@@ -291,64 +291,60 @@ div.stButton > button[kind="primary"] {
 """, unsafe_allow_html=True)
 
 # --- Sub Tabs Sidebar Styling ---
-st.markdown("""
+st.sidebar.markdown("""
 <style>
-/* --- CLEAN FIX for Streamlit Markdown styling --- */
-.stSidebar .stMarkdown a.subtab {
-    all: unset !important;
-    display: block !important;
-    background: #f9fafb;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    margin: 4px 0 4px 1.4rem;
-    padding: 8px 12px;
-    color: #444 !important;
-    font-size: 14px !important;
-    font-weight: 500;
-    text-decoration: none !important;
+/* --- Main Tab Buttons --- */
+div.stButton > button:first-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: left !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
     transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    position: relative;
+    width: 100% !important;
+}
+div.stButton > button:first-child:hover {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+div.stButton > button[kind="primary"] {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
 }
 
-/* Hover effect */
-.stSidebar .stMarkdown a.subtab:hover {
-    background-color: #e7f1ff;
+/* --- Subtab Buttons --- */
+div[data-testid="stSidebar"] div.stButton.subtab > button:first-child {
+    margin-left: 1.5rem !important;
+    background-color: #f9fafb !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #444 !important;
+    padding: 6px 12px !important;
+    transition: all 0.2s ease-in-out;
+    width: calc(100% - 1.5rem) !important;
+}
+div[data-testid="stSidebar"] div.stButton.subtab > button:first-child:hover {
+    background-color: #e7f1ff !important;
     color: #0d6efd !important;
-    border-color: #0d6efd;
+    border-color: #0d6efd !important;
     transform: translateX(3px);
 }
-
-/* Active state */
-.stSidebar .stMarkdown a.subtab.active {
-    background-color: #0d6efd;
+div[data-testid="stSidebar"] div.stButton.subtab.active > button:first-child {
+    background-color: #0d6efd !important;
     color: white !important;
-    border-color: #0d6efd;
-    box-shadow: 0 2px 6px rgba(13,110,253,0.25);
-    font-weight: 600;
-}
-
-/* Left accent bar for active item */
-.stSidebar .stMarkdown a.subtab.active::before {
-    content: "";
-    position: absolute;
-    left: -8px;
-    top: 8px;
-    width: 4px;
-    height: calc(100% - 16px);
-    background-color: #0d6efd;
-    border-radius: 2px;
-}
-
-/* Remove Streamlit’s link copy icon */
-[data-testid="stMarkdownContainer"] a[href]:after {
-    display: none !important;
-}
-
-/* Prevent focus outline */
-.stSidebar .stMarkdown a.subtab:focus {
-    outline: none !important;
-    box-shadow: none !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 2px 6px rgba(13,110,253,0.25) !important;
+    font-weight: 600 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -527,15 +523,10 @@ elif page == "Weather Forecast":
 # ==============================
 # PADDY MAPPING MODULE
 # ==============================
-elif page == "Paddy Mapping":
-    # Select sub-section under Paddy Mapping
-    subpage = st.sidebar.radio(
-        "Select Subsection",
-        ["Seasonal Analysis", "Seasonal Monitoring", "Data and Methods"],
-        key="paddy_subpage"
-    )
+elif page == "Rice Mapping":
+    subpage = st.session_state["active_subtab"]  # comes from sidebar dropdown selection
 
-    # SEASONAL ANALYSIS CONTROLS
+    # SEASONAL ANALYSIS
     if subpage == "Seasonal Analysis":
         with st.sidebar.expander("Time Series Analysis"):
             st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
@@ -582,10 +573,10 @@ elif page == "Paddy Mapping":
         }
         analysis.show(params)
 
-    # SEASONAL MONITORING CONTROLS
+    # SEASONAL MONITORING
     elif subpage == "Seasonal Monitoring":
         with st.sidebar.expander("Monitoring"):
-            st.info("Monitor seasonal rice growth. Select the period and run the analysis")
+            st.info("Monitor seasonal rice growth. Select the period and run the analysis.")
 
             aoi_option_mnt = st.selectbox(
                 "Select AOI",
@@ -606,10 +597,119 @@ elif page == "Paddy Mapping":
         }
         monitoring.show(params)
 
-    # ABOUT SECTION
+    # COMPARE SEASONS
+    elif subpage == "Compare Seasons":
+        st.markdown("""
+        <div style="
+            background-color:#fff8e6;
+            border-left: 6px solid #f7c948;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        ">
+            <h3 style="color:#b58900;">🔁 Compare Seasons</h3>
+            <p style="color:#555; font-size:16px;">
+                This section will soon allow users to compare rice growing patterns, 
+                mRVI curves, and classification results between multiple seasons.
+            </p>
+            <p style="color:#777; font-size:14px;">
+                Tools will include season overlay maps, growth timeline comparisons, 
+                and pixel-wise change detection analytics.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # DATA AND METHODS
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
         show_readme()
+
+
+
+# elif page == "Paddy Mapping":
+#     # Select sub-section under Paddy Mapping
+#     subpage = st.sidebar.radio(
+#         "Select Subsection",
+#         ["Seasonal Analysis", "Seasonal Monitoring", "Data and Methods"],
+#         key="paddy_subpage"
+#     )
+
+#     # SEASONAL ANALYSIS CONTROLS
+#     if subpage == "Seasonal Analysis":
+#         with st.sidebar.expander("Time Series Analysis"):
+#             st.info("Plotting sample points over several years may be heavy. Use a limited date range (e.g., a single season).")
+
+#             aoi_option = st.selectbox(
+#                 "Select AOI",
+#                 ["Walawa Irrigation Scheme"],
+#                 # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
+#                 key="aoi_select_tab1"
+#             )
+
+#             start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"))
+#             end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"))
+#             run_ts = st.button("Run Time Series Analysis")
+
+#         with st.sidebar.expander("Outlier Analysis"):
+#             st.info("Perform Time Series analysis before Outlier analysis.")
+#             run_outlier = st.button("Run Outlier Analysis")
+
+#         with st.sidebar.expander("Rice Mapping"):
+#             st.info("Select the Start, Peak, and Harvest dates. These will be used for further analysis.")
+#             season_start_date = st.date_input("Start of Season", value=pd.to_datetime("2021-12-13"))
+#             peak_date = st.date_input("Peak of Season", value=pd.to_datetime("2022-02-25"))
+#             harvest_date = st.date_input("Harvest Date", value=pd.to_datetime("2022-04-01"))
+#             run_paddy = st.button("Run Paddy Season Analysis")
+
+#         with st.sidebar.expander("Statistical Analysis"):
+#             st.info("Calculate total paddy area, area by month, and area by start date.")
+#             run_stats = st.button("Run Statistical Analysis")
+
+#         params = {
+#             "aoi": aoi_option,
+#             "start_date": str(start_date),
+#             "end_date": str(end_date),
+#             "run_ts": run_ts,
+#             "run_outlier": run_outlier,
+#             "run_paddy": run_paddy,
+#             "run_stats": run_stats,
+#             "season_dates": {
+#                 "start": str(season_start_date),
+#                 "peak": str(peak_date),
+#                 "harvest": str(harvest_date)
+#             }
+#         }
+#         analysis.show(params)
+
+#     # SEASONAL MONITORING CONTROLS
+#     elif subpage == "Seasonal Monitoring":
+#         with st.sidebar.expander("Monitoring"):
+#             st.info("Monitor seasonal rice growth. Select the period and run the analysis")
+
+#             aoi_option_mnt = st.selectbox(
+#                 "Select AOI",
+#                 ["Walawa Irrigation Scheme"],
+#                 # ["MahaKanadarawa Water Influence Zone", "MahaKanadarawa Irrigable Area"],
+#                 key="aoi_select_tab2"
+#             )
+
+#             start_date_mnt = st.date_input("Start Date", pd.to_datetime("2023-11-01"), key="start_tab2")
+#             end_date_mnt = st.date_input("End Date", pd.to_datetime("2024-01-31"), key="end_tab2")
+#             run_monitor = st.button("Run Analysis")
+
+#         params = {
+#             "aoi_mnt": aoi_option_mnt,
+#             "start_date_mnt": str(start_date_mnt),
+#             "end_date_mnt": str(end_date_mnt),
+#             "run_monitor": run_monitor
+#         }
+#         monitoring.show(params)
+
+#     # ABOUT SECTION
+#     elif subpage == "Data and Methods":
+#         from utils.readme_section import show_readme
+#         show_readme()
 
 
 # ==============================
