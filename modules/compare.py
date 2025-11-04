@@ -7,16 +7,6 @@ from utils.config import AOI_OPTIONS
 
 
 def show(params):
-    st.markdown("""
-    <div style="background-color:#fff8e6; border-left:6px solid #f7c948;
-    padding:20px; border-radius:8px; margin-top:20px;">
-    <h3 style="color:#b58900;">Compare Paddy Extent Between Seasons</h3>
-    <p style="color:#555; font-size:16px;">
-    This tool compares rice extent between two growing seasons using Sentinel-1 mRVI time-series analysis.
-    </p>
-    </div>
-    """, unsafe_allow_html=True)
-
     # --- Load season CSV ---
     season_df = pd.read_csv(
         "data/season_dates.csv",
