@@ -102,7 +102,7 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
 
 # MAIN FUNCTION
 def show(params: dict):
-    Map = geemap.Map(center=[7.8, 80.7], zoom=9)
+    Map = geemap.Map(center=[7.8, 80.7], zoom=7)
     static_layers = get_static_layers()
 
     # ---- Add static GEE layers ----
