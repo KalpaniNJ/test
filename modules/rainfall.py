@@ -146,8 +146,9 @@ def show(params: dict):
     if params.get("run_forecast") and aoi is not None:
         start_date = params["start_date"]
         end_date = params["end_date"]
+        temporal_method = params.get("temporal_method", "Sum")
     
-        # --- Load and display shapefile ---
+        # --- Load and display entire shapefile ---
         if params["analysis_type"] == "Administrative":
             full_gdf = _read_vector(_safe_path(DATA_DIR, "lka_districts.shp")).to_crs(4326)
             layer_name = "District Boundaries"
@@ -157,55 +158,74 @@ def show(params: dict):
             layer_name = "River Basins"
             aoi_gdf = full_gdf[full_gdf[COL_BASIN] == params["basin"]]
     
-        Map.add_gdf(full_gdf, layer_name=layer_name, style={"color": "#333333", "weight": 0.8, "fillOpacity": 0})
+        Map.add_gdf(
+            full_gdf,
+            layer_name=layer_name,
+            style={"color": "#333333", "weight": 0.8, "fillOpacity": 0}
+        )
     
-        # --- Zoom to AOI bounds ---
+        # --- Zoom to AOI bounds only ---
         if not aoi_gdf.empty:
-            bounds = aoi_gdf.total_bounds
+            bounds = aoi_gdf.total_bounds  # [minx, miny, maxx, maxy]
             Map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
+        else:
+            st.warning(f"Could not find {aoi_label} in shapefile for zooming.")
     
-        with st.spinner(f"Computing rainfall layers for {aoi_label} ({start_date} → {end_date})..."):
-    
-            # --- Define visualization parameters for each rainfall mode ---
-            vis_params_dict = {
-                "Sum": {
-                    "img": _rainfall_aggregate(start_date, end_date, "sum").clip(aoi),
-                    "vis": {"min": 0, "max": 500, "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0044cc", "#001f66"]},
-                    "label": "Total Rainfall [mm]"
-                },
-                "Mean": {
-                    "img": _rainfall_aggregate(start_date, end_date, "mean").clip(aoi),
-                    "vis": {"min": 0, "max": 10, "palette": ["#f7fcf0", "#ccece6", "#66c2a4", "#238b45", "#00441b"]},
-                    "label": "Mean Rainfall Rate [mm/hr]"
-                },
-                "Max": {
-                    "img": _rainfall_aggregate(start_date, end_date, "max").clip(aoi),
-                    "vis": {"min": 0, "max": 50, "palette": ["#ffffcc", "#ffeda0", "#feb24c", "#f03b20", "#bd0026"]},
-                    "label": "Maximum Rainfall Rate [mm/hr]"
+        # --- Proceed with rainfall analysis ---
+        with st.spinner(
+            f"Computing {temporal_method} rainfall for {aoi_label} ({start_date}→{end_date})..."
+        ):
+            # --- Choose palette and range dynamically ---
+            if temporal_method.lower() == "sum":
+                rain_vis = {
+                    "min": 0,
+                    "max": 500,
+                    "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
                 }
-            }
+                legend_label = "Total Rainfall [mm]"
+            
+            elif temporal_method.lower() == "mean":
+                rain_vis = {
+                    "min": 0,
+                    "max": 20,
+                    "palette": ["#f7fcf0", "#ccece6", "#66c2a4", "#238b45", "#00441b"],
+                }
+                legend_label = "Mean Rainfall Rate [mm/hr]"
+            
+            elif temporal_method.lower() == "max":
+                rain_vis = {
+                    "min": 0,
+                    "max": 50,
+                    "palette": ["#ffffcc", "#ffeda0", "#feb24c", "#f03b20", "#bd0026"],
+                }
+                legend_label = "Maximum Rainfall Rate [mm/hr]"
+            
+            else:
+                # fallback default
+                rain_vis = {
+                    "min": 0,
+                    "max": 500,
+                    "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
+                }
+                legend_label = "GPM Rainfall [mm]"
     
-            # --- Add layers and legends ---
-            for key, cfg in vis_params_dict.items():
-                Map.addLayer(cfg["img"], cfg["vis"], f"GPM Rainfall ({key})")
-                Map.add_colorbar(
-                    vis_params=cfg["vis"],
-                    label=cfg["label"],
-                    layer_name=f"GPM Rainfall ({key})",
-                    font_size=14,
-                    label_font_size=16
-                )
+            # --- Compute rainfall image ---
+            rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
     
-            # --- Optional: Highlight specific ranges (<10, >100 mm) for Sum ---
-            sum_img = vis_params_dict["Sum"]["img"]
-            low_rain_mask = sum_img.lt(10).selfMask()
-            high_rain_mask = sum_img.gt(100).selfMask()
+            # --- Add layer and legend ---
+            Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
+            Map.add_colorbar(
+                vis_params=rain_vis,
+                label=legend_label,
+                layer_name=f"GPM Rainfall ({temporal_method})",
+                font_size=16,
+                label_font_size=18
+            )
     
-            Map.addLayer(low_rain_mask, {"palette": ["#ffcc00"]}, "< 10 mm Rainfall", False)
-            Map.addLayer(high_rain_mask, {"palette": ["#9900cc"]}, "> 100 mm Rainfall", False)
-    
-        # --- Finalize ---
-        Map.addLayerControl()
-        Map.to_streamlit()
+    # ---- Final map ----
+    Map.addLayerControl()
+    Map.to_streamlit()
+
+
         
 
