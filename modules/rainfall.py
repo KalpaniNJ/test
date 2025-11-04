@@ -188,7 +188,7 @@ def show(params: dict):
                 rain_vis = {
                     "min": 0,
                     "max": 20,
-                    "palette": ["#f7fcf0", "#ccece6", "#66c2a4", "#238b45", "#00441b"],
+                    "palette": ["ffffff", "#f7fcf0", "#ccece6", "#66c2a4", "#238b45", "#00441b"],
                 }
                 legend_label = "Mean Rainfall Rate [mm/hr]"
             
@@ -196,7 +196,7 @@ def show(params: dict):
                 rain_vis = {
                     "min": 0,
                     "max": 50,
-                    "palette": ["#ffffcc", "#ffeda0", "#feb24c", "#f03b20", "#bd0026"],
+                    "palette": ["ffffff", "#ffffcc", "#ffeda0", "#feb24c", "#f03b20", "#bd0026"],
                 }
                 legend_label = "Maximum Rainfall Rate [mm/hr]"
             
@@ -212,7 +212,6 @@ def show(params: dict):
             # --- Compute rainfall image ---
             rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
     
-            # --- Add layer and legend ---
             Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
             Map.add_colorbar(
                 vis_params=rain_vis,
@@ -222,10 +221,5 @@ def show(params: dict):
                 label_font_size=18
             )
     
-    # ---- Final map ----
     Map.addLayerControl()
     Map.to_streamlit()
-
-
-        
-
