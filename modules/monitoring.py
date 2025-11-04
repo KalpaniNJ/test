@@ -834,3 +834,7 @@ def show(params):
                         ax4.set_title("Paddy Area % by Start Date")
                         st.pyplot(fig4)
                         plt.close(fig4)
+
+        else:
+            st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                        unsafe_allow_html=True)
