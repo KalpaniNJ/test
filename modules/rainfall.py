@@ -75,8 +75,7 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str, ao
 
     # Load IMERG 30-minute precipitation rate (mm/hr)
     ic = (
-        # ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
-        ee.ImageCollection("NASA/GPM_L3/IMERGDF_V07")
+        ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
         .filterBounds(aoi)
         .filterDate(ee.Date(start_date), ee.Date(end_date))
         .select("precipitation")
@@ -97,7 +96,7 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str, ao
 
     else:
         # Total rainfall (mm): each image represents 0.5 hour of rate (mm/hr)
-        img = ic.sum()
+        img = ic.sum().multiply(0.5)
 
     # Mask very small or invalid values
     img = img.updateMask(img.gt(0.1))
