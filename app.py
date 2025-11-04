@@ -454,7 +454,7 @@ if page == "Rainfall Distribution":
     col1, col2 = st.columns([0.4, 1.3])
 
     with col1:
-        st.markdown("## 🌧️ Rainfall Distribution")
+        st.markdown("### 🌧️ Rainfall Distribution")
         st.info("Visualize GPM rainfall aggregated by administrative or basin boundaries.")
 
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
@@ -559,7 +559,7 @@ elif page == "Rice Mapping":
 
     # SEASONAL ANALYSIS MODULE (4-step flow)
     if subpage == "Seasonal Analysis":
-        st.markdown("### Seasonal Analysis")
+        st.subheader("📈 Seasonal Analysis")
         st.markdown("""
         <p style="color:#444; font-size:16px;">
             Analyze rice growth dynamics using Sentinel-1 mRVI data.
@@ -582,7 +582,7 @@ elif page == "Rice Mapping":
         if step == "Time Series Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
-                st.subheader("Time Series Analysis")
+                st.markdown("### Time Series Analysis")
                 st.info("Use a limited date range (e.g., one season) for faster processing.")
                 aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_ts")
                 st.session_state["aoi"] = aoi_option
@@ -614,7 +614,7 @@ elif page == "Rice Mapping":
         elif step == "Outlier Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
-                st.subheader("Outlier Analysis")
+                st.markdown("### Outlier Analysis")
                 st.info("Identify anomalies in mRVI values across time and sample points.")
                 run_outlier = st.button("Run Outlier Analysis")
 
@@ -636,7 +636,7 @@ elif page == "Rice Mapping":
         elif step == "Rice Mapping":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
-                st.subheader("Rice Mapping")
+                st.markdown("### Rice Mapping")
                 st.info("Define season dates for rice extent classification.")
                 season_start_date = st.date_input("Start of Season", pd.to_datetime("2021-12-13"))
                 peak_date = st.date_input("Peak of Season", pd.to_datetime("2022-02-25"))
@@ -668,7 +668,7 @@ elif page == "Rice Mapping":
         elif step == "Statistical Analysis":
             col1, col2 = st.columns([0.4, 1.3])
             with col1:
-                st.subheader("Statistical Analysis")
+                st.markdown("### Statistical Analysis")
                 st.info("Compute total paddy area and cropping start-date distribution.")
                 run_stats = st.button("Run Statistical Analysis")
 
@@ -687,7 +687,7 @@ elif page == "Rice Mapping":
 
     # --- seasonal monitoring module ---
     elif subpage == "Seasonal Monitoring":
-        st.markdown("### Seasonal Monitoring")
+        st.subheader(" 🌾 Seasonal Monitoring")
         st.markdown("""
         <p style="color:#444; font-size:16px;">
             Perform near real-time monitoring of the active rice season using Sentinel-1 mRVI time series. 
@@ -708,7 +708,7 @@ elif page == "Rice Mapping":
         monitoring.show(params)
 
     elif subpage == "Compare Seasons":
-        st.markdown("### Compare Seasons")
+        st.subheader(" 🔁 Compare Seasons")
         st.markdown("""
         <p style="color:#444; font-size:16px;">
             Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series. Each map is generated after outlier detection and thresholding.
