@@ -222,7 +222,7 @@ def show(params: dict):
                 legend_label = "GPM Rainfall [mm]"
     
             # --- Compute rainfall image ---
-            rain_img = _rainfall_aggregate(start_date, end_date, temporal_method).clip(aoi)
+            rain_img = _rainfall_aggregate(start_date, end_date, temporal_method, aoi)
     
             Map.addLayer(rain_img, rain_vis, f"GPM Rainfall ({temporal_method})")
             Map.add_colorbar(
