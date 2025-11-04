@@ -251,7 +251,7 @@ def show(params):
                     st.pyplot(plt.gcf())
     
                 with col2:
-                    st.subheader(" ")
+                    # st.subheader(" ")
                     # --- Point Data Visualization ---
                     # Sample each image at all points and add time property
                     def sample_image(image):
