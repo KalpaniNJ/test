@@ -97,16 +97,17 @@ def show(params):
             key="season_right"
         )
 
-    # Find corresponding rows for selected seasons
-    left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
-    right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
+        # Find corresponding rows for selected seasons
+        left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
+        right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
+    
+        # AOI selection
+        aoi_name = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
+        aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
 
-    # AOI selection
-    aoi_name = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
 
-    with col2:
-        if st.button("Run Comparison"):
+    if st.button("Run Comparison"):
+        with col2:
             with st.spinner("Generating paddy maps for both seasons..."):
     
                 # Define date sets for each selected season
@@ -172,4 +173,4 @@ def show(params):
     
                 Map.add(split_control)
                 Map.to_streamlit(height=600)
-
+    
