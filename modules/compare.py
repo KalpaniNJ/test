@@ -85,7 +85,7 @@ def show(params):
                     aoi=aoi,
                     mosaicCollectionUInt16=mosaic_left,
                     filteredDekadList=dekads_left,
-                    outlier_params=dummy_outlier_params,
+                    outlier_params=outlier_params_left,
                     dates=left_dates
                 )
     
@@ -100,7 +100,7 @@ def show(params):
                     aoi=aoi,
                     mosaicCollectionUInt16=mosaic_right,
                     filteredDekadList=dekads_right,
-                    outlier_params=dummy_outlier_params,
+                    outlier_params=outlier_params_right,
                     dates=right_dates
                 )
     
