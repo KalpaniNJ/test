@@ -84,25 +84,28 @@ def show(params):
                     dates=right_dates
                 )
 
-                # --- Create two maps ---
+                # --- Create split map ---
                 aoi_center = aoi.centroid().coordinates().getInfo()
+                Map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
+                Map.add_basemap("SATELLITE")
+                
+                if isinstance(paddy_left, ee.Image) and isinstance(paddy_right, ee.Image):
+                    left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
+                    right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
+                
+                    split_control = geemap.SplitMapControl(
+                        left_layer=left_vis,
+                        right_layer=right_vis,
+                        left_label=season_left,
+                        right_label=season_right
+                    )
+                
+                    Map.add(split_control)
+                    Map.addLayerControl()
+                    Map.to_streamlit(height=600)
+                else:
+                    st.error("❌ One of the rice maps failed to generate. Please check season dates or AOI.")
 
-                # Left season map
-                left_map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
-                left_map.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_left)
-
-                # Right season map
-                right_map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
-                right_map.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_right)
-
-                # --- Display maps side by side ---
-                map_col1, map_col2 = st.columns(2)
-                with map_col1:
-                    st.markdown(f"### 🌾 {season_left}")
-                    left_map.to_streamlit(height=500)
-                with map_col2:
-                    st.markdown(f"### 🌾 {season_right}")
-                    right_map.to_streamlit(height=500)
 
 
 # import streamlit as st
