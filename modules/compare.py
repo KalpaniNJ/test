@@ -72,31 +72,34 @@ def show(params):
     """, unsafe_allow_html=True)
 
     # Load season CSV
-    season_df = pd.read_csv("data/season_dates.csv", parse_dates=[
-        "start_date", "season_start", "peak_date", "harvest_date", "end_date"
-    ])
+    season_df = pd.read_csv(
+        "data/season_dates.csv",
+        parse_dates=["start_date", "season_start", "peak_date", "harvest_date", "end_date"]
+    )
+
+    # Create clean display names (e.g. "2023 Yala")
+    season_df["display_name"] = season_df["season"].apply(
+        lambda x: x.replace("-", " ") if isinstance(x, str) else x
+    )
 
     # Season selection
     col1, col2 = st.columns(2)
     with col1:
         season_left = st.selectbox(
             "Select Left Season",
-            [f"{r['year']} {r['season']}" for _, r in season_df.iterrows()],
+            season_df["display_name"].tolist(),
             key="season_left"
         )
     with col2:
         season_right = st.selectbox(
             "Select Right Season",
-            [f"{r['year']} {r['season']}" for _, r in season_df.iterrows()],
+            season_df["display_name"].tolist(),
             key="season_right"
         )
 
-    left_row = season_df.loc[
-        (season_df["year"].astype(str) + " " + season_df["season"]) == season_left
-    ].iloc[0]
-    right_row = season_df.loc[
-        (season_df["year"].astype(str) + " " + season_df["season"]) == season_right
-    ].iloc[0]
+    # Find corresponding rows for selected seasons
+    left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
+    right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
 
     # AOI selection
     aoi_name = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
@@ -105,7 +108,7 @@ def show(params):
     if st.button("Run Comparison"):
         with st.spinner("Generating paddy maps for both seasons..."):
 
-            # Define date sets
+            # Define date sets for each selected season
             left_dates = {
                 "start": str(left_row["season_start"]),
                 "peak": str(left_row["peak_date"]),
@@ -168,3 +171,4 @@ def show(params):
 
             Map.add(split_control)
             Map.to_streamlit(height=600)
+
