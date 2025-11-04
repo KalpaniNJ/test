@@ -193,7 +193,7 @@ def show(params: dict):
                 rain_vis = {
                     "min": 0,
                     "max": 500,
-                    "palette": ["#ffffff", "#cce5ff", "#66b2ff", "#0066ff", "#001f66"],
+                    "palette": ["#ffffff", "#00ffef", "#66b2ff", "#0066ff", "#001f66"],
                 }
                 legend_label = "Total Rainfall [mm]"
             
