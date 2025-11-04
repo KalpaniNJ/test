@@ -71,7 +71,7 @@ def show(params):
                     end_date=str(left_row["end_date"].date())
                 )
     
-                paddy_left = rice_algorithms.perform_rice_mapping(
+                paddy_left = rice_algorithms.perform_rice_mapping_onlyrice(
                     aoi=aoi,
                     mosaicCollectionUInt16=mosaic_left,
                     filteredDekadList=dekads_left,
@@ -85,22 +85,30 @@ def show(params):
                     start_date=str(right_row["start_date"].date()),
                     end_date=str(right_row["end_date"].date())
                 )
-    
-                paddy_right = rice_algorithms.perform_rice_mapping(
+                   
+                paddy_right = rice_algorithms.perform_rice_mapping_onlyrice(
                     aoi=aoi,
                     mosaicCollectionUInt16=mosaic_right,
                     filteredDekadList=dekads_right,
                     outlier_params=outlier_params_right,
                     dates=right_dates
                 )
-    
+
                 # Create split map
                 aoi_center = aoi.centroid().coordinates().getInfo()
                 Map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
                 Map.add_basemap("SATELLITE")
     
-                left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
-                right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
+                # left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
+                # right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
+
+                if isinstance(paddy_left, ee.Image) and isinstance(paddy_right, ee.Image):
+                    left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
+                    right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
+                else:
+                    st.error("❌ One of the rice maps failed to generate. Please check season dates or AOI.")
+                    return
+
     
                 split_control = geemap.SplitMapControl(
                     left_layer=left_vis,
