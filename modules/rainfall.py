@@ -229,6 +229,6 @@ def show(params: dict):
                 font_size=16,
                 label_font_size=18
             )
-    
-    Map.addLayerControl()
-    Map.to_streamlit()
+    with st.spinner("Loading map and layers... Please wait."):
+        Map.addLayerControl()
+        Map.to_streamlit()
