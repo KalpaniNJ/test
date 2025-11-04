@@ -2,6 +2,7 @@ import streamlit as st
 import ee
 import geemap.foliumap as geemap
 import pandas as pd
+from geemap.foliumap import SplitMapControl
 from utils import gee_helpers, rice_algorithms
 from utils.config import AOI_OPTIONS
 
@@ -93,7 +94,7 @@ def show(params):
                     left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
                     right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
                 
-                    split_control = geemap.SplitMapControl(
+                    split_control = SplitMapControl(
                         left_layer=left_vis,
                         right_layer=right_vis,
                         left_label=season_left,
