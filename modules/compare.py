@@ -81,13 +81,13 @@ def show(params):
     with col1:
         season_left = st.selectbox(
             "Select Left Season",
-            [f"{r.year} {r.season}" for _, r in season_df.iterrows()],
+            [f"{r['year']} {r['season']}" for _, r in season_df.iterrows()],
             key="season_left"
         )
     with col2:
         season_right = st.selectbox(
             "Select Right Season",
-            [f"{r.year} {r.season}" for _, r in season_df.iterrows()],
+            [f"{r['year']} {r['season']}" for _, r in season_df.iterrows()],
             key="season_right"
         )
 
