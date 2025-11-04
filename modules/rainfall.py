@@ -42,6 +42,29 @@ def _get_sri_lanka_geometry() -> ee.Geometry:
         .geometry()
     )
 
+# ---------- Static layers: load once ----------
+@st.cache_resource(show_spinner=False)
+def get_static_layers():
+    """Load static GEE layers only once for speed."""
+    worldcover = (
+        ee.ImageCollection("ESA/WorldCover/v200")
+        .first()
+        .select("Map")
+        .clip(_get_sri_lanka_geometry())
+    )
+
+    srtm = ee.Image("USGS/SRTMGL1_003").clip(_get_sri_lanka_geometry())
+
+    water = (
+        ee.Image("JRC/GSW1_4/GlobalSurfaceWater")
+        .select("occurrence")
+        .gt(90)
+        .updateMask(ee.Image("JRC/GSW1_4/GlobalSurfaceWater").select("occurrence").gt(90))
+        .clip(_get_sri_lanka_geometry())
+    )
+
+    return {"worldcover": worldcover, "srtm": srtm, "water": water}
+    
 # ---------- Rainfall (GPM IMERG V07) ----------
 def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
     """Aggregate GPM rainfall over time.
@@ -55,6 +78,7 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
         .filterDate(ee.Date(start_date), ee.Date(end_date))
         .select("precipitation")
+        .map(lambda img: img.clip(aoi))
     )
 
     method = temporal_method.lower()
@@ -75,21 +99,6 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
     img = img.updateMask(img.gt(0.1))
 
     return img
-
-# ---------- ESA/WorldCover (LULC) ----------
-def _worldcover_2021():
-    return ee.ImageCollection("ESA/WorldCover/v200").first().select("Map").clip(_get_sri_lanka_geometry())
-
-# ---------- SRTM-DEM ----------
-def _srtm_dem():
-    return ee.Image("USGS/SRTMGL1_003").clip(_get_sri_lanka_geometry())
-
-# ---------- JRC Permanent Water ----------
-def _jrc_permanent_water():
-    """Return permanent water mask (1 = permanent water, 0 = non-water)."""
-    dataset = ee.Image("JRC/GSW1_4/GlobalSurfaceWater")
-    permanent = dataset.select("occurrence").gt(90)  # >90% occurrence = permanent
-    return permanent.updateMask(permanent).clip(_get_sri_lanka_geometry())
 
 # MAIN FUNCTION
 def show(params: dict):
@@ -142,7 +151,7 @@ def show(params: dict):
         else:
             st.error(f"Basin '{params.get('basin')}' is not found.")
 
-    # ---- Main analysis ----
+    # Main rainfall analysis
     if params.get("run_forecast") and aoi is not None:
         start_date = params["start_date"]
         end_date = params["end_date"]
