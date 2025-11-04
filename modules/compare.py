@@ -55,16 +55,25 @@ def show(params):
                     "harvest": str(right_row["harvest_date"].date())
                 }
     
-                # --- Run mosaic and rice mapping for both seasons ---
-                # (You can adjust the outlier detection method as needed)
-                # Here we use dummy outlier_params; replace with your own or load from cache
-                dummy_outlier_params = {
-                    "diff_start_peak": 0.1,
-                    "diff_peak_harvest": 0.1,
-                    "q3_start": 0.2,
-                    "q1_peak": 0.3,
-                }
+                # --- Run parameter extraction, mosaic and rice mapping for both seasons ---
+                # Left season
+                df_line_left, df_points_left = gee_helpers.get_time_series(
+                    aoi=aoi,
+                    start_date=str(left_row["start_date"].date()),
+                    end_date=str(left_row["end_date"].date())
+                )
     
+                outlier_params_left = rice_algorithms.detect_outliers(df_points_left, left_dates)
+
+                # Right season
+                df_line_right, df_points_right = gee_helpers.get_time_series(
+                    aoi=aoi,
+                    start_date=str(right_row["start_date"].date()),
+                    end_date=str(right_row["end_date"].date())
+                )
+    
+                outlier_params_right = rice_algorithms.detect_outliers(df_points_right, right_dates)
+
                 # Left season
                 mosaic_left, dekads_left = gee_helpers.get_mosaic_collection(
                     aoi=aoi,
@@ -95,7 +104,7 @@ def show(params):
                     dates=right_dates
                 )
     
-                # --- Create split map ---
+                # Create split map
                 aoi_center = aoi.centroid().coordinates().getInfo()
                 Map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
                 Map.add_basemap("SATELLITE")
