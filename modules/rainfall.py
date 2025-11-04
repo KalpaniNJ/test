@@ -66,7 +66,7 @@ def get_static_layers():
     return {"worldcover": worldcover, "srtm": srtm, "water": water}
     
 # ---------- Rainfall (GPM IMERG V07) ----------
-def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) -> ee.Image:
+def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str, aoi=None) -> ee.Image:
     """Aggregate GPM rainfall over time.
     - Sum: total rainfall (mm) from 30-min data
     - Mean: mean rainfall rate (mm/hr)
@@ -78,8 +78,10 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
         ee.ImageCollection("NASA/GPM_L3/IMERG_V07")
         .filterDate(ee.Date(start_date), ee.Date(end_date))
         .select("precipitation")
-        .map(lambda img: img.clip(aoi))
     )
+    
+    if aoi:
+        ic = ic.map(lambda img: img.clip(aoi))
 
     method = temporal_method.lower()
 
