@@ -454,7 +454,7 @@ if page == "Rainfall Distribution":
     col1, col2 = st.columns([0.4, 1.3])
 
     with col1:
-        st.markdown("### 🌧️ Rainfall Distribution")
+        st.markdown("## 🌧️ Rainfall Distribution")
         st.info("Visualize GPM rainfall aggregated by administrative or basin boundaries.")
 
         analysis_type = st.radio("Select Analysis Type", ["Administrative", "Hydrological"], horizontal=True)
