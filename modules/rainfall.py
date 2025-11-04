@@ -102,10 +102,11 @@ def _rainfall_aggregate(start_date: str, end_date: str, temporal_method: str) ->
 
 # MAIN FUNCTION
 def show(params: dict):
-    Map = geemap.Map(center=[7.8, 80.7], zoom=8)
+    Map = geemap.Map(center=[7.8, 80.7], zoom=9)
+    static_layers = get_static_layers()
 
     # ---- Add static GEE layers ----
-    Map.addLayer(_worldcover_2021(), {"min": 10, "max": 100,
+    Map.addLayer(static_layers["worldcover"], {"min": 10, "max": 100,
             "palette": [
                 "#006400", "#ffbb22", "#ffff4c", "#f096ff", "#fa0000",
                 "#b4b4b4", "#f0f0f0", "#0064c8", "#0096a0", "#00cf75",
@@ -115,7 +116,7 @@ def show(params: dict):
         "LULC (ESA WorldCover 2021)", False
     )
 
-    Map.addLayer(_srtm_dem(), {"min": 0, "max": 3000,
+    Map.addLayer(static_layers["srtm"], {"min": 0, "max": 3000,
             "palette": [
                 "#2E8B57", "#9ACD32", "#EEE8AA", "#CD853F", "#D2691E", "#A0522D", "#FFFFFF"
             ],
@@ -123,7 +124,7 @@ def show(params: dict):
         "Elevation (SRTM)", False
     )
     
-    Map.addLayer(_jrc_permanent_water(), {"palette": ["#0000FF"], "opacity": 0.6}, "Permanent Water (JRC)", False)
+    Map.addLayer(static_layers["water"], {"palette": ["#0000FF"], "opacity": 0.6}, "Permanent Water (JRC)", False)
 
     # ---- Build AOI ----
     aoi = None
@@ -229,6 +230,8 @@ def show(params: dict):
                 font_size=16,
                 label_font_size=18
             )
+    
     with st.spinner("Loading map and layers... Please wait."):
         Map.addLayerControl()
+        time.sleep(0.5)
         Map.to_streamlit()
