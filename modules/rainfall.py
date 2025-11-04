@@ -233,5 +233,4 @@ def show(params: dict):
     
     with st.spinner("Loading map and layers... Please wait."):
         Map.addLayerControl()
-        time.sleep(0.5)
         Map.to_streamlit()
