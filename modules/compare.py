@@ -85,6 +85,7 @@ def show(params):
     col1, col2 = st.columns([0.4, 1.3])
     # Season selection
     with col1:
+        st.subheader("Select seasons to compare")
         season_left = st.selectbox(
             "Select Season",
             season_df["display_name"].tolist(),
