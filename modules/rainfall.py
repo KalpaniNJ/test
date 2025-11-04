@@ -187,7 +187,7 @@ def show(params: dict):
             elif temporal_method.lower() == "mean":
                 rain_vis = {
                     "min": 0,
-                    "max": 20,
+                    "max": 10,
                     "palette": ["ffffff", "#f7fcf0", "#ccece6", "#66c2a4", "#238b45", "#00441b"],
                 }
                 legend_label = "Mean Rainfall Rate [mm/hr]"
