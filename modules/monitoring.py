@@ -24,8 +24,8 @@ def show(params):
             aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_mnt")
     
             # Date range
-            start_date_mnt = st.date_input("Start Date", pd.to_datetime("2022-12-01"), key="start_mnt")
-            end_date_mnt = st.date_input("End Date", pd.to_datetime("2023-02-28"), key="end_mnt")
+            start_date_mnt = st.date_input("From", pd.to_datetime("2022-12-01"), key="start_mnt")
+            end_date_mnt = st.date_input("To", pd.to_datetime("2023-02-28"), key="end_mnt")
     
             # Run button
             run_monitor = st.button("Run Seasonal Monitoring")
