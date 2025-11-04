@@ -356,3 +356,115 @@ def perform_rice_mapping(aoi, mosaicCollectionUInt16, filteredDekadList, outlier
     ).updateMask(maskedPaddyClassification)
 
     return maskedPaddyClassification, growingSeason, maskedStartMonth, maskedStartMonthDay
+
+
+
+def perform_rice_mapping_onlyrice(aoi, mosaicCollectionUInt16, filteredDekadList, outlier_params, dates):
+    """Perform rice mapping using mRVI temporal logic."""
+
+    assets = load_assets()
+    roads = assets["roads"]
+    water = assets["water"]
+
+    # Extract outlier parameters from the dictionary
+    diff_start_peak = outlier_params["diff_start_peak"]
+    diff_peak_harvest = outlier_params["diff_peak_harvest"]
+    q3_start = outlier_params["q3_start"]
+    q1_peak = outlier_params["q1_peak"]
+
+    # Earth Engine dates
+    sosDate = ee.Date(dates['start'])
+    peakDate = ee.Date(dates['peak'])
+    fallDate = ee.Date(dates['harvest'])
+
+    # ---------------- mRVI SOS-Peak-Fall analysis ----------------
+    #  Function to get adjacent dekads
+    def getAdjacentDekads(targetDate, dekadList):
+        index = dekadList.indexOf(targetDate)
+        return ee.List([
+            dekadList.get(ee.Number(index).subtract(1)),
+            targetDate,
+            dekadList.get(ee.Number(index).add(1))
+        ]).filter(ee.Filter.neq('item', None))
+
+    # Extract SOS, Peak, Fall Images
+    sosWindow = getAdjacentDekads(sosDate, filteredDekadList)
+    sosImages = mosaicCollectionUInt16.filter(ee.Filter.inList('dekad', sosWindow))
+    sosMin = sosImages.reduce(ee.Reducer.min())
+
+    peakWindow = getAdjacentDekads(peakDate, filteredDekadList)
+    peakImages = mosaicCollectionUInt16.filter(ee.Filter.inList('dekad', peakWindow))
+    peakMax = peakImages.reduce(ee.Reducer.max())
+
+    fallWindow = getAdjacentDekads(fallDate, filteredDekadList)
+    fallImages = mosaicCollectionUInt16.filter(ee.Filter.inList('dekad', fallWindow))
+    fallMin = fallImages.reduce(ee.Reducer.min())
+
+    # Main Conditions
+    positiveGrowth = peakMax.subtract(sosMin).gt(diff_start_peak/2)
+    negativeDecline = peakMax.subtract(fallMin).gt(diff_peak_harvest/2)
+
+    # Additional Temporal and Quartile Checks
+    # thresholds from quartile analysis
+    sosMaxThreshold = q3_start
+    peakMinThreshold = q1_peak
+
+    # Check SOS < Q3 and Peak > Q1
+    valuePatternMask = sosMin.lte(sosMaxThreshold).And(peakMax.gte(peakMinThreshold))
+
+    # Time difference in months between SOS min and Peak max
+    timeDiffMonths = peakDate.difference(sosDate, 'month')
+    timePatternMask = timeDiffMonths.gte(1)
+
+    # Combine All Conditions
+    paddyMask = positiveGrowth.And(negativeDecline).And(valuePatternMask).And(timePatternMask)
+
+    paddyClassification = paddyMask.clip(aoi).rename('paddy_classified').selfMask()
+
+    def clean_paddy_mask(paddy_mask, aoi, kernel_radius=1, min_object_area=10000):
+        """Clean a paddy mask by masking tree cover and built-up areas, applying dilation, and removing small objects."""
+        # Load ESA WorldCover and clip
+        esa = ee.ImageCollection('ESA/WorldCover/v200').first().clip(aoi)
+        
+        # Mask tree cover and built-up areas
+        tree_cover = esa.eq(10)
+        built_up = esa.eq(50)
+        paddy_clean = paddy_mask.updateMask(tree_cover.Not()).updateMask(built_up.Not())
+        
+        # Apply dilation
+        kernel = ee.Kernel.circle(radius=kernel_radius, units='pixels')
+        paddy_clean = paddy_clean.focal_max(kernel=kernel, iterations=1)
+        
+        # Object-based noise removal
+        object_size = paddy_clean.connectedPixelCount(maxSize=128, eightConnected=False)
+        pixel_area = ee.Image.pixelArea()
+        object_area = object_size.multiply(pixel_area)
+        
+        # Mask small objects
+        paddy_clean = paddy_clean.updateMask(object_area.gte(min_object_area))
+        
+        return paddy_clean
+
+    # Add generalization
+    cleaned_paddy = clean_paddy_mask(paddyClassification, aoi)
+
+    # ---------------- Mask roads & water features ----------------
+    # Set a mask property for each feature
+    water = water.map(lambda f: f.set('mask', 1))
+    roads = roads.map(lambda f: f.set('mask', 1))
+
+    # Optional: buffer roads (e.g., 3 meters)
+    roadsBuffer = roads.map(lambda f: f.buffer(3))
+
+    # Convert features to raster mask
+    waterMask = water.reduceToImage(properties=['mask'], reducer=ee.Reducer.first()).clip(aoi).unmask(0).gt(0)
+    roadsMask = roadsBuffer.reduceToImage(properties=['mask'], reducer=ee.Reducer.first()).clip(aoi).unmask(0).gt(0)
+
+    # Combine masks
+    eraseMask = waterMask.Or(roadsMask)
+
+    # Apply mask to paddyClassification
+    maskedPaddyClassification = cleaned_paddy.updateMask(eraseMask.Not()).rename('masked_paddy_classified')
+    maskedPaddyClassification = maskedPaddyClassification.updateMask(maskedPaddyClassification.gt(0))
+
+    return maskedPaddyClassification
