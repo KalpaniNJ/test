@@ -60,17 +60,6 @@ def generate_sar_stack(aoi, start_date, season_start, peak_date, end_date):
 
 # --- Main Function ---
 def show(params):
-    st.markdown("""
-    <div style="background-color:#fff8e6; border-left:6px solid #f7c948;
-    padding:20px; border-radius:8px; margin-top:20px;">
-    <h3 style="color:#b58900;">Compare Seasons</h3>
-    <p style="color:#555; font-size:16px;">
-    Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series.
-    Each map is generated with automatic outlier detection and thresholding.
-    </p>
-    </div>
-    """, unsafe_allow_html=True)
-
     # Load season CSV
     season_df = pd.read_csv(
         "data/season_dates.csv",
