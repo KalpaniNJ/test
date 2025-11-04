@@ -89,12 +89,10 @@ def show(params):
 
                 # Left season map
                 left_map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
-                left_map.add_basemap("SATELLITE")
                 left_map.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_left)
 
                 # Right season map
                 right_map = geemap.Map(center=[aoi_center[1], aoi_center[0]], zoom=11)
-                right_map.add_basemap("SATELLITE")
                 right_map.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_right)
 
                 # --- Display maps side by side ---
