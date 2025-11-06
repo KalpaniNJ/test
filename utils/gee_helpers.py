@@ -378,3 +378,39 @@ def compute_statistics(aoi, maskedPaddyClassification, maskedStartMonth, maskedS
 def perform_monitoring(params):
     """Placeholder for seasonal monitoring analysis"""
     return {"trend": []}
+
+
+def get_sar_rgb(aoi, start_date, peak_date, harvest_date, orbit_pass="DESCENDING"):
+    """
+    Generate a Sentinel-1 VV RGB composite:
+        R = mean VV between start and peak (pre-peak)
+        G = mean VV between peak and harvest (peak to harvest)
+        B = mean VV between harvest and one month after harvest (post-harvest)
+    Args:
+        aoi (ee.Geometry or ee.FeatureCollection): Area of interest.
+        start_date (str): Start date (e.g., "2022-06-01").
+        peak_date (str): Peak date (e.g., "2022-09-01").
+        harvest_date (str): Harvest date (e.g., "2022-11-01").
+        orbit_pass (str): Sentinel-1 orbit ("ASCENDING" or "DESCENDING").
+    Returns:
+        ee.Image: A 3-band RGB composite (VV polarization).
+    """
+
+    s1 = (
+        ee.ImageCollection("COPERNICUS/S1_GRD")
+        .filterBounds(aoi)
+        .filter(ee.Filter.eq("instrumentMode", "IW"))
+        .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
+        .filter(ee.Filter.eq("orbitProperties_pass", orbit_pass))
+        .select(["VV"])
+    )
+
+    im1 = s1.filterDate(start_date, peak_date).mean()
+    im2 = s1.filterDate(peak_date, harvest_date).mean()
+    im3 = s1.filterDate(harvest_date, ee.Date(harvest_date).advance(1, "month")).mean()
+
+    sar_rgb = im1.addBands(im2).addBands(im3).clip(aoi)
+    return sar_rgb.set({
+        "description": f"S1_RGB_{start_date}_{harvest_date}",
+        "orbit_pass": orbit_pass
+    })
