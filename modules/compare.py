@@ -22,34 +22,31 @@ CONSTANT_OUTLIER_PARAMS = {
 # =============================
 # SPLIT MAP VIEWER
 # =============================
+import streamlit.components.v1 as components
+
 def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
-    # Type checks before visualization
-    if not isinstance(paddy_left, ee.image.Image):
-        st.error("Left season rice map is not a valid Earth Engine image.")
-        st.stop()
-    if not isinstance(paddy_right, ee.image.Image):
-        st.error("Right season rice map is not a valid Earth Engine image.")
+    # Verify image validity
+    if not isinstance(paddy_left, ee.image.Image) or not isinstance(paddy_right, ee.image.Image):
+        st.error("One of the rice maps is invalid. Please verify the processing steps.")
         st.stop()
 
-    # Get AOI center
     center = aoi.centroid().coordinates().getInfo()
-
-    # Create map
     m = geemap.Map(center=[center[1], center[0]], zoom=11)
     m.add_basemap("SATELLITE")
 
-    # Add split map
-    m.split_map(
-        left_layer=paddy_left.visualize(min=0, max=1, palette=["red", "green"]),
-        right_layer=paddy_right.visualize(min=0, max=1, palette=["red", "green"]),
-        left_label=season_left,
-        right_label=season_right
-    )
+    try:
+        m.split_map(
+            left_layer=paddy_left.visualize(min=0, max=1, palette=["red", "green"]),
+            right_layer=paddy_right.visualize(min=0, max=1, palette=["red", "green"]),
+            left_label=season_left,
+            right_label=season_right
+        )
+    except Exception as e:
+        st.error(f"Unable to render split map: {e}")
+        st.stop()
 
-    # Use HTML rendering (safer for Streamlit Cloud)
     map_html = m.to_html(width="100%", height="600px")
     components.html(map_html, height=600)
-
     st.caption(f"⬅️ {season_left} | {season_right} ➡️")
 
 
