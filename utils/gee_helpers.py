@@ -380,7 +380,7 @@ def perform_monitoring(params):
     return {"trend": []}
 
 
-def get_sar_rgb(aoi, start_date, peak_date, harvest_date, orbit_pass="DESCENDING"):
+def get_sar_rgb(aoi, start_date, season_date, peak_date, harvest_date, orbit_pass="DESCENDING"):
     """
     Generate a Sentinel-1 VV RGB composite:
         R = mean VV between start and peak (pre-peak)
@@ -405,9 +405,9 @@ def get_sar_rgb(aoi, start_date, peak_date, harvest_date, orbit_pass="DESCENDING
         .select(["VV"])
     )
 
-    im1 = s1.filterDate(start_date, peak_date).mean()
-    im2 = s1.filterDate(peak_date, harvest_date).mean()
-    im3 = s1.filterDate(harvest_date, ee.Date(harvest_date).advance(1, "month")).mean()
+    im1 = s1.filterDate(start_date, season_date).mean()
+    im2 = s1.filterDate(season_date, peak_date).mean()
+    im3 = s1.filterDate(peak_date, harvest_date).mean()
 
     sar_rgb = im1.addBands(im2).addBands(im3).clip(aoi)
     return sar_rgb.set({
