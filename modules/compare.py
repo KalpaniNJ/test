@@ -13,9 +13,10 @@ def show():
     # LOAD AVAILABLE ASSETS AND CSV
     # ---------------------------------------------------------
     assets = load_assets()
-    AOI_OPTIONS = assets["AOI_OPTIONS"] if "AOI_OPTIONS" in assets else {
-        "Walawa Irrigation Scheme": assets.get("aoi"),
-    }
+    AOI_OPTIONS = assets["AOI_OPTIONS"]
+    aoi_choice = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()))
+    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_choice])
+
     
     # CSV containing seasonal dates
     SEASON_CSV = "data/season_dates.csv"
@@ -37,8 +38,6 @@ def show():
     with col2:
         season2 = st.selectbox("🌾 Select Season 2", season_df["season"].unique(), index=1)
     
-    # Load chosen AOI
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_choice])
     
     # ---------------------------------------------------------
     # FIXED PARAMETERS
