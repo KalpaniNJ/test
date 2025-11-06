@@ -5,6 +5,9 @@ import pandas as pd
 from utils import gee_helpers, rice_algorithms
 from utils.config import AOI_OPTIONS
 
+import streamlit.components.v1 as components
+import geemap.foliumap as geemap
+
 # =============================
 # CONSTANT OUTLIER PARAMETERS
 # (Adjust values based on your calibrated site)
@@ -16,26 +19,29 @@ CONSTANT_OUTLIER_PARAMS = {
     "diff_peak_harvest": 1000
 }
 
-# =============================
-# SPLIT MAP VIEWER
-# =============================
+
 def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
-    # Get AOI center for map initialization
+    # Get AOI center
     center = aoi.centroid().coordinates().getInfo()
 
+    # Create one geemap Map
     m = geemap.Map(center=[center[1], center[0]], zoom=11)
     m.add_basemap("SATELLITE")
 
-    # Add left and right season layers
+    # --- Add split map for visual comparison ---
     m.split_map(
         left_layer=paddy_left.visualize(min=0, max=1, palette=["red", "green"]),
         right_layer=paddy_right.visualize(min=0, max=1, palette=["red", "green"]),
+        left_label=season_left,
+        right_label=season_right
     )
 
-    # Display split map
-    st.markdown(f"### 🌾 {season_left} vs {season_right}")
-    m.to_streamlit(height=600)
-    st.caption("Left: Green = Rice in first season | Right: Green = Rice in second season")
+    # --- Convert to HTML and render ---
+    map_html = m.to_html(width="100%", height="600px")
+    components.html(map_html, height=600)
+
+    st.caption(f"⬅️ {season_left} | {season_right} ➡️")
+
 
 
 # =============================
