@@ -7,15 +7,11 @@ from utils.config import load_assets
 
 
 def show():
-    # ---------------------------------------------------------
-    # LOAD AVAILABLE ASSETS AND CSV
-    # ---------------------------------------------------------
-    assets = load_assets()
-    AOI_OPTIONS = assets["AOI_OPTIONS"]
-    aoi_choice = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()))
-    aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_choice])
+    # -------------------- Load AOI and Season Inputs --------------------
+    aoi_choice = st.selectbox("📍 Select AOI", list(AOI_OPTIONS.keys()))
+    aoi_path = AOI_OPTIONS[aoi_choice]
+    aoi = ee.FeatureCollection(aoi_path).geometry()  # ✅ matches monitoring.py pattern
 
-    
     # CSV containing seasonal dates
     SEASON_CSV = "data/season_dates.csv"
     season_df = pd.read_csv(SEASON_CSV)
