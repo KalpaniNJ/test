@@ -375,11 +375,6 @@ def compute_statistics(aoi, maskedPaddyClassification, maskedStartMonth, maskedS
     return total_area_ha, month_stats, mmdd_stats
 
 
-def perform_monitoring(params):
-    """Placeholder for seasonal monitoring analysis"""
-    return {"trend": []}
-
-
 def get_sar_rgb(aoi, start_date, season_start, peak_date, harvest_date, orbit_pass="DESCENDING"):
     """
     Generate a Sentinel-1 VV RGB composite:
