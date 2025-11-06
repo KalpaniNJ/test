@@ -2,12 +2,12 @@ import streamlit as st
 import ee
 import geemap.foliumap as geemap
 import pandas as pd
+import streamlit.components.v1 as components
 from utils import gee_helpers, rice_algorithms
 from utils.config import AOI_OPTIONS
 
 # =============================
 # CONSTANT OUTLIER PARAMETERS
-# (Adjust values based on your calibrated site)
 # =============================
 CONSTANT_OUTLIER_PARAMS = {
     "q3_start": 0.15,
@@ -23,22 +23,34 @@ CONSTANT_OUTLIER_PARAMS = {
 # SPLIT MAP VIEWER
 # =============================
 def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
-    # Get AOI center for map initialization
+    # Type checks before visualization
+    if not isinstance(paddy_left, ee.image.Image):
+        st.error("Left season rice map is not a valid Earth Engine image.")
+        st.stop()
+    if not isinstance(paddy_right, ee.image.Image):
+        st.error("Right season rice map is not a valid Earth Engine image.")
+        st.stop()
+
+    # Get AOI center
     center = aoi.centroid().coordinates().getInfo()
 
+    # Create map
     m = geemap.Map(center=[center[1], center[0]], zoom=11)
     m.add_basemap("SATELLITE")
 
-    # Add left and right season layers
+    # Add split map
     m.split_map(
         left_layer=paddy_left.visualize(min=0, max=1, palette=["red", "green"]),
         right_layer=paddy_right.visualize(min=0, max=1, palette=["red", "green"]),
+        left_label=season_left,
+        right_label=season_right
     )
 
-    # Display split map
-    st.markdown(f"### 🌾 {season_left} vs {season_right}")
-    m.to_streamlit(height=600)
-    st.caption("Left: Green = Rice in first season | Right: Green = Rice in second season")
+    # Use HTML rendering (safer for Streamlit Cloud)
+    map_html = m.to_html(width="100%", height="600px")
+    components.html(map_html, height=600)
+
+    st.caption(f"⬅️ {season_left} | {season_right} ➡️")
 
 
 # =============================
@@ -73,7 +85,7 @@ def show(params):
 
     # --- Run comparison ---
     if st.button("Run Season Comparison"):
-        with st.spinner("Generating paddy maps for both seasons... this may take a few minutes."):
+        with st.spinner("Generating paddy maps for both seasons..."):
 
             # Prepare date dictionaries
             left_dates = {
@@ -117,5 +129,5 @@ def show(params):
                 dates=right_dates
             )
 
-            # --- SHOW DUAL MAP ---
+            # --- Show split map ---
             show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right)
