@@ -700,7 +700,7 @@ def show(params):
                 mmdd_stats = {g["mmdd"]: g["sum"] / 10000 for g in mmdd_groups}
     
                 # SEASONAL STATISTICS & VISUALIZATION
-                season_start = 10
+                season_start = 11
                 seasonal_order = [(season_start + i - 1) % 12 + 1 for i in range(12)]
     
                 # Handle potential empty stats safely
