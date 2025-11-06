@@ -234,20 +234,6 @@ def show(params: dict):
                 label_font_size=18
             )
     
-    # with st.spinner("Loading map and layers... Please wait."):
-    #     Map.addLayerControl()
-    #     Map.to_streamlit()
-
-
-            map_placeholder = st.empty()
-            
-            # --- Handle pre/post button states ---
-            if not params.get("run_forecast"):
-                # Show message before any analysis is run
-                map_placeholder.info("Map is loading... Please wait...")
-            else:
-                # After the user clicks Run Forecast
-                with st.spinner("Loading map and layers... Please wait..."):
-                    Map.addLayerControl()
-                    map_placeholder.empty()  # clear placeholder text
-                    Map.to_streamlit(height=600)
+    with st.spinner("Loading map and layers... Please wait."):
+        Map.addLayerControl()
+        Map.to_streamlit()
