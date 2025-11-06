@@ -708,15 +708,25 @@ elif page == "Rice Mapping":
         monitoring.show(params)
 
     elif subpage == "Compare Seasons":
-        st.subheader(" 🔁 Compare Seasons")
-        st.markdown("""
+    st.subheader(" 🔁 Compare Seasons")
+    st.markdown("""
         <p style="color:#444; font-size:16px;">
             Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series. Each map is generated after outlier detection and thresholding.
         </p>
         """, unsafe_allow_html=True)
+    st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
+    compare.show({})
 
-        st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
-        compare.show({})
+    # elif subpage == "Compare Seasons":
+    #     st.subheader(" 🔁 Compare Seasons")
+    #     st.markdown("""
+    #     <p style="color:#444; font-size:16px;">
+    #         Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series. Each map is generated after outlier detection and thresholding.
+    #     </p>
+    #     """, unsafe_allow_html=True)
+
+    #     st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
+    #     compare.show({})
 
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
