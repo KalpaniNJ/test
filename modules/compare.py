@@ -89,18 +89,20 @@ def show(params=None):
                 # --- Sentinel-1 SAR Visualization for Each Season ---
                 sar_left = gee_helpers.get_sar_rgb(
                     aoi=aoi,
-                    start_date=left_dates["start"],
-                    peak_date=left_dates["peak"],
-                    harvest_date=left_dates["harvest"]
+                    start_date=str(left_row["start_date"].date()),
+                    season_start=str(left_row["season_start"].date()),
+                    peak_date=str(left_row["peak_date"].date()),
+                    harvest_date=str(left_row["harvest_date"].date())
                 )
                 
                 sar_right = gee_helpers.get_sar_rgb(
                     aoi=aoi,
-                    start_date=right_dates["start"],
-                    peak_date=right_dates["peak"],
-                    harvest_date=right_dates["harvest"]
+                    start_date=str(right_row["start_date"].date()),
+                    season_start=str(right_row["season_start"].date()),
+                    peak_date=str(right_row["peak_date"].date()),
+                    harvest_date=str(right_row["harvest_date"].date())
                 )
-                
+               
                 vis_sar = {"min": -25, "max": 0}
                 
                 # --- Create map ---
