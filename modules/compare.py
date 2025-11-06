@@ -119,7 +119,7 @@ def show(params=None):
                 m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right} Rice")
                 
                 # --- Difference overlay ---
-                diff = paddy_right.subtract(paddy_left).rename("change_map")
+                diff = paddy_right.subtract(paddy_left).round().int16().rename("change_map")
                 vis_diff = {"min": -1, "max": 1, "palette": ["#ff0000", "#b0b0b0", "#00ff00"]}
                 m.addLayer(diff, vis_diff, "Change (Right - Left)", False)
     
