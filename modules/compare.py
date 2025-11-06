@@ -111,8 +111,8 @@ def show(params=None):
                 m.add_basemap("HYBRID")
                 
                 # --- SAR composites ---
-                m.addLayer(sar_left, vis_sar, f"{season_left} – SAR VV RGB")
-                m.addLayer(sar_right, vis_sar, f"{season_right} – SAR VV RGB")
+                m.addLayer(sar_left, vis_sar, f"{season_left} – SAR VV RGB", False)
+                m.addLayer(sar_right, vis_sar, f"{season_right} – SAR VV RGB", False)
                 
                 # --- Rice maps ---
                 m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#008200"]}, f"{season_left} Rice")
@@ -121,7 +121,7 @@ def show(params=None):
                 # --- Difference overlay ---
                 diff = paddy_right.subtract(paddy_left).rename("change_map")
                 vis_diff = {"min": -1, "max": 1, "palette": ["#ff0000", "#b0b0b0", "#00ff00"]}
-                m.addLayer(diff, vis_diff, "Change (Right - Left)")
+                m.addLayer(diff, vis_diff, "Change (Right - Left)", False)
     
                 m.addLayerControl()
     
