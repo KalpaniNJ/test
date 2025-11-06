@@ -29,8 +29,8 @@ def show():
     
     col_aoi, col1, col2 = st.columns(3)
     
-    with col_aoi:
-        aoi_choice = st.selectbox("📍 Select AOI", list(AOI_OPTIONS.keys()))
+    with col1:
+            aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_cmp")
     
     with col1:
         season1 = st.selectbox("🌿 Select Season 1", season_df["season"].unique(), index=0)
