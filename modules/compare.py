@@ -19,7 +19,7 @@ def show(params=None):
     # --- Layout ---
     col1, col2 = st.columns([0.4, 1.3])
 
-    with col_1:
+    with col1:
         st.markdown("### Add Seasons to compare")
 
         aoi_name = st.selectbox("AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
@@ -101,7 +101,7 @@ def show(params=None):
 
             m.addLayerControl()
 
-            with col_2:
+            with col2:
                 st.markdown(f"### 🌿 {season_left} & {season_right} Overlaid")
                 m.to_streamlit(height=600)
 
