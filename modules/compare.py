@@ -128,7 +128,7 @@ def show(params=None):
                 st.markdown(f"### 🌿 {season_left} & {season_right} Overlaid")
                 m.to_streamlit(height=600)
     
-                st.caption("🟩 Green = Left season rice | 🟧 Orange = Right season rice | 🟥/🟩 = change areas | ⬜ = No change")
+                st.caption("🟩 Green = Previous season | 🟧 Orange = Latter season | 🟥/🟩 = change areas | ⬜ = No change")
 
     else:
         with col2:
