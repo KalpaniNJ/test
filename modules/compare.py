@@ -2,72 +2,107 @@ import streamlit as st
 import ee
 import geemap.foliumap as geemap
 import pandas as pd
-from utils import rice_algorithms
-from utils.config import AOI_OPTIONS, load_assets   # import AOI_OPTIONS just like in monitoring.py
+from utils import gee_helpers, rice_algorithms
+from utils.config import AOI_OPTIONS
 
-def show():
-    ee.Initialize()
 
-    st.markdown("## 🌾 Rice Mapping - Compare Two Seasons")
+def show(params=None):
+    # st.subheader("🌾 Compare Seasonal Rice Maps (Side-by-Side)")
 
-    # ---------------- AOI SELECTION ----------------
-    aoi_choice = st.selectbox("📍 Select AOI", list(AOI_OPTIONS.keys()))
-    aoi_path = AOI_OPTIONS[aoi_choice]
-    aoi = ee.FeatureCollection(aoi_path).geometry()   # same pattern as monitoring.py
+    # --- Load season CSV ---
+    season_df = pd.read_csv(
+        "data/season_dates.csv",
+        parse_dates=["start_date", "season_start", "peak_date", "harvest_date", "end_date"]
+    )
+    season_df["display_name"] = season_df["season"].apply(
+        lambda x: x.replace("-", " ") if isinstance(x, str) else x
+    )
 
-    # ---------------- SEASON INPUT ----------------
-    season_csv = "data/season_dates.csv"
-    season_df = pd.read_csv(season_csv)
-
-    col1, col2 = st.columns(2)
+    # --- Layout controls ---
+    col1, _ = st.columns([0.4, 1.6])
     with col1:
-        season_left = st.selectbox("🌿 Select Season 1", season_df["season"].unique(), index=0)
-    with col2:
-        season_right = st.selectbox("🌾 Select Season 2", season_df["season"].unique(), index=1)
+        st.markdown("#### Select Seasons")
 
-    if st.button("Generate Rice Maps"):
-        st.info(f"Processing {season_left} and {season_right} for {aoi_choice}...")
+        aoi_name = st.selectbox("AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
+        aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
 
-        # --- Thresholds (constants for now) ---
-        outlier_params = {
-            "diff_start_peak": 0.15,
-            "diff_peak_harvest": 0.1,
-            "q3_start": 0.3,
-            "q1_peak": 0.2,
-        }
+        season_left = st.selectbox("Left Season", season_df["display_name"].tolist(), key="left_season")
+        season_right = st.selectbox("Right Season", season_df["display_name"].tolist(), key="right_season")
 
-        # --- Season dates lookup ---
-        def extract_dates(season_name):
-            row = season_df.loc[season_df["season"] == season_name].iloc[0]
-            return {"start": row["season_start"], "peak": row["peak_date"], "harvest": row["harvest_date"]}
+    left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
+    right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
 
-        dates_left = extract_dates(season_left)
-        dates_right = extract_dates(season_right)
+    if st.button("Run Comparison"):
+        with st.spinner("Generating maps... this may take a few minutes."):
 
-        # --- Load assets (roads, water, etc.) ---
-        assets = load_assets()
+            # --- Prepare constants ---
+            CONSTANT_OUTLIER_PARAMS = {
+                "q3_start": 5000,
+                "q1_peak": 6000,
+                "diff_start_peak": 2000,
+                "diff_peak_harvest": 1000,
+            }
 
-        # Here you would build mosaicCollectionUInt16 and filteredDekadList exactly as in your monitoring.py logic
-        # For example:
-        # mosaicCollectionUInt16, filteredDekadList = build_mosaic(aoi, dates_left["start"], dates_left["harvest"])
+            # --- Prepare dates ---
+            left_dates = {
+                "start": str(left_row["season_start"].date()),
+                "peak": str(left_row["peak_date"].date()),
+                "harvest": str(left_row["harvest_date"].date())
+            }
+            right_dates = {
+                "start": str(right_row["season_start"].date()),
+                "peak": str(right_row["peak_date"].date()),
+                "harvest": str(right_row["harvest_date"].date())
+            }
 
-        # --- Run rice mapping for each season ---
-        masked_left = rice_algorithms.perform_rice_mapping_onlyrice(aoi, mosaicCollectionUInt16, filteredDekadList, outlier_params, dates_left)
-        masked_right = rice_algorithms.perform_rice_mapping_onlyrice(aoi, mosaicCollectionUInt16, filteredDekadList, outlier_params, dates_right)
+            # --- Left Season ---
+            mosaic_left, dekads_left = gee_helpers.get_mosaic_collection(
+                aoi=aoi,
+                start_date=str(left_row["start_date"].date()),
+                end_date=str(left_row["end_date"].date())
+            )
+            paddy_left = rice_algorithms.perform_rice_mapping_onlyrice(
+                aoi=aoi,
+                mosaicCollectionUInt16=mosaic_left,
+                filteredDekadList=dekads_left,
+                outlier_params=CONSTANT_OUTLIER_PARAMS,
+                dates=left_dates
+            )
 
-        # ---------------- SIDE-BY-SIDE MAP DISPLAY ----------------
-        col1, col2 = st.columns(2)
+            # --- Right Season ---
+            mosaic_right, dekads_right = gee_helpers.get_mosaic_collection(
+                aoi=aoi,
+                start_date=str(right_row["start_date"].date()),
+                end_date=str(right_row["end_date"].date())
+            )
+            paddy_right = rice_algorithms.perform_rice_mapping_onlyrice(
+                aoi=aoi,
+                mosaicCollectionUInt16=mosaic_right,
+                filteredDekadList=dekads_right,
+                outlier_params=CONSTANT_OUTLIER_PARAMS,
+                dates=right_dates
+            )
 
-        with col1:
-            st.subheader(f"{season_left}")
-            Map1 = geemap.Map(height=500)
-            Map1.addLayer(masked_left, {"palette": ["yellow", "green"], "min": 0, "max": 1}, f"{season_left} Rice")
-            Map1.addLayer(aoi, {}, "AOI")
-            Map1.to_streamlit(width=500, height=500)
+            # --- Center point for both maps ---
+            center = aoi.centroid().coordinates().getInfo()
 
-        with col2:
-            st.subheader(f"{season_right}")
-            Map2 = geemap.Map(height=500)
-            Map2.addLayer(masked_right, {"palette": ["yellow", "green"], "min": 0, "max": 1}, f"{season_right} Rice")
-            Map2.addLayer(aoi, {}, "AOI")
-            Map2.to_streamlit(width=500, height=500)
+            # --- Left Map ---
+            left_map = geemap.Map(center=[center[1], center[0]], zoom=11)
+            left_map.add_basemap("SATELLITE")
+            left_map.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_left)
+
+            # --- Right Map ---
+            right_map = geemap.Map(center=[center[1], center[0]], zoom=11)
+            right_map.add_basemap("SATELLITE")
+            right_map.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_right)
+
+            # --- Display maps side-by-side ---
+            map_col1, map_col2 = st.columns(2)
+            with map_col1:
+                st.markdown(f"### 🌾 {season_left}")
+                left_map.to_streamlit(height=550)
+            with map_col2:
+                st.markdown(f"### 🌾 {season_right}")
+                right_map.to_streamlit(height=550)
+
+        st.caption("Green = Rice | Red = Non-rice")
