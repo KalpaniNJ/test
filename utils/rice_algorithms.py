@@ -2,15 +2,12 @@ import streamlit as st
 import ee
 import geemap.foliumap as geemap
 import pandas as pd
+import streamlit.components.v1 as components
 from utils import gee_helpers, rice_algorithms
 from utils.config import AOI_OPTIONS
 
-import streamlit.components.v1 as components
-import geemap.foliumap as geemap
-
 # =============================
 # CONSTANT OUTLIER PARAMETERS
-# (Adjust values based on your calibrated site)
 # =============================
 CONSTANT_OUTLIER_PARAMS = {
     "q3_start": 5000,
@@ -19,16 +16,18 @@ CONSTANT_OUTLIER_PARAMS = {
     "diff_peak_harvest": 1000
 }
 
-
+# =============================
+# SPLIT MAP VIEWER
+# =============================
 def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
     # Get AOI center
     center = aoi.centroid().coordinates().getInfo()
 
-    # Create one geemap Map
+    # Create single map
     m = geemap.Map(center=[center[1], center[0]], zoom=11)
     m.add_basemap("SATELLITE")
 
-    # --- Add split map for visual comparison ---
+    # Add split comparison
     m.split_map(
         left_layer=paddy_left.visualize(min=0, max=1, palette=["red", "green"]),
         right_layer=paddy_right.visualize(min=0, max=1, palette=["red", "green"]),
@@ -36,12 +35,11 @@ def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
         right_label=season_right
     )
 
-    # --- Convert to HTML and render ---
+    # Render as HTML for full reliability in Streamlit
     map_html = m.to_html(width="100%", height="600px")
     components.html(map_html, height=600)
 
     st.caption(f"⬅️ {season_left} | {season_right} ➡️")
-
 
 
 # =============================
@@ -76,7 +74,7 @@ def show(params):
 
     # --- Run comparison ---
     if st.button("Run Season Comparison"):
-        with st.spinner("Generating paddy maps for both seasons... this may take a few minutes."):
+        with st.spinner("Generating paddy maps for both seasons..."):
 
             # Prepare date dictionaries
             left_dates = {
@@ -96,7 +94,6 @@ def show(params):
                 start_date=str(left_row["start_date"].date()),
                 end_date=str(left_row["end_date"].date())
             )
-
             paddy_left = rice_algorithms.perform_rice_mapping_onlyrice(
                 aoi=aoi,
                 mosaicCollectionUInt16=mosaic_left,
@@ -111,7 +108,6 @@ def show(params):
                 start_date=str(right_row["start_date"].date()),
                 end_date=str(right_row["end_date"].date())
             )
-
             paddy_right = rice_algorithms.perform_rice_mapping_onlyrice(
                 aoi=aoi,
                 mosaicCollectionUInt16=mosaic_right,
@@ -120,5 +116,5 @@ def show(params):
                 dates=right_dates
             )
 
-            # --- SHOW DUAL MAP ---
+            # --- SHOW SINGLE SPLIT MAP ---
             show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right)
