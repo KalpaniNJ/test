@@ -26,8 +26,10 @@ import streamlit.components.v1 as components
 import geemap.foliumap as geemap
 
 def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
-    # Center the map
+    # Get AOI center
     center = aoi.centroid().coordinates().getInfo()
+
+    # Create folium-based map for Streamlit
     m = geemap.Map(center=[center[1], center[0]], zoom=11)
     m.add_basemap("SATELLITE")
 
@@ -35,18 +37,17 @@ def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
     left_vis = paddy_left.visualize(min=0, max=1, palette=["red", "green"])
     right_vis = paddy_right.visualize(min=0, max=1, palette=["red", "green"])
 
-    # Add Swipe (Compare) Control
-    m.add_layer_control()
-    m.add_ee_layer(left_vis, {}, name=f"{season_left} Rice Map (Left)")
-    m.add_ee_layer(right_vis, {}, name=f"{season_right} Rice Map (Right)")
+    # Add EE layers (folium-style)
+    m.addLayer(left_vis, {}, f"{season_left} Rice Map (Left)")
+    m.addLayer(right_vis, {}, f"{season_right} Rice Map (Right)")
 
-    # Add swipe plugin (works in Streamlit)
+    # Add swipe comparison (works in Streamlit)
     m.add_swipe_control(
         left_layer_name=f"{season_left} Rice Map (Left)",
-        right_layer_name=f"{season_right} Rice Map (Right)",
+        right_layer_name=f"{season_right} Rice Map (Right)"
     )
 
-    # Render map safely in Streamlit
+    # Render safely in Streamlit
     map_html = m.to_html(width="100%", height="600px")
     components.html(map_html, height=600)
 
