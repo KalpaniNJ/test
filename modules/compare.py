@@ -7,8 +7,6 @@ from utils.config import load_assets
 
 
 def show():
-    st.markdown("## 🌾 Rice Mapping - Compare Two Seasons")
-
     # ---------------------------------------------------------
     # LOAD AVAILABLE ASSETS AND CSV
     # ---------------------------------------------------------
@@ -21,11 +19,6 @@ def show():
     # CSV containing seasonal dates
     SEASON_CSV = "data/season_dates.csv"
     season_df = pd.read_csv(SEASON_CSV)
-    
-    # ---------------------------------------------------------
-    # USER INPUTS
-    # ---------------------------------------------------------
-    st.markdown("## 🌾 Rice Mapping - Compare Two Seasons")
     
     col_aoi, col1, col2 = st.columns(3)
     
