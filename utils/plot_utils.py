@@ -100,7 +100,7 @@ def plot_outlier_boxplot(df_points):
     return fig
 
 
-def plot_statistics(month_stats, mmdd_stats, season_start=10):
+def plot_statistics(month_stats, mmdd_stats, season_start=11):
     """Plot paddy area statistics as bar and pie charts."""
     seasonal_order = [(season_start + i - 1) % 12 + 1 for i in range(12)]
 
