@@ -5,13 +5,6 @@ import pandas as pd
 from utils import rice_algorithms
 from utils.config import load_assets
 
-# ---------------------------------------------------------
-# INITIAL SETUP
-# ---------------------------------------------------------
-st.set_page_config(page_title="Rice Mapping - Seasonal Comparison", layout="wide")
-
-# Initialize Earth Engine
-ee.Initialize()
 
 # ---------------------------------------------------------
 # LOAD AVAILABLE ASSETS AND CSV
