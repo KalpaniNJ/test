@@ -108,5 +108,6 @@ def show(params=None):
             st.caption("🟩 Green = Left season rice | 🟧 Orange = Right season rice | 🟥/🟩 = change areas | ⬜ = No change")
 
     else:
-        st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
-                    unsafe_allow_html=True)
+        with col2:
+            st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                        unsafe_allow_html=True)
