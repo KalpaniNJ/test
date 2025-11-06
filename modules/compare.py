@@ -1,141 +1,40 @@
 import streamlit as st
-import ee
-import geemap.foliumap as geemap
-import pandas as pd
-import streamlit.components.v1 as components
-from utils import gee_helpers, rice_algorithms
-from utils.config import AOI_OPTIONS
+import folium
+from streamlit_folium import st_folium
 
-# =============================
-# CONSTANT OUTLIER PARAMETERS
-# =============================
-CONSTANT_OUTLIER_PARAMS = {
-    "q3_start": 0.15,
-    "q1_peak": 0.25,
-    "mean_start": 0.12,
-    "mean_peak": 0.38,
-    "mean_harvest": 0.20,
-    "diff_start_peak": 0.26,
-    "diff_peak_harvest": 0.18
-}
+def show():
+    st.title("🌾 Season Comparison")
 
-# =============================
-# SPLIT MAP VIEWER
-# =============================
-import streamlit.components.v1 as components
-import geemap.foliumap as geemap
-
-def show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right):
-    # Center map on AOI
-    center = aoi.centroid().coordinates().getInfo()
-
-    # Create Folium-based map (Streamlit compatible)
-    m = geemap.Map(center=[center[1], center[0]], zoom=11)
-    m.add_basemap("SATELLITE")
-
-    # Visualization parameters
-    vis_params = {"min": 0, "max": 1, "palette": ["red", "green"]}
-
-    # Convert Earth Engine images to folium tile layers
-    left_vis = geemap.ee_tile_layer(
-        paddy_left.visualize(**vis_params),
-        name=f"{season_left} Rice Map (Left)"
-    )
-    right_vis = geemap.ee_tile_layer(
-        paddy_right.visualize(**vis_params),
-        name=f"{season_right} Rice Map (Right)"
-    )
-
-    # Add side-by-side swipe comparison
-    m.add_side_by_side_layers(
-        left_layer=left_vis,
-        right_layer=right_vis,
-        left_label=season_left,
-        right_label=season_right
-    )
-
-    # Render to Streamlit safely
-    map_html = m.to_html(width="100%", height="600px")
-    components.html(map_html, height=600)
-
-    st.caption(f"⬅️ {season_left} | {season_right} ➡️")
-
-
-# =============================
-# MAIN STREAMLIT FUNCTION
-# =============================
-def show(params):
-    # --- Load season CSV ---
-    season_df = pd.read_csv(
-        "data/season_dates.csv",
-        parse_dates=["start_date", "season_start", "peak_date", "harvest_date", "end_date"]
-    )
-    season_df["display_name"] = season_df["season"].apply(
-        lambda x: x.replace("-", " ") if isinstance(x, str) else x
-    )
-
-    # --- Layout ---
-    col1, _ = st.columns([0.4, 1.6])
+    # --- Sidebar Inputs ---
+    col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Select seasons to compare")
+        season_left = st.selectbox("Select Left Season", ["Maha 2023/24", "Yala 2024", "Maha 2024/25"], key="left_season")
+    with col2:
+        season_right = st.selectbox("Select Right Season", ["Maha 2023/24", "Yala 2024", "Maha 2024/25"], key="right_season")
 
-        # Select AOI
-        aoi_name = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
-        aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
+    # --- Run button ---
+    if st.button("Run Comparison"):
+        st.success(f"Showing {season_left} vs {season_right}")
 
-        # Select two seasons
-        season_left = st.selectbox("Select Season", season_df["display_name"].tolist(), key="left_season")
-        season_right = st.selectbox("Select Season to compare", season_df["display_name"].tolist(), key="right_season")
+        # --- Create two folium maps ---
+        map_left = folium.Map(location=[7.9, 80.7], zoom_start=8, tiles="OpenStreetMap")
+        map_right = folium.Map(location=[7.9, 80.7], zoom_start=8, tiles="OpenStreetMap")
 
-    # Extract selected season metadata
-    left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
-    right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
+        # --- Add simple labels to each map ---
+        folium.Marker([7.9, 80.7], popup=f"{season_left}").add_to(map_left)
+        folium.Marker([7.9, 80.7], popup=f"{season_right}").add_to(map_right)
 
-    # --- Run comparison ---
-    if st.button("Run Season Comparison"):
-        with st.spinner("Generating paddy maps for both seasons..."):
+        # --- Display two maps side-by-side ---
+        left_col, right_col = st.columns(2)
 
-            # Prepare date dictionaries
-            left_dates = {
-                "start": str(left_row["season_start"].date()),
-                "peak": str(left_row["peak_date"].date()),
-                "harvest": str(left_row["harvest_date"].date())
-            }
-            right_dates = {
-                "start": str(right_row["season_start"].date()),
-                "peak": str(right_row["peak_date"].date()),
-                "harvest": str(right_row["harvest_date"].date())
-            }
+        with left_col:
+            st.markdown(f"### 🌾 {season_left}")
+            st_folium(map_left, width=350, height=400)
 
-            # --- LEFT SEASON PROCESSING ---
-            mosaic_left, dekads_left = gee_helpers.get_mosaic_collection(
-                aoi=aoi,
-                start_date=str(left_row["start_date"].date()),
-                end_date=str(left_row["end_date"].date())
-            )
+        with right_col:
+            st.markdown(f"### 🌾 {season_right}")
+            st_folium(map_right, width=350, height=400)
 
-            paddy_left = rice_algorithms.perform_rice_mapping_onlyrice(
-                aoi=aoi,
-                mosaicCollectionUInt16=mosaic_left,
-                filteredDekadList=dekads_left,
-                outlier_params=CONSTANT_OUTLIER_PARAMS,
-                dates=left_dates
-            )
-
-            # --- RIGHT SEASON PROCESSING ---
-            mosaic_right, dekads_right = gee_helpers.get_mosaic_collection(
-                aoi=aoi,
-                start_date=str(right_row["start_date"].date()),
-                end_date=str(right_row["end_date"].date())
-            )
-
-            paddy_right = rice_algorithms.perform_rice_mapping_onlyrice(
-                aoi=aoi,
-                mosaicCollectionUInt16=mosaic_right,
-                filteredDekadList=dekads_right,
-                outlier_params=CONSTANT_OUTLIER_PARAMS,
-                dates=right_dates
-            )
-
-            # --- Show split map ---
-            show_dual_maps(aoi, paddy_left, paddy_right, season_left, season_right)
+        st.caption("Use this view to visually compare two maps side-by-side.")
+    else:
+        st.info("👈 Select two seasons and click **Run Comparison** to see maps side-by-side.")
