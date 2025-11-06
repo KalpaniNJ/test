@@ -711,11 +711,16 @@ elif page == "Rice Mapping":
         st.subheader(" 🔁 Compare Seasons")
         st.markdown("""
             <p style="color:#444; font-size:16px;">
-                Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series. Each map is generated after outlier detection and thresholding.
+                Compare rice extent between seasons using paddy maps derived from Sentinel-1 time series. 
+                Each map is generated after outlier detection and thresholding.
             </p>
             """, unsafe_allow_html=True)
         st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
-        compare.show({})
+    
+        # Call the module
+        from modules import compare
+        compare.show()
+
 
     # elif subpage == "Compare Seasons":
     #     st.subheader(" 🔁 Compare Seasons")
