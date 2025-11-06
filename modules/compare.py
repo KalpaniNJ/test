@@ -17,21 +17,21 @@ def show(params=None):
     )
 
     # --- Layout ---
-    col_left, col_right = st.columns([0.35, 0.65])
+    col1, col2 = st.columns([0.4, 1.3])
 
-    with col_left:
-        st.markdown("### ⚙️ Compare Seasons")
+    with col_1t:
+        st.markdown("### Add Seasons to compare")
 
         aoi_name = st.selectbox("AOI", list(AOI_OPTIONS.keys()), key="compare_aoi")
         aoi = ee.FeatureCollection(AOI_OPTIONS[aoi_name]).geometry()
 
-        season_left = st.selectbox("Left Season", season_df["display_name"].tolist(), key="left_season")
-        season_right = st.selectbox("Right Season", season_df["display_name"].tolist(), key="right_season")
+        season_left = st.selectbox("Add a Season", season_df["display_name"].tolist(), key="left_season")
+        season_right = st.selectbox("Add a Season to compare", season_df["display_name"].tolist(), key="right_season")
 
         run = st.button("Run Comparison", use_container_width=True)
 
     if run:
-        with st.spinner("🛰️ Generating rice maps... please wait."):
+        with st.spinner("Generating rice maps for comparison... please wait..."):
 
             # --- Constants ---
             CONSTANT_OUTLIER_PARAMS = {
@@ -91,18 +91,22 @@ def show(params=None):
             m.add_basemap("HYBRID")
 
             # --- Add both season layers ---
-            m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#00FF00"]}, f"{season_left} 🌾")
-            m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right} 🌾")
+            m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#008200"]}, f"{season_left}")
+            m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right}")
 
-            # --- Add a visual overlay of differences (optional) ---
+            # --- Add a visual overlay of differences ---
             diff = paddy_right.subtract(paddy_left).rename("change_map")
             vis_diff = {"min": -1, "max": 1, "palette": ["red", "gray", "green"]}
             m.addLayer(diff, vis_diff, "Change (Right - Left)")
 
-            m.addLayerControl()  # 👈 toggle layers
+            m.addLayerControl()
 
             with col_right:
-                st.markdown(f"### 🌾 {season_left} & {season_right} Overlaid")
+                st.markdown(f"### 🌿 {season_left} & {season_right} Overlaid")
                 m.to_streamlit(height=600)
 
-            st.caption("🟩 Green = Left season rice | 🟧 Orange = Right season rice | 🟥/🟩 = change areas")
+            st.caption("🟩 Green = Left season rice | 🟧 Orange = Right season rice | 🟥/🟩 = change areas | ⬜ = No change")
+
+        else:
+            st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
+                        unsafe_allow_html=True)
