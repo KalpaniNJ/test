@@ -357,7 +357,6 @@ def perform_rice_mapping(aoi, mosaicCollectionUInt16, filteredDekadList, outlier
     return maskedPaddyClassification, growingSeason, maskedStartMonth, maskedStartMonthDay
 
 
-
 def perform_rice_mapping_onlyrice(aoi, mosaicCollectionUInt16, filteredDekadList, outlier_params, dates):
     """Perform rice mapping using mRVI temporal logic."""
 
