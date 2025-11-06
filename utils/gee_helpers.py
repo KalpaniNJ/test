@@ -405,8 +405,8 @@ def get_sar_rgb(aoi, start_date, season_date, peak_date, harvest_date, orbit_pas
         .select(["VV"])
     )
 
-    im1 = s1.filterDate(start_date, season_date).mean()
-    im2 = s1.filterDate(season_date, peak_date).mean()
+    im1 = s1.filterDate(start_date, season_start).mean()
+    im2 = s1.filterDate(season_start, peak_date).mean()
     im3 = s1.filterDate(peak_date, harvest_date).mean()
 
     sar_rgb = im1.addBands(im2).addBands(im3).clip(aoi)
