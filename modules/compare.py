@@ -86,18 +86,39 @@ def show(params=None):
                     dates=right_dates
                 )
     
-                # --- Create single map ---
+                # --- Sentinel-1 SAR Visualization for Each Season ---
+                sar_left = gee_helpers.get_sar_rgb(
+                    aoi=aoi,
+                    start_date=left_dates["start"],
+                    peak_date=left_dates["peak"],
+                    harvest_date=left_dates["harvest"]
+                )
+                
+                sar_right = gee_helpers.get_sar_rgb(
+                    aoi=aoi,
+                    start_date=right_dates["start"],
+                    peak_date=right_dates["peak"],
+                    harvest_date=right_dates["harvest"]
+                )
+                
+                vis_sar = {"min": -25, "max": 0}
+                
+                # --- Create map ---
                 center = aoi.centroid().coordinates().getInfo()
                 m = geemap.Map(center=[center[1], center[0]], zoom=11)
                 m.add_basemap("HYBRID")
-    
-                # --- Add both season layers ---
-                m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#008200"]}, f"{season_left}")
-                m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right}")
-    
-                # --- Add a visual overlay of differences ---
+                
+                # --- SAR composites ---
+                m.addLayer(sar_left, vis_sar, f"{season_left} – SAR VV RGB")
+                m.addLayer(sar_right, vis_sar, f"{season_right} – SAR VV RGB")
+                
+                # --- Rice maps ---
+                m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#008200"]}, f"{season_left} Rice")
+                m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right} Rice")
+                
+                # --- Difference overlay ---
                 diff = paddy_right.subtract(paddy_left).rename("change_map")
-                vis_diff = {"min": -1, "max": 1, "palette": ["red", "gray", "green"]}
+                vis_diff = {"min": -1, "max": 1, "palette": ["#ff0000", "#b0b0b0", "#00ff00"]}
                 m.addLayer(diff, vis_diff, "Change (Right - Left)")
     
                 m.addLayerControl()
