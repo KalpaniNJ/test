@@ -716,7 +716,7 @@ elif page == "Rice Mapping":
         """, unsafe_allow_html=True)
 
         st.markdown("<hr style='border:0.5px solid #ccc; margin-top:5px; margin-bottom:30px;'>", unsafe_allow_html=True)
-        compare.show(params)
+        compare.show({})
 
     elif subpage == "Data and Methods":
         from utils.readme_section import show_readme
