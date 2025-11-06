@@ -16,7 +16,7 @@ def show(params=None):
         lambda x: x.replace("-", " ") if isinstance(x, str) else x
     )
 
-    # --- Layout: Left (inputs) | Right (maps) ---
+    # --- Layout ---
     col_left, col_right = st.columns([0.35, 0.65])
 
     with col_left:
@@ -31,8 +31,9 @@ def show(params=None):
         run = st.button("Run Comparison", use_container_width=True)
 
     if run:
-        with st.spinner("🛰️ Generating rice maps... please wait a few minutes."):
+        with st.spinner("🛰️ Generating rice maps... please wait."):
 
+            # --- Constants ---
             CONSTANT_OUTLIER_PARAMS = {
                 "q3_start": 5000,
                 "q1_peak": 6000,
@@ -40,10 +41,10 @@ def show(params=None):
                 "diff_peak_harvest": 1000,
             }
 
+            # --- Select season info ---
             left_row = season_df.loc[season_df["display_name"] == season_left].iloc[0]
             right_row = season_df.loc[season_df["display_name"] == season_right].iloc[0]
 
-            # --- Prepare date dictionaries ---
             left_dates = {
                 "start": str(left_row["season_start"].date()),
                 "peak": str(left_row["peak_date"].date()),
@@ -55,7 +56,7 @@ def show(params=None):
                 "harvest": str(right_row["harvest_date"].date())
             }
 
-            # --- Get mosaics ---
+            # --- Retrieve mosaics ---
             mosaic_left, dekads_left = gee_helpers.get_mosaic_collection(
                 aoi=aoi,
                 start_date=str(left_row["start_date"].date()),
@@ -84,34 +85,24 @@ def show(params=None):
                 dates=right_dates
             )
 
-            # --- Map center ---
+            # --- Create single map ---
             center = aoi.centroid().coordinates().getInfo()
+            m = geemap.Map(center=[center[1], center[0]], zoom=11)
+            m.add_basemap("HYBRID")
 
-            # --- Create maps separately ---
-            left_map = geemap.Map(center=[center[1], center[0]], zoom=11)
-            left_map.add_basemap("HYBRID")
-            left_map.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_left)
+            # --- Add both season layers ---
+            m.addLayer(paddy_left, {"min": 0, "max": 1, "palette": ["#00FF00"]}, f"{season_left} 🌾")
+            m.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["#FFA500"]}, f"{season_right} 🌾")
 
-            right_map = geemap.Map(center=[center[1], center[0]], zoom=11)
-            right_map.add_basemap("HYBRID")
-            right_map.addLayer(paddy_right, {"min": 0, "max": 1, "palette": ["red", "green"]}, season_right)
+            # --- Add a visual overlay of differences (optional) ---
+            diff = paddy_right.subtract(paddy_left).rename("change_map")
+            vis_diff = {"min": -1, "max": 1, "palette": ["red", "gray", "green"]}
+            m.addLayer(diff, vis_diff, "Change (Right - Left)")
 
-            # --- Render both maps side-by-side inside the right column ---
+            m.addLayerControl()  # 👈 toggle layers
+
             with col_right:
-                st.markdown(f"### 🌾 {season_left} vs {season_right}")
+                st.markdown(f"### 🌾 {season_left} & {season_right} Overlaid")
+                m.to_streamlit(height=600)
 
-                map_html_left = left_map.to_html(width="100%", height="520px")
-                map_html_right = right_map.to_html(width="100%", height="520px")
-
-                # Create two map containers using HTML side-by-side
-                st.components.v1.html(
-                    f"""
-                    <div style="display:flex; gap:10px;">
-                        <div style="flex:1; border-radius:8px; overflow:hidden;">{map_html_left}</div>
-                        <div style="flex:1; border-radius:8px; overflow:hidden;">{map_html_right}</div>
-                    </div>
-                    """,
-                    height=540,
-                )
-
-                st.caption("Green = Rice")
+            st.caption("🟩 Green = Left season rice | 🟧 Orange = Right season rice | 🟥/🟩 = change areas")
