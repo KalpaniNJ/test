@@ -475,7 +475,7 @@ if page == "Rainfall Distribution":
         temporal_method = st.radio("Temporal Aggregation", ["Sum", "Mean", "Max"], horizontal=True)
 
         wea_start_date = st.date_input("Start Date", pd.to_datetime("2025-01-01"))
-        wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-31"))
+        wea_end_date = st.date_input("End Date", pd.to_datetime("2025-01-03"))
 
         # Convert to serializable strings
         start_str = wea_start_date.strftime("%Y-%m-%d")
