@@ -15,6 +15,29 @@ def detect_outliers(df_points, dates):
     peak_values = df_points[df_points["time"] == peak_date]["mRVI_median"]
     harvest_values = df_points[df_points["time"] == harvest_date]["mRVI_median"]
 
+    # Guard against missing data: if a season date isn't present in the
+    # Time Series results (e.g. it falls outside the date range used for
+    # that step), .mean()/.quantile() on an empty slice silently return NaN.
+    # Left unchecked, that NaN gets baked as a literal into the Earth Engine
+    # image expression in perform_rice_mapping() and blows up much later
+    # with an opaque "Invalid JSON payload" error from the GEE API. Fail
+    # here instead, with a message that says exactly what to fix.
+    missing = []
+    if start_values.empty:
+        missing.append(f"Start of Season ({start_date.date()})")
+    if peak_values.empty:
+        missing.append(f"Peak of Season ({peak_date.date()})")
+    if harvest_values.empty:
+        missing.append(f"Harvest Date ({harvest_date.date()})")
+    if missing:
+        raise ValueError(
+            "No Time Series data found for: " + ", ".join(missing) + ". "
+            "These dates must fall within the date range used in the Time "
+            "Series Analysis step, and land on a dekad (day 1, 13, or 25 of "
+            "a month). Re-run Time Series Analysis with a range that covers "
+            "all three season dates, then try Rice Mapping again."
+        )
+
     # Quartiles
     q3_start = start_values.quantile(0.75)
     q1_peak = peak_values.quantile(0.25)
@@ -61,12 +84,25 @@ def perform_rice_mapping(aoi, mosaicCollectionUInt16, filteredDekadList, outlier
     # ---------------- mRVI SOS-Peak-Fall analysis ----------------
     #  Function to get adjacent dekads
     def getAdjacentDekads(targetDate, dekadList):
-        index = dekadList.indexOf(targetDate)
-        return ee.List([
-            dekadList.get(ee.Number(index).subtract(1)),
-            targetDate,
-            dekadList.get(ee.Number(index).add(1))
-        ]).filter(ee.Filter.neq('item', None))
+        index = ee.Number(dekadList.indexOf(targetDate))
+        size = dekadList.size()
+        prevIndex = index.subtract(1)
+        nextIndex = index.add(1)
+
+        # Guard both directions before calling .get(). A naive
+        # dekadList.get(index+1) hard-errors when targetDate is the last
+        # entry (out of range, as opposed to returning nothing), which is
+        # exactly what happens whenever the Harvest Date is the final
+        # dekad in the series. The mirror case is worse: dekadList.get(-1)
+        # for a targetDate at index 0 does NOT error — Earth Engine treats
+        # negative indices as counting from the end — so it silently wraps
+        # around and picks up the last dekad in the whole list as a bogus
+        # "previous" neighbor, corrupting the SOS/Peak/Fall stats without
+        # any visible error.
+        prevItem = ee.Algorithms.If(prevIndex.gte(0), dekadList.get(prevIndex), None)
+        nextItem = ee.Algorithms.If(nextIndex.lt(size), dekadList.get(nextIndex), None)
+
+        return ee.List([prevItem, targetDate, nextItem]).removeAll([None])
 
     # Extract SOS, Peak, Fall Images
     sosWindow = getAdjacentDekads(sosDate, filteredDekadList)
@@ -328,12 +364,21 @@ def perform_rice_mapping(aoi, mosaicCollectionUInt16, filteredDekadList, outlier
     maskedStartMonthDay = finalStartMonthDay.updateMask(maskedPaddyClassification).updateMask(finalStartMonthDay.neq(0))
 
     # ---------------- Create Growing Season map ----------------
+    # This reduceRegion is a full, non-tiled aggregation over every 10m
+    # pixel in the AOI (unlike the other layers, which render as ordinary
+    # map tiles), and it dominates Rice Mapping's total runtime — ~36s of
+    # a typical ~39s "Run Rice Mapping" click was spent here alone.
+    # tileScale tells Earth Engine to split the aggregation into smaller
+    # server-side chunks instead of one large one; it only affects how the
+    # computation is parallelized, not which pixels are read or the
+    # min/max result itself.
     stats = maskedStartDate.reduceRegion(
         reducer=ee.Reducer.minMax(),
         geometry=aoi,
         scale=10,
         maxPixels=1e9,
-        bestEffort=True
+        bestEffort=True,
+        tileScale=4
     )
 
     minValue = ee.Number(stats.get('Longest_Streak_Start_min'))
@@ -377,12 +422,25 @@ def perform_rice_mapping_onlyrice(aoi, mosaicCollectionUInt16, filteredDekadList
     # ---------------- mRVI SOS-Peak-Fall analysis ----------------
     #  Function to get adjacent dekads
     def getAdjacentDekads(targetDate, dekadList):
-        index = dekadList.indexOf(targetDate)
-        return ee.List([
-            dekadList.get(ee.Number(index).subtract(1)),
-            targetDate,
-            dekadList.get(ee.Number(index).add(1))
-        ]).filter(ee.Filter.neq('item', None))
+        index = ee.Number(dekadList.indexOf(targetDate))
+        size = dekadList.size()
+        prevIndex = index.subtract(1)
+        nextIndex = index.add(1)
+
+        # Guard both directions before calling .get(). A naive
+        # dekadList.get(index+1) hard-errors when targetDate is the last
+        # entry (out of range, as opposed to returning nothing), which is
+        # exactly what happens whenever the Harvest Date is the final
+        # dekad in the series. The mirror case is worse: dekadList.get(-1)
+        # for a targetDate at index 0 does NOT error — Earth Engine treats
+        # negative indices as counting from the end — so it silently wraps
+        # around and picks up the last dekad in the whole list as a bogus
+        # "previous" neighbor, corrupting the SOS/Peak/Fall stats without
+        # any visible error.
+        prevItem = ee.Algorithms.If(prevIndex.gte(0), dekadList.get(prevIndex), None)
+        nextItem = ee.Algorithms.If(nextIndex.lt(size), dekadList.get(nextIndex), None)
+
+        return ee.List([prevItem, targetDate, nextItem]).removeAll([None])
 
     # Extract SOS, Peak, Fall Images
     sosWindow = getAdjacentDekads(sosDate, filteredDekadList)

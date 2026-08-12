@@ -6,3 +6,8 @@
 *.shx
 *.prj
 *.csv
+
+# Secrets (contains GCP service account private key)
+.streamlit/secrets.toml
+secrets.toml
+.venv

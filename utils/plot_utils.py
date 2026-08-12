@@ -25,9 +25,15 @@ def plot_time_series(df_line, show=True):
 
     fig1, ax1 = plt.subplots(figsize=(12, 6))
 
-    # Plot each point
-    for pid, group in df_line.groupby("point_id"):
-        ax1.plot(group["time"], group["mRVI"], marker="o", linestyle="-", alpha=0.5, label=f"Point {pid}")
+    # Plot each point as a faint background trace. With dozens of sample
+    # points, giving each its own legend entry (as before) produced a
+    # legend list as long as the point count, dwarfing the chart itself.
+    # A single shared "Sample points" entry (only labeled once) keeps the
+    # per-point detail visible while the legend stays fixed at 2 entries.
+    for i, (pid, group) in enumerate(df_line.groupby("point_id")):
+        ax1.plot(group["time"], group["mRVI"], marker="o", markersize=4, linestyle="-",
+                  color="steelblue", alpha=0.35,
+                  label="Sample points" if i == 0 else None)
 
     # Mean curve
     mean_df = df_line.groupby("time")["mRVI"].mean().reset_index()
@@ -40,7 +46,7 @@ def plot_time_series(df_line, show=True):
     ax1.set_ylabel("mRVI Value")
     ax1.set_title("Time Series of Mean mRVI at Sample Points")
     plt.xticks(rotation=45)
-    ax1.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=8)
+    ax1.legend(loc="upper left", fontsize=9)
     plt.tight_layout()
 
     st.pyplot(fig1)
@@ -63,8 +69,12 @@ def plot_point_series(df_points, show=True):
 
     fig2, ax2 = plt.subplots(figsize=(12, 6))
 
-    for pid, group in df_points.groupby("point_id"):
-        ax2.plot(group["time"], group["mRVI_median"], marker="o", linestyle="-", markersize=5, alpha=0.7, label=f"Point {pid}")
+    # Same fix as plot_time_series: one shared legend entry instead of one
+    # per point, so the legend doesn't scale with the number of sample points.
+    for i, (pid, group) in enumerate(df_points.groupby("point_id")):
+        ax2.plot(group["time"], group["mRVI_median"], marker="o", linestyle="-", markersize=5,
+                  color="steelblue", alpha=0.5,
+                  label="Sample points" if i == 0 else None)
 
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
     ax2.xaxis.set_major_locator(mdates.AutoDateLocator())
@@ -72,6 +82,7 @@ def plot_point_series(df_points, show=True):
     ax2.set_ylabel("mRVI Value")
     ax2.set_title("Time Series of mRVI at Sample Points")
     plt.xticks(rotation=45)
+    ax2.legend(loc="upper left", fontsize=9)
     plt.tight_layout()
 
     st.pyplot(fig2)

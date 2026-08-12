@@ -29,7 +29,8 @@ def run_time_series(params):
             df_line, df_points = gee_helpers.get_time_series(
                 aoi=aoi,
                 start_date=params["start_date"],
-                end_date=params["end_date"]
+                end_date=params["end_date"],
+                aoi_name=aoi_name
             )
 
             st.session_state.update({
@@ -80,16 +81,22 @@ def run_rice_mapping(params):
         return
 
     st.session_state["season_dates"] = dates
+    show_growing_season = params.get("show_growing_season", False)
 
     if params.get("run_paddy"):
         df_points = st.session_state["ts_df_points"]
-        outlier_params = rice_algorithms.detect_outliers(df_points, dates)
+        try:
+            outlier_params = rice_algorithms.detect_outliers(df_points, dates)
+        except ValueError as e:
+            st.error(str(e))
+            return
 
         with st.spinner("Running Rice Mapping..."):
             mosaicCollectionUInt16, filteredDekadList = gee_helpers.get_mosaic_collection(
                 aoi=aoi,
                 start_date=params["start_date"],
-                end_date=params["end_date"]
+                end_date=params["end_date"],
+                aoi_name=aoi_name
             )
 
             (maskedPaddyClassification,
@@ -110,21 +117,37 @@ def run_rice_mapping(params):
                 "maskedStartMonth": maskedStartMonth,
                 "maskedStartMonthDay": maskedStartMonthDay
             })
+            # New run invalidates any previously-rendered map, including
+            # whether the (expensive) Growing Season layer is on it.
+            st.session_state["_growing_season_on_map"] = False
 
+    # (Re)build the map on a fresh run, or when the Growing Season toggle
+    # was just switched on and isn't on the current map yet. The Growing
+    # Season layer requires an AOI-wide reduceRegion that dominates Rice
+    # Mapping's runtime (~20-30s of a ~30s run) — everything else here is
+    # cheap (~1-2s total) — so it's only computed/added when asked for,
+    # instead of on every run regardless of whether it's even shown.
+    needs_rebuild = params.get("run_paddy") or (
+        show_growing_season and not st.session_state.get("_growing_season_on_map")
+    )
+    if needs_rebuild and "maskedPaddyClassification" in st.session_state:
+        with st.spinner("Rendering map..."):
             aoi_centroid = aoi.centroid().coordinates().getInfo()
             Map = geemap.Map(center=[aoi_centroid[1], aoi_centroid[0]], zoom=12)
             Map.add_basemap("SATELLITE")
-            Map.addLayer(maskedPaddyClassification,
+            Map.addLayer(st.session_state["maskedPaddyClassification"],
                          {"min": 0, "max": 1, "palette": ["red", "green"]}, "Paddy Map")
-            Map.addLayer(growingSeason,
-                         {"min": 0, "max": 2, "palette": ["blue", "green", "orange"]},
-                         "Growing Season", False)
-            Map.addLayer(maskedStartMonth,
+            if show_growing_season:
+                Map.addLayer(st.session_state["growingSeason"],
+                             {"min": 0, "max": 2, "palette": ["blue", "green", "orange"]},
+                             "Growing Season", False)
+                st.session_state["_growing_season_on_map"] = True
+            Map.addLayer(st.session_state["maskedStartMonth"],
                          {"min": 1, "max": 12,
                           "palette": ["blue", "cyan", "green", "lime", "yellow", "orange",
                                       "red", "pink", "purple", "brown", "gray", "black"]},
                          "Start Month", False)
-            Map.addLayer(maskedStartMonthDay,
+            Map.addLayer(st.session_state["maskedStartMonthDay"],
                          {"min": 101, "max": 1231,
                           "palette": ["blue", "cyan", "green", "yellow", "orange", "red"]},
                          "Start Month–Day", False)
@@ -135,6 +158,8 @@ def run_rice_mapping(params):
     if "map_SA" in st.session_state:
         st.subheader("Rice Mapping Results")
         st.session_state["map_SA"].to_streamlit(height=600)
+        if not show_growing_season:
+            st.caption("Enable \"Show Growing Season layer\" (left panel) to also compute it — adds ~20-30s.")
     else:
         st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                     unsafe_allow_html=True)

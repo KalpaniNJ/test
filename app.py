@@ -586,8 +586,12 @@ elif page == "Rice Mapping":
                 st.info("Use a limited date range (e.g., one season) for faster processing.")
                 aoi_option = st.selectbox("Select AOI", list(AOI_OPTIONS.keys()), key="aoi_ts")
                 st.session_state["aoi"] = aoi_option
-                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-01"), key="start_ts")
-                end_date = st.date_input("End Date", pd.to_datetime("2022-05-31"), key="end_ts")
+                # Defaults verified end-to-end to return data, and matched to the
+                # Rice Mapping step's default season dates (Start of Season
+                # 2021-12-13, Harvest 2022-04-01) so the default workflow doesn't
+                # hit a season date outside the Time Series range.
+                start_date = st.date_input("Start Date", pd.to_datetime("2021-12-13"), key="start_ts")
+                end_date = st.date_input("End Date", pd.to_datetime("2022-04-01"), key="end_ts")
                 run_ts = st.button("Run Time Series Analysis")
 
                 # Save for persistence
@@ -641,6 +645,14 @@ elif page == "Rice Mapping":
                 season_start_date = st.date_input("Start of Season", pd.to_datetime("2021-12-13"))
                 peak_date = st.date_input("Peak of Season", pd.to_datetime("2022-02-25"))
                 harvest_date = st.date_input("Harvest Date", pd.to_datetime("2022-04-01"))
+                # The Growing Season layer requires an AOI-wide reduceRegion
+                # (to derive early/mid/late thresholds) that alone accounts for
+                # the vast majority of Rice Mapping's runtime — the other layers
+                # render in ~1-2s each. It's hidden by default anyway, so only
+                # compute it when actually requested.
+                show_growing_season = st.checkbox(
+                    "Show Growing Season layer (adds ~20-30s)", value=False
+                )
                 run_paddy = st.button("Run Rice Mapping")
 
             with col2:
@@ -653,13 +665,17 @@ elif page == "Rice Mapping":
                         "peak": str(peak_date),
                         "harvest": str(harvest_date),
                     },
-                    "run_paddy": run_paddy
+                    "run_paddy": run_paddy,
+                    "show_growing_season": show_growing_season
                 }
 
                 if run_paddy:
                     analysis.run_rice_mapping(params)
                 elif "map_SA" in st.session_state:
-                    analysis.run_rice_mapping({"aoi": st.session_state["aoi"]})
+                    analysis.run_rice_mapping({
+                        "aoi": st.session_state["aoi"],
+                        "show_growing_season": show_growing_season
+                    })
                 else:
                     st.markdown("<p style='color:gray;'>Results will appear here after running the analysis.</p>",
                                 unsafe_allow_html=True)
